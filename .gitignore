@@ -1,13 +1,29 @@
+# ============================
 # Build output
+# ============================
 dist/
 dist-ssr/
 build/
+*.tsbuildinfo
+stats.html
 
+# ============================
 # Dependencies
+# ============================
 node_modules/
 .pnpm-store/
+.yarn/*
+!.yarn/patches/
+!.yarn/plugins/
+!.yarn/releases/
+!.yarn/sdks/
+!.yarn/versions/
+.pnp.*
+*.tgz
 
+# ============================
 # Logs
+# ============================
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -15,39 +31,79 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ============================
 # Environment
+# ============================
 .env
 .env.*
 !.env.example
 !.env.test
 
-# Editor / IDE
-.vscode/
+# ============================
+# Visual Studio / Visual Studio Code
+# (kept intentionally versioned files, if any, must be explicitly re-added
+#  via a `!` rule — extensions.json is the current example)
+# ============================
+.vscode/*
 !.vscode/extensions.json
-.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
+# ============================
+# JetBrains Rider / WebStorm
+# ============================
+.idea/
+*.iml
+*.ipr
+*.iws
+*.DotSettings.user
+
+# ============================
 # Test artifacts
+# ============================
 coverage/
 *.lcov
 playwright-report/
 test-results/
 playwright/.cache/
 
+# ============================
 # Tooling caches
+# ============================
 .eslintcache
+.stylelintcache
 .cache/
 .parcel-cache/
 .vite/
+.turbo/
 
-# OS
+# ============================
+# Docker
+# ============================
+docker-compose.override.local.yml
+.docker/
+
+# ============================
+# Windows
+# ============================
 Thumbs.db
-.DS_Store
+ehthumbs.db
+Desktop.ini
 desktop.ini
+$RECYCLE.BIN/
+*.lnk
 
+# ============================
+# macOS (contributors on other OSes)
+# ============================
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ============================
 # Generated OpenAPI client (regenerate from spec instead of committing)
+# ============================
 src/api/generated/
