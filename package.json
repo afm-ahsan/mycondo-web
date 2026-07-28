@@ -101,6 +101,11 @@
   },
   "overrides": {
     "minimatch": "^10.2.1",
-    "ajv": ">=8.18.0"
+    "@apidevtools/swagger-parser": {
+      "ajv": ">=8.18.0"
+    },
+    "@rtk-query/codegen-openapi": {
+      "ajv": ">=8.18.0"
+    }
   }
 }

@@ -4,6 +4,12 @@
 
 MyCondo is a multi-tenant SaaS building automation and property management platform delivered to ARP Flat Owner's Association under proposal MC-PROP-2026-001 (fixed-price BDT 2,50,000, 24 weeks). This repo is the **frontend SPA**: React + TypeScript + Vite + Metronic, calling the backend API at https://github.com/afm-ahsan/mycondo-api.
 
+**Governance baseline:** see `../mycondo-docs/02-architecture/CURRENT_STATE_ASSESSMENT.md`,
+`TARGET_ARCHITECTURE.md`, and `Architecture_Decision_Register.md` (established 2026-07-28, Wave 0).
+Notably, ADR-005 (RTK Query, approved 2026-07-28 — resolved a conflict with the governing strategy
+document's TanStack Query recommendation) and ADR-006 (`modules/` → `features/` rename, executed
+2026-07-28) are both settled; see the register for the reasoning if you need it.
+
 ## Tech Stack
 
 - **React 19** + **TypeScript 5.9+ strict** + **Vite 7**
@@ -33,12 +39,12 @@ mycondo-web/
 │   ├── App.tsx
 │   ├── auth/                       # Metronic auth scaffolding (kept; adapted to our JWT)
 │   ├── components/                 # Metronic UI components (kept)
-│   ├── modules/                    # Business modules (mirror backend module names 1:1)
+│   ├── features/                   # Business features (mirror backend module names 1:1; renamed from modules/ 2026-07-28, ADR-006)
 │   │   └── <feature>/
 │   │       ├── pages/
 │   │       ├── components/
 │   │       ├── hooks/
-│   │       ├── api/                # RTK Query slice for this module
+│   │       ├── api/                # RTK Query slice for this feature
 │   │       └── types.ts
 │   ├── store/                      # Redux store + typed hooks
 │   ├── api/                        # Shared RTK Query base + generated client
@@ -61,40 +67,43 @@ Most relevant files:
 
 When the conventions specify a rule, **follow it**. Project-specific overrides are listed below.
 
-## Module Layout (mirrors backend 1:1)
+## Feature Layout (mirrors backend 1:1)
 
 | Backend module                     | Frontend folder           |
 |-----------------------------------|---------------------------|
-| `MyCondo.Modules.Tenancy`         | `src/modules/tenancy/`    |
-| `MyCondo.Modules.Identity`        | `src/modules/identity/`   |
-| `MyCondo.Modules.Property`        | `src/modules/property/`   |
-| `MyCondo.Modules.Residents`       | `src/modules/residents/`  |
-| `MyCondo.Modules.Leasing`         | `src/modules/leasing/`    |
-| `MyCondo.Modules.Billing`         | `src/modules/billing/`    |
-| `MyCondo.Modules.Payments`        | `src/modules/payments/`   |
-| `MyCondo.Modules.Expenses`        | `src/modules/expenses/`   |
-| `MyCondo.Modules.Vendors`         | `src/modules/vendors/`    |
-| `MyCondo.Modules.Payroll`         | `src/modules/payroll/`    |
-| `MyCondo.Modules.Complaints`      | `src/modules/complaints/` |
-| `MyCondo.Modules.Notifications`   | `src/modules/notifications/` |
-| `MyCondo.Modules.Documents`       | `src/modules/documents/`  |
-| `MyCondo.Modules.Reporting`       | `src/modules/reporting/`  |
-| `MyCondo.Modules.Amenities` (P2)  | `src/modules/amenities/`  |
-| `MyCondo.Modules.Maintenance` (P2)| `src/modules/maintenance/`|
-| `MyCondo.Modules.Security` (P2)   | `src/modules/security/`   |
+| `MyCondo.Modules.Tenancy`         | `src/features/tenancy/`    |
+| `MyCondo.Modules.Identity`        | `src/features/identity/`   |
+| `MyCondo.Modules.Property`        | `src/features/property/`   |
+| `MyCondo.Modules.Residents`       | `src/features/residents/`  |
+| `MyCondo.Modules.Leasing`         | `src/features/leasing/`    |
+| `MyCondo.Modules.Billing`         | `src/features/billing/`    |
+| `MyCondo.Modules.Payments`        | `src/features/payments/`   |
+| `MyCondo.Modules.Expenses`        | `src/features/expenses/`   |
+| `MyCondo.Modules.Vendors`         | `src/features/vendors/`    |
+| `MyCondo.Modules.Payroll`         | `src/features/payroll/`    |
+| `MyCondo.Modules.Complaints`      | `src/features/complaints/` |
+| `MyCondo.Modules.Notifications`   | `src/features/notifications/` |
+| `MyCondo.Modules.Documents`       | `src/features/documents/`  |
+| `MyCondo.Modules.Reporting`       | `src/features/reporting/`  |
+| `MyCondo.Modules.Amenities` (P2)  | `src/features/amenities/`  |
+| `MyCondo.Modules.Maintenance` (P2)| `src/features/maintenance/`|
+| `MyCondo.Modules.Security` (P2)   | `src/features/security/`   |
 
 ## Common Commands
 
 ```powershell
 npm install
 npm run dev                       # Vite dev server on http://localhost:5173
-npm run typecheck
-npm run lint
-npm test                          # Vitest
-npm run test:e2e                  # Playwright (requires API running)
-npm run build
+npm run lint                      # eslint --fix
+npm run build                     # tsc typecheck + vite build (no separate `typecheck` script exists)
 npm run preview                   # serve the built bundle
 ```
+
+**As of 2026-07-28 (Wave 0), there is no `typecheck`, `test`, or `test:e2e` script, and no
+Vitest/React Testing Library/Playwright dependency is installed.** `npm run build` is currently the
+only way to catch type errors (via the `tsc` step ahead of `vite build`). Adding real frontend test
+tooling is tracked as `mycondo-docs/07-delivery/MASTER_BACKLOG.md` PF-5 — do not assume test commands
+below this line exist until that item lands.
 
 ## Required Frontend Env (`.env`)
 
@@ -109,7 +118,7 @@ VITE_MYCONDO_ENV=development
 - Use **strict TypeScript**; no `any`, no `@ts-ignore` without comment justifying it.
 - Put **server state in RTK Query**, never copy it into Redux slices.
 - Validate every form with **Zod** + React Hook Form; map server errors to `form.setError`.
-- Keep modules independent — module A imports from module B only via its public surface (`module/index.ts`).
+- Keep features independent — feature A imports from feature B only via its public surface (`feature/index.ts`).
 - Use Metronic's existing layout shell; don't fork it.
 
 ## Never Do
