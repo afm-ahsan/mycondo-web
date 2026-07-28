@@ -1,5 +1,6 @@
-import { AuthRouting } from '@/auth/auth-routing';
-import { RequireAuth } from '@/auth/require-auth';
+import { ClassicLayout } from '@/auth/layouts/classic';
+import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { RequireAuth } from '@/lib/auth/RequireAuth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
 import {
@@ -92,12 +93,12 @@ import {
   StoreClientPage,
   WishlistPage,
 } from '@/pages/store-client';
-import { Navigate, Route, Routes } from 'react-router';
+import { Navigate, Outlet, Route, Routes } from 'react-router';
 
 export function AppRoutingSetup() {
   return (
     <Routes>
-      <Route element={<RequireAuth />}>
+      <Route element={<RequireAuth><Outlet /></RequireAuth>}>
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DefaultPage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
@@ -383,7 +384,9 @@ export function AppRoutingSetup() {
         </Route>
       </Route>
       <Route path="error/*" element={<ErrorRouting />} />
-      <Route path="auth/*" element={<AuthRouting />} />
+      <Route element={<ClassicLayout />}>
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
   );

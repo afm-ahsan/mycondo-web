@@ -1,12 +1,14 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
+import { sessionEnded } from '@/store/slices/authSlice';
 import { ApiError, type ProblemDetails } from './errors';
 
 const ACCESS_TOKEN_HEADER = 'Authorization';
 const CORRELATION_HEADER = 'X-Correlation-Id';
 
-// In-memory access token. Refresh token lives in an HttpOnly cookie set by mycondo-api.
+// In-memory access token. Refresh token lives in an HttpOnly cookie set by mycondo-api
+// (RefreshTokenCookie, scoped to /api/v1/auth) — never touched by JS.
 let accessToken: string | null = null;
 
 export function setAccessToken(token: string | null): void {
@@ -19,7 +21,7 @@ export function getAccessToken(): string | null {
 
 const rawBaseQuery = fetchBaseQuery({
   baseUrl: env.VITE_MYCONDO_API_BASE_URL,
-  credentials: 'include', // send refresh-token cookie on /auth/refresh
+  credentials: 'include', // send the mycondo_rt refresh cookie on /api/v1/auth/*
   prepareHeaders: (headers) => {
     if (accessToken) {
       headers.set(ACCESS_TOKEN_HEADER, `Bearer ${accessToken}`);
@@ -31,24 +33,38 @@ const rawBaseQuery = fetchBaseQuery({
   },
 });
 
-// Wraps the fetch base query: on 401 attempt a single refresh, then retry.
+// Minimal shape of what this file needs from RootState — kept local rather than importing
+// RootState from @/store/store, which itself imports baseApi (avoids a module-graph cycle).
+interface PartialAuthState {
+  auth?: { user?: { tenantId?: string } | null };
+}
+
+// Wraps the fetch base query: on 401 attempt a single refresh, then retry. The refresh call needs a
+// tenantId (RefreshRequest — the token itself comes from the cookie) — read the last-known tenant from
+// Redux state, since that's what a mid-session token expiry means: there was an active session a
+// moment ago. A cold page load's session restore is a separate, explicit call (useSessionBootstrap),
+// not this automatic-retry path — there's no prior Redux state to read from yet on first load.
 export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   async (args, api, extraOptions) => {
     let result = await rawBaseQuery(args, api, extraOptions);
 
     if (result.error?.status === 401) {
-      const refresh = await rawBaseQuery(
-        { url: '/api/auth/refresh', method: 'POST' },
-        api,
-        extraOptions,
-      );
+      const tenantId = (api.getState() as PartialAuthState).auth?.user?.tenantId;
+
+      const refresh = tenantId
+        ? await rawBaseQuery(
+            { url: '/api/v1/auth/refresh', method: 'POST', body: { tenantId } },
+            api,
+            extraOptions,
+          )
+        : { data: undefined };
 
       if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
         setAccessToken((refresh.data as { accessToken: string }).accessToken);
         result = await rawBaseQuery(args, api, extraOptions);
       } else {
         setAccessToken(null);
-        // Caller can read this error and route to /login.
+        api.dispatch(sessionEnded());
       }
     }
 

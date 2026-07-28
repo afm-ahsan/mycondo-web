@@ -1,5 +1,7 @@
 import { ReactNode } from 'react';
-import { useAuth } from '@/auth/context/auth-context';
+import { setAccessToken } from '@/api/baseApi';
+import { useLogout } from '@/features/auth/api/authApi';
+import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
 import { I18N_LANGUAGES } from '@/i18n/config';
 import { Language } from '@/i18n/types';
 import {
@@ -17,8 +19,10 @@ import {
   Users,
 } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { toAbsoluteUrl } from '@/lib/helpers';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { sessionEnded } from '@/store/slices/authSlice';
 import { useLanguage } from '@/providers/i18n-provider';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -37,20 +41,27 @@ import {
 import { Switch } from '@/components/ui/switch';
 
 export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
-  const { logout, user } = useAuth();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const user = useAppSelector((s) => s.auth.user);
+  const [logoutMutation] = useLogout();
   const { currenLanguage, changeLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
 
-  // Use display data from currentUser
-  const displayName =
-    user?.fullname ||
-    (user?.first_name && user?.last_name
-      ? `${user.first_name} ${user.last_name}`
-      : user?.username || 'User');
-
+  const displayName = user?.name || 'User';
   const displayEmail = user?.email || '';
-  // const displayAvatar = user?.pic || toAbsoluteUrl('/media/avatars/300-2.png');
   const displayAvatar = toAbsoluteUrl('/media/avatars/300-2.png');
+
+  async function logout() {
+    try {
+      await logoutMutation().unwrap();
+    } finally {
+      setAccessToken(null);
+      clearPersistedTenantId();
+      dispatch(sessionEnded());
+      navigate('/login');
+    }
+  }
 
   const handleLanguage = (lang: Language) => {
     changeLanguage(lang);

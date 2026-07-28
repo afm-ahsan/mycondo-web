@@ -1,12 +1,19 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
+export interface BuildingPermission {
+  buildingId: string;
+  permission: string;
+}
+
 export interface AuthUser {
   id: string;
   email: string;
   name: string;
   tenantId: string;
   roles: string[];
+  permissions: string[];
   buildingIds: string[];
+  buildingPermissions: BuildingPermission[];
 }
 
 export interface AuthState {
