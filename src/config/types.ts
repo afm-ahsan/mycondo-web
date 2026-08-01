@@ -14,6 +14,8 @@ export interface MenuItem {
   expandTitle?: string;
   badge?: string;
   separator?: boolean;
+  /** Tenant-wide permission required to see this item — see RequirePermission.tsx. UX only. */
+  permission?: string;
 }
 
 export type MenuConfig = MenuItem[];

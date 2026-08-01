@@ -1,10 +1,13 @@
 'use client';
 
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MENU_SIDEBAR } from '@/config/menu.config';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
+import { hasPermission } from '@/lib/auth/permissions';
+import { useAppSelector } from '@/store/hooks';
+import type { AuthUser } from '@/store/slices/authSlice';
 import {
   AccordionMenu,
   AccordionMenuClassNames,
@@ -17,8 +20,22 @@ import {
 } from '@/components/ui/accordion-menu';
 import { Badge } from '@/components/ui/badge';
 
+// Drops any item (and, recursively, its children) whose `permission` the current user lacks — a UX
+// convenience so admin-only links don't clutter the sidebar for users who'd just hit "Access denied"
+// (RequirePermission on the route is what actually enforces this; the backend enforces it for real).
+function filterMenuByPermission(items: MenuConfig, user: AuthUser | null): MenuConfig {
+  return items
+    .filter((item) => !item.permission || hasPermission(user, item.permission))
+    .map((item) =>
+      item.children ? { ...item, children: filterMenuByPermission(item.children, user) } : item,
+    );
+}
+
 export function SidebarMenu() {
   const { pathname } = useLocation();
+  const user = useAppSelector((s) => s.auth.user);
+
+  const visibleMenu = useMemo(() => filterMenuByPermission(MENU_SIDEBAR, user), [user]);
 
   // Memoize matchPath to prevent unnecessary re-renders
   const matchPath = useCallback(
@@ -218,7 +235,7 @@ export function SidebarMenu() {
         collapsible
         classNames={classNames}
       >
-        {buildMenu(MENU_SIDEBAR)}
+        {buildMenu(visibleMenu)}
       </AccordionMenu>
     </div>
   );

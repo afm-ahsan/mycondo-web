@@ -1,6 +1,10 @@
 import { ClassicLayout } from '@/auth/layouts/classic';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
+import { RegisterPage } from '@/features/auth/pages/RegisterPage';
+import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
+import { CreateTenantPage } from '@/features/tenancy';
 import { RequireAuth } from '@/lib/auth/RequireAuth';
+import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
 import {
@@ -381,13 +385,49 @@ export function AppRoutingSetup() {
             element={<AllProductsPage />}
           />
           <Route path="/auth/get-started" element={<AccountGetStartedPage />} />
+          <Route
+            path="/admin/users"
+            element={
+              <RequirePermission permission="user.view" fallback={<AccessDeniedNotice />}>
+                <UsersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <RequirePermission permission="role.view" fallback={<AccessDeniedNotice />}>
+                <RolePermissionMatrixPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/admin/tenants/new"
+            element={
+              <RequirePermission permission="tenant.manage" fallback={<AccessDeniedNotice />}>
+                <CreateTenantPage />
+              </RequirePermission>
+            }
+          />
         </Route>
       </Route>
       <Route path="error/*" element={<ErrorRouting />} />
       <Route element={<ClassicLayout />}>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
+  );
+}
+
+function AccessDeniedNotice() {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
+      <h2 className="text-lg font-semibold">Access denied</h2>
+      <p className="text-sm text-muted-foreground">
+        You don&apos;t have permission to view this page.
+      </p>
+    </div>
   );
 }

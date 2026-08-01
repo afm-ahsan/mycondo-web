@@ -11,8 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  install-lint-build:
-    name: Install, lint, build
+  install-lint-test-build:
+    name: Install, lint, test, build
     runs-on: ubuntu-latest
 
     steps:
@@ -31,8 +31,11 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Test (Vitest — PF-5)
+        run: npm run test
+
       - name: Build (includes strict TypeScript typecheck)
         run: npm run build
 
-      # No `npm test` / `npm run test:e2e` step yet — no test runner is installed as of Wave 0.5.
-      # See mycondo-docs/07-delivery/MASTER_BACKLOG.md PF-5. Add a test job here once it lands.
+      # Playwright E2E is deferred to a later verification slice — needs a running backend, not just
+      # a static build. See mycondo-docs/07-delivery/DELIVERY_ROADMAP.md Frontend Slice 2.

@@ -65,6 +65,16 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Dark Sidebar', path: '/dark-sidebar' },
     ],
   },
+  { heading: 'Administration' },
+  {
+    title: 'Administration',
+    icon: Building,
+    children: [
+      { title: 'Users', path: '/admin/users', permission: 'user.view' },
+      { title: 'Roles & Permissions', path: '/admin/roles', permission: 'role.view' },
+      { title: 'Create Tenant', path: '/admin/tenants/new', permission: 'tenant.manage' },
+    ],
+  },
   { heading: 'User' },
   {
     title: 'Public Profile',
