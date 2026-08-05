@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /d/Workspace/Projects/MyCondo/mycondo-api && find . -maxdepth 3 -not -path '*/node_modules*' -not -path '*/bin*' -not -path '*/obj*' -not -path './.git*' | sort)",
+      "Read(//d/Workspace/Projects/MyCondo/mycondo-api/**)",
+      "Bash(git commit *)",
+      "Read(//d/Workspace/Projects/MyCondo/**)",
+      "Read(//d/Workspace/Projects/MyCondo/mycondo-api/.claude/skills/**)",
+      "Bash(grep -n \"5000\\\\|5173\\\\|5174\\\\|5114\\\\|7298\" /d/Workspace/Projects/MyCondo/mycondo-api/.claude/skills/*.md /d/Workspace/Projects/MyCondo/mycondo-api/tests/*/*.cs 2>/dev/null)",
+      "Read(//d/Workspace/Projects/MyCondo/mycondo-api/tests/MyCondo.Api.IntegrationTests/**)",
+      "Read(//d/Workspace/Projects/MyCondo/mycondo-api/src/MyCondo.Api/**)",
+      "Bash(node scripts/check-ports.mjs)",
+      "Bash(echo \"exit code: $?\")",
+      "PowerShell(cd D:\\\\Workspace\\\\Projects\\\\MyCondo\\\\mycondo-api; pwsh -File scripts/check-ports.ps1; Write-Host \"exit code: $LASTEXITCODE\")",
+      "Bash(npm test *)"
+    ],
+    "additionalDirectories": [
+      "d:\\Workspace\\Projects\\MyCondo\\mycondo-api\\src\\MyCondo.Api\\Properties",
+      "d:\\Workspace\\Projects\\MyCondo\\mycondo-api\\src\\MyCondo.Api",
+      "d:\\Workspace\\Projects\\MyCondo\\mycondo-api"
+    ]
+  }
+}
