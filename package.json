@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/check-ports.mjs",
     "dev": "vite",
     "build": "tsc && vite build",
     "lint": "eslint src --fix",

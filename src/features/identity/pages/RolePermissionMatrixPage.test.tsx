@@ -7,7 +7,7 @@ import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
 import { RolePermissionMatrixPage } from './RolePermissionMatrixPage';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://localhost:7219';
 
 const roleManagerUser: AuthUser = {
   id: 'user-1',

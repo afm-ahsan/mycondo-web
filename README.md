@@ -43,7 +43,8 @@ mycondo-web/
 ### Prerequisites
 
 - Node 22 LTS (or use `.nvmrc` with `nvm use`)
-- A running `mycondo-api` on http://localhost:5000
+- A running `mycondo-api` on https://localhost:7219 (see `docs/local-development-ports.md` for the
+  full local port registry shared across projects on this machine)
 
 ### Setup
 
@@ -53,10 +54,10 @@ cd mycondo-web
 
 npm install
 copy .env.example .env
-# Edit .env: VITE_MYCONDO_API_BASE_URL=http://localhost:5000
+# Edit .env: VITE_MYCONDO_API_BASE_URL=https://localhost:7219
 
 npm run dev
-# → http://localhost:5173
+# → http://localhost:4219 (predev runs scripts/check-ports.mjs and fails fast on a conflict)
 ```
 
 ## Development
@@ -87,6 +88,7 @@ npm run preview             # serve the production bundle locally
 
 - **Conventions**: `docs/conventions/` — opinionated rules; AI tools and humans must read before editing
 - **AI guidance**: `CLAUDE.md` — module-mapping table, stack quirks, deviation list
+- **Local ports**: `docs/local-development-ports.md` — the reserved port range for this and sibling local projects
 
 ## Conventions
 

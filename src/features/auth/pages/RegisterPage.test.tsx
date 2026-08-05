@@ -6,7 +6,7 @@ import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import { RegisterPage } from './RegisterPage';
 
-const API_BASE = 'http://localhost:5000';
+const API_BASE = 'https://localhost:7219';
 
 function mockSuccessfulRegistration() {
   server.use(

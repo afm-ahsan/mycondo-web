@@ -9,7 +9,7 @@
 
 ## Workflow
 
-1. Backend changes a contract → OpenAPI spec at `http://localhost:5000/openapi/v1.json` updates.
+1. Backend changes a contract → OpenAPI spec at `https://localhost:7219/openapi/v1.json` updates (port per `docs/local-development-ports.md`).
 2. Run `npm run codegen` here → `src/api/generated/` rewrites.
 3. Module's `api/` slice extends `baseApi` and consumes the generated types.
 4. Type errors surface immediately — that's the point.

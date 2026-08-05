@@ -8,7 +8,7 @@ description: How the frontend consumes the backend's OpenAPI contract — codege
 ## Codegen
 
 `openapi-typescript` (types) + `@rtk-query/codegen-openapi` (RTK Query hooks), generating from
-`mycondo-api`'s `/openapi/v1.json` (served locally at `http://localhost:5000/openapi/v1.json`, UI at
+`mycondo-api`'s `/openapi/v1.json` (served locally at `https://localhost:7219/openapi/v1.json`, UI at
 `/scalar`). Never hand-write a type or fetch call for something the backend already exposes via
 OpenAPI — regenerate the client instead. Generated output lives under `src/generated/api/` (per the
 target structure) or wherever the current codegen config points — check

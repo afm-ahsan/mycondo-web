@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 const EnvSchema = z.object({
-  VITE_MYCONDO_API_BASE_URL: z.string().url().default('http://localhost:5000'),
+  VITE_MYCONDO_API_BASE_URL: z.string().url().default('https://localhost:7219'),
   VITE_MYCONDO_APP_NAME: z.string().min(1).default('MyCondo'),
   VITE_MYCONDO_ENV: z.enum(['development', 'staging', 'production']).default('development'),
 });

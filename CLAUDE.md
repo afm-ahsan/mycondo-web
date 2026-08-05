@@ -108,10 +108,14 @@ below this line exist until that item lands.
 ## Required Frontend Env (`.env`)
 
 ```
-VITE_MYCONDO_API_BASE_URL=http://localhost:5000
+VITE_MYCONDO_API_BASE_URL=https://localhost:7219
 VITE_MYCONDO_APP_NAME=MyCondo
 VITE_MYCONDO_ENV=development
 ```
+
+Dev server runs on `http://localhost:4219` (fixed in `vite.config.ts`, not env-driven). See
+`docs/local-development-ports.md` for the full reserved-port registry shared with sibling local
+projects on this machine.
 
 ## Always Do
 
@@ -140,5 +144,5 @@ These deviate from the conventions library; an ADR will be added before Phase 2 
 ## Useful Links
 
 - Backend repo: https://github.com/afm-ahsan/mycondo-api
-- Backend OpenAPI spec (when running locally): http://localhost:5000/openapi/v1.json
-- Backend API docs UI: http://localhost:5000/scalar
+- Backend OpenAPI spec (when running locally): https://localhost:7219/openapi/v1.json
+- Backend API docs UI: https://localhost:7219/scalar
