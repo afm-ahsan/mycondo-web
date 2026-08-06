@@ -2,7 +2,15 @@ import { ClassicLayout } from '@/auth/layouts/classic';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
+import {
+  CurrentlyInsideGuestsPage,
+  GuestCheckInOutPage,
+  GuestDirectoryPage,
+  GuestProfileFormPage,
+} from '@/features/security';
 import { CreateTenantPage } from '@/features/tenancy';
+import { AccessDeniedNotice } from '@/components/shared/AccessDeniedNotice';
+import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { RequireAuth } from '@/lib/auth/RequireAuth';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { ErrorRouting } from '@/errors/error-routing';
@@ -409,6 +417,38 @@ export function AppRoutingSetup() {
               </RequirePermission>
             }
           />
+          <Route
+            path="/security/guests"
+            element={
+              <RequirePermission permission={PERMISSIONS.visitor.view} fallback={<AccessDeniedNotice />}>
+                <GuestDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/guests/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.visitor.create} fallback={<AccessDeniedNotice />}>
+                <GuestProfileFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/guests/checkin-out"
+            element={
+              <RequirePermission permission={PERMISSIONS.visitor.checkin} fallback={<AccessDeniedNotice />}>
+                <GuestCheckInOutPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/guests/currently-inside"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
+                <CurrentlyInsideGuestsPage />
+              </RequirePermission>
+            }
+          />
         </Route>
       </Route>
       <Route path="error/*" element={<ErrorRouting />} />
@@ -418,16 +458,5 @@ export function AppRoutingSetup() {
       </Route>
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
-  );
-}
-
-function AccessDeniedNotice() {
-  return (
-    <div className="flex flex-col items-center justify-center py-24 text-center gap-2">
-      <h2 className="text-lg font-semibold">Access denied</h2>
-      <p className="text-sm text-muted-foreground">
-        You don&apos;t have permission to view this page.
-      </p>
-    </div>
   );
 }

@@ -74,6 +74,7 @@ When the conventions specify a rule, **follow it**. Project-specific overrides a
 | `MyCondo.Modules.Tenancy`         | `src/features/tenancy/`    |
 | `MyCondo.Modules.Identity`        | `src/features/identity/`   |
 | `MyCondo.Modules.Property`        | `src/features/property/`   |
+| `MyCondo.Modules.Security`        | `src/features/security/`   |
 | `MyCondo.Modules.Residents`       | `src/features/residents/`  |
 | `MyCondo.Modules.Leasing`         | `src/features/leasing/`    |
 | `MyCondo.Modules.Billing`         | `src/features/billing/`    |
@@ -87,23 +88,36 @@ When the conventions specify a rule, **follow it**. Project-specific overrides a
 | `MyCondo.Modules.Reporting`       | `src/features/reporting/`  |
 | `MyCondo.Modules.Amenities` (P2)  | `src/features/amenities/`  |
 | `MyCondo.Modules.Maintenance` (P2)| `src/features/maintenance/`|
-| `MyCondo.Modules.Security` (P2)   | `src/features/security/`   |
+
+`src/features/security/` (as of 2026-08-06): only `guests/` (Guest Register — directory, create,
+fast check-in/check-out, currently-inside view) is implemented. The backend's other `Features/
+Security/*` areas (Vehicles, DomesticWorkers, ServiceProviders, SebaVisits, Parcels) have a complete,
+wired API contract already but **no frontend UI yet** — do not assume they exist. Community Hall
+booking, Swimming Pool, Generator, and Gas Cylinder management have no backend implementation at all
+as of this date (confirmed by repo-wide search of `mycondo-api`) and are blocked on backend work
+before any frontend slice can start.
 
 ## Common Commands
 
 ```powershell
 npm install
-npm run dev                       # Vite dev server on http://localhost:5173
+npm run dev                       # Vite dev server on http://localhost:4219
 npm run lint                      # eslint --fix
 npm run build                     # tsc typecheck + vite build (no separate `typecheck` script exists)
 npm run preview                   # serve the built bundle
+npm test                          # vitest run
+npm run test:watch                # vitest (watch mode)
 ```
 
-**As of 2026-07-28 (Wave 0), there is no `typecheck`, `test`, or `test:e2e` script, and no
-Vitest/React Testing Library/Playwright dependency is installed.** `npm run build` is currently the
-only way to catch type errors (via the `tsc` step ahead of `vite build`). Adding real frontend test
-tooling is tracked as `mycondo-docs/07-delivery/MASTER_BACKLOG.md` PF-5 — do not assume test commands
-below this line exist until that item lands.
+**As of 2026-08-06 (Wave 0.5, Security/Guest Register slice), Vitest + React Testing Library + MSW
+are installed and wired** (`vitest.config.ts`, `src/test/setup.ts`, `src/test/server.ts`,
+`src/test/renderWithProviders.tsx`) — `npm test` runs the suite. Tests are colocated
+`<PageName>.test.tsx` next to the component they cover; see `src/features/identity/pages/
+RolePermissionMatrixPage.test.tsx` or `src/features/security/guests/pages/
+GuestCheckInOutPage.test.tsx` for the pattern (MSW `http.get/post` handlers +
+`renderWithProviders` + `userEvent`). There is still no separate `typecheck` script (`npm run build`
+remains the way to catch type errors) and no Playwright/`test:e2e` script yet — that gap is tracked
+as `mycondo-docs/07-delivery/MASTER_BACKLOG.md` PF-5.
 
 ## Required Frontend Env (`.env`)
 

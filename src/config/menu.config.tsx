@@ -54,6 +54,7 @@ import {
   Briefcase as WorkIcon,
   Zap,
 } from 'lucide-react';
+import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { type MenuConfig } from './types';
 
 export const MENU_SIDEBAR: MenuConfig = [
@@ -73,6 +74,30 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'Users', path: '/admin/users', permission: 'user.view' },
       { title: 'Roles & Permissions', path: '/admin/roles', permission: 'role.view' },
       { title: 'Create Tenant', path: '/admin/tenants/new', permission: 'tenant.manage' },
+    ],
+  },
+  { heading: 'Security & Access' },
+  {
+    title: 'Security & Access',
+    icon: ShieldUser,
+    children: [
+      {
+        title: 'Visitor Management',
+        children: [
+          { title: 'Guest Register', path: '/security/guests', permission: PERMISSIONS.visitor.view },
+          { title: 'New Guest', path: '/security/guests/new', permission: PERMISSIONS.visitor.create },
+          {
+            title: 'Check In / Out',
+            path: '/security/guests/checkin-out',
+            permission: PERMISSIONS.visitor.checkin,
+          },
+          {
+            title: 'Current Visitors',
+            path: '/security/guests/currently-inside',
+            permission: PERMISSIONS.report.securityView,
+          },
+        ],
+      },
     ],
   },
   { heading: 'User' },

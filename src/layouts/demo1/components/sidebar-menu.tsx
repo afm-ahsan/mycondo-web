@@ -23,12 +23,23 @@ import { Badge } from '@/components/ui/badge';
 // Drops any item (and, recursively, its children) whose `permission` the current user lacks — a UX
 // convenience so admin-only links don't clutter the sidebar for users who'd just hit "Access denied"
 // (RequirePermission on the route is what actually enforces this; the backend enforces it for real).
+// A group whose children are entirely filtered out is dropped too — it would otherwise render as an
+// empty, clickless accordion group — unless it also has its own `path`, i.e. it's a real destination
+// and not just a container. A `heading` marker left with no surviving group beneath it is dropped as
+// well, so a section title never appears over nothing.
 function filterMenuByPermission(items: MenuConfig, user: AuthUser | null): MenuConfig {
-  return items
+  const filtered = items
     .filter((item) => !item.permission || hasPermission(user, item.permission))
     .map((item) =>
       item.children ? { ...item, children: filterMenuByPermission(item.children, user) } : item,
-    );
+    )
+    .filter((item) => !item.children || item.children.length > 0 || item.path);
+
+  return filtered.filter((item, index) => {
+    if (!item.heading) return true;
+    const next = filtered[index + 1];
+    return next !== undefined && !next.heading;
+  });
 }
 
 export function SidebarMenu() {
