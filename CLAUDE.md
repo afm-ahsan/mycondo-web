@@ -122,21 +122,60 @@ regenerated OpenAPI client for this slice — every generated hook, computed fie
 (`totalKg`/`lineAmount`/`unitPricePerKg`/`grandTotal`), and permission string matched the backend
 exactly on the first regeneration.
 
-`src/features/leasing/` (as of 2026-08-07, Tenant Registration): a 5-step guided wizard (Property &
-Occupant → Contact & Identity → Household → Documents → Review & Submit) replacing the paper Flat
-Owner/Tenant Registration Form, plus a status-filterable list page and a detail/review page with the
-owner-review → management-verification → activate/move-out action set and a real status-history
-timeline (backend-persisted, not a timestamp reconstruction like `ApprovalTimeline`). Domain/permission
-names use `OccupancyRegistration`/`occupancy-registration.*` rather than `TenantRegistration` to avoid
-colliding with this app's own multi-tenancy vocabulary (`TenantId`, `tenant.manage`) — "Tenant
-Registration" remains the label used everywhere in UI copy and menu titles; see mycondo-api's
-`OccupancyRegistration` doc comment for the full rationale. **Known, disclosed limitation**: document
-upload records file metadata only (name/type/size against a synthetic storage key) — mycondo-api's
-`Attachments` feature has no real object-storage upload path yet (see `Attachment`'s doc comment); the
-wizard's Documents step says so plainly rather than pretending files are stored anywhere. Sensitive
-fields (National ID/passport) are masked server-side via `IdentityMasking`, matching the
-`GuestProfileDto`/`DomesticWorkerProfileDto` precedent — no unmasked value is ever returned by any
-endpoint this feature calls.
+`src/features/leasing/` (as of 2026-08-07, Tenant Registration — merged to `main` in both repos via
+PR #3): a 5-step guided wizard (Property & Occupant → Contact & Identity → Household → Documents →
+Review & Submit) replacing the paper Flat Owner/Tenant Registration Form, plus a status-filterable
+list page and a detail/review page with the owner-review → management-verification → activate/
+move-out action set and a real status-history timeline (backend-persisted, not a timestamp
+reconstruction like `ApprovalTimeline`). **Priority 2** (also delivered): Domestic Worker assignment,
+Driver assignment (no separate Driver aggregate — a `DomesticWorkerProfile` with
+`WorkerType.Driver`, assigned through the same worker-assignment endpoint), Vehicle assignment, a
+restricted Security Directory (`SecurityDirectoryPage`, DTOs structurally omit NID/passport/address/
+email — the fields simply don't exist on the type), move-out cascade that ends every active worker/
+vehicle assignment and deactivates every household member in one transaction, live-computed (not
+persisted) access eligibility, and a printable English registration form (`@media print`, A4, no PDF
+library — see architecture decisions below). Domain/permission names use `OccupancyRegistration`/
+`occupancy-registration.*` rather than `TenantRegistration` to avoid colliding with this app's own
+multi-tenancy vocabulary (`TenantId`, `tenant.manage`) — "Tenant Registration" remains the label used
+everywhere in UI copy and menu titles; see mycondo-api's `OccupancyRegistration` doc comment for the
+full rationale. Sensitive fields (National ID/passport) are masked server-side via `IdentityMasking`,
+matching the `GuestProfileDto`/`DomesticWorkerProfileDto` precedent — no unmasked value is ever
+returned by any endpoint this feature calls; replacing a stored NID requires the user to type a full
+new value (the raw value can never be redisplayed to pre-fill the form).
+
+**Known limitations (explicitly disclosed, not oversights):**
+1. Document upload records file metadata only (name/type/size against a synthetic storage key) —
+   mycondo-api's `Attachments` feature has no real object-storage upload path yet (see `Attachment`'s
+   doc comment); the wizard's Documents step says so plainly rather than pretending files are stored
+   anywhere. App-wide gap, not specific to this feature.
+2. No dedicated frontend idempotency-key plumbing for Tenant Registration's mutating requests.
+3. A previously stored masked NID cannot be recovered for editing; replacement requires a full new
+   value (by design — see masking discipline above).
+4. Docker-dependent `MyCondo.MultiTenancyTests`/parts of `MyCondo.Api.IntegrationTests` remain
+   unavailable without a local Docker daemon (Testcontainers) — pre-existing environment gap, not a
+   regression from this feature.
+5. Status changes surface via the existing `OccupancyRegistrationStatusHistory` audit trail rather
+   than a new/parallel notification framework (approved architecture decision, not a gap).
+6. Print support uses browser/A4 `@media print` rather than server-generated PDF (approved
+   architecture decision).
+7. **The printable form covers 29 of the 45 fields on the full paper-form checklist** — Father's/
+   Mother's Name, Marital Status, Profession, Employer/Office Address, household member Occupation,
+   driver Licence information, Property name (single-property system, so not applicable), Passport as
+   a field distinct from National ID, Emergency Contact Relationship/Address, Unit lease Start/End
+   dates, Previous residence/landlord information, and a vehicle's linked driver were never part of
+   the Priority 1/2 data model (`OccupancyRegistration`/`HouseholdMember` only capture the fields
+   listed in the domain entity). This was true from initial delivery and confirmed unchanged during
+   the 2026-08-07 finalization review — not a regression, but not previously written down either.
+
+**Finalization review (2026-08-07, post-merge):** two genuine defects were found and fixed via small
+follow-up branches (both repos' `feat/tenant-registration` had already been merged to `main` by the
+time the review ran, so fixes landed on new branches off `main` rather than amending the merged PRs):
+`fix/tenant-registration-move-in-date` (mycondo-web) — Step 2 of the wizard was hardcoding
+`moveInExpectedDate: null` on every save, silently wiping the date entered in Step 1 on every
+registration; and `fix/tenant-registration-nid-preserve-on-blank` (mycondo-api) — resuming a draft and
+saving Step 2 without retyping the (deliberately blank) NID field silently cleared a previously
+recorded NID, since `UpdateDraft` treated "not provided" the same as "clear it." Both are fixed,
+tested, and pushed; neither has been merged (awaiting review, per standing policy).
 
 ## Common Commands
 
