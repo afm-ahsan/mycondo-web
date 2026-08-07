@@ -21,6 +21,8 @@ import {
   FileQuestion,
   FileText,
   Flag,
+  Flame,
+  Fuel,
   Ghost,
   Gift,
   Grid,
@@ -148,6 +150,65 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Closures / Settings',
             path: '/facilities/swimming-pool/settings',
             permission: PERMISSIONS.facility.manage,
+          },
+        ],
+      },
+    ],
+  },
+  { heading: 'Operations' },
+  {
+    title: 'Operations',
+    icon: Zap,
+    children: [
+      {
+        title: 'Generator',
+        icon: Fuel,
+        children: [
+          {
+            title: 'Operation Log',
+            path: '/operations/generator/log',
+            permission: PERMISSIONS.generator.operationManage,
+          },
+          {
+            title: 'Fuel Log',
+            path: '/operations/generator/fuel',
+            permission: PERMISSIONS.generator.fuelManage,
+          },
+          {
+            title: 'Maintenance',
+            path: '/operations/generator/maintenance',
+            permission: PERMISSIONS.generator.maintenanceManage,
+          },
+          {
+            title: 'Reports',
+            path: '/operations/generator/reports',
+            permission: PERMISSIONS.generator.report,
+          },
+        ],
+      },
+      {
+        title: 'Gas Cylinders',
+        icon: Flame,
+        children: [
+          {
+            title: 'Purchases',
+            path: '/operations/gas-cylinders/purchases',
+            permission: PERMISSIONS.gasCylinder.purchaseManage,
+          },
+          {
+            title: 'Stock',
+            path: '/operations/gas-cylinders/stock',
+            permission: PERMISSIONS.gasCylinder.stockManage,
+          },
+          {
+            title: 'Consumption',
+            path: '/operations/gas-cylinders/consumption',
+            permission: PERMISSIONS.gasCylinder.stockManage,
+          },
+          {
+            title: 'Supplier Comparison',
+            path: '/operations/gas-cylinders/supplier-comparison',
+            permission: PERMISSIONS.gasCylinder.report,
           },
         ],
       },

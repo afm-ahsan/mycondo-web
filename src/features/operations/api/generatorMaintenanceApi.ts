@@ -1,0 +1,26 @@
+import {
+  useGetApiV1GeneratorBreakdownsQuery,
+  useGetApiV1GeneratorFuelReceiptsQuery,
+  useGetApiV1GeneratorMaintenanceSchedulesQuery,
+  useGetApiV1GeneratorServiceRecordsQuery,
+  usePostApiV1GeneratorBreakdownsByIdResolveMutation,
+  usePostApiV1GeneratorBreakdownsMutation,
+  usePostApiV1GeneratorFuelReceiptsMutation,
+  usePostApiV1GeneratorMaintenanceSchedulesByIdCompleteMutation,
+  usePostApiV1GeneratorMaintenanceSchedulesMutation,
+  usePutApiV1GeneratorMaintenanceSchedulesByIdMutation,
+} from '@/api/generated/mycondoApi';
+
+export const useGeneratorFuelReceipts = useGetApiV1GeneratorFuelReceiptsQuery;
+export const useRecordFuelReceipt = usePostApiV1GeneratorFuelReceiptsMutation;
+
+export const useGeneratorMaintenanceSchedules = useGetApiV1GeneratorMaintenanceSchedulesQuery;
+export const useCreateMaintenanceSchedule = usePostApiV1GeneratorMaintenanceSchedulesMutation;
+export const useUpdateMaintenanceSchedule = usePutApiV1GeneratorMaintenanceSchedulesByIdMutation;
+export const useCompleteMaintenanceService = usePostApiV1GeneratorMaintenanceSchedulesByIdCompleteMutation;
+
+export const useGeneratorServiceRecords = useGetApiV1GeneratorServiceRecordsQuery;
+
+export const useGeneratorBreakdowns = useGetApiV1GeneratorBreakdownsQuery;
+export const useRecordBreakdown = usePostApiV1GeneratorBreakdownsMutation;
+export const useResolveBreakdown = usePostApiV1GeneratorBreakdownsByIdResolveMutation;

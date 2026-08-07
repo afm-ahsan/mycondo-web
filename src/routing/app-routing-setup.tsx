@@ -13,6 +13,16 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
 import {
+  CylinderConsumptionPage,
+  CylinderPurchaseListPage,
+  CylinderStockPage,
+  GeneratorFuelLogPage,
+  GeneratorLogPage,
+  GeneratorMaintenancePage,
+  GeneratorReportsPage,
+  SupplierComparisonPage,
+} from '@/features/operations';
+import {
   CurrentlyInsideGuestsPage,
   GuestCheckInOutPage,
   GuestDirectoryPage,
@@ -520,6 +530,70 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.facility.manage} fallback={<AccessDeniedNotice />}>
                 <FacilitySettingsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/generator/log"
+            element={
+              <RequirePermission permission={PERMISSIONS.generator.operationManage} fallback={<AccessDeniedNotice />}>
+                <GeneratorLogPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/generator/fuel"
+            element={
+              <RequirePermission permission={PERMISSIONS.generator.fuelManage} fallback={<AccessDeniedNotice />}>
+                <GeneratorFuelLogPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/generator/maintenance"
+            element={
+              <RequirePermission permission={PERMISSIONS.generator.maintenanceManage} fallback={<AccessDeniedNotice />}>
+                <GeneratorMaintenancePage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/generator/reports"
+            element={
+              <RequirePermission permission={PERMISSIONS.generator.report} fallback={<AccessDeniedNotice />}>
+                <GeneratorReportsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/gas-cylinders/purchases"
+            element={
+              <RequirePermission permission={PERMISSIONS.gasCylinder.purchaseManage} fallback={<AccessDeniedNotice />}>
+                <CylinderPurchaseListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/gas-cylinders/stock"
+            element={
+              <RequirePermission permission={PERMISSIONS.gasCylinder.stockManage} fallback={<AccessDeniedNotice />}>
+                <CylinderStockPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/gas-cylinders/consumption"
+            element={
+              <RequirePermission permission={PERMISSIONS.gasCylinder.stockManage} fallback={<AccessDeniedNotice />}>
+                <CylinderConsumptionPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/operations/gas-cylinders/supplier-comparison"
+            element={
+              <RequirePermission permission={PERMISSIONS.gasCylinder.report} fallback={<AccessDeniedNotice />}>
+                <SupplierComparisonPage />
               </RequirePermission>
             }
           />

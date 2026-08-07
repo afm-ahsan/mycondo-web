@@ -38,6 +38,23 @@ export const PERMISSIONS = {
     override: 'pool.override',
     incidentManage: 'pool.incident.manage',
   },
+  // mycondo-api's Seed_Operations_Permissions.cs (Slice H) — Generator Management.
+  generator: {
+    view: 'generator.view',
+    manage: 'generator.manage',
+    operationManage: 'generator.operation.manage',
+    fuelManage: 'generator.fuel.manage',
+    maintenanceManage: 'generator.maintenance.manage',
+    report: 'generator.report',
+  },
+  // mycondo-api's Seed_Operations_Permissions.cs (Slice H) — Gas Cylinder Management.
+  gasCylinder: {
+    view: 'gascylinder.view',
+    purchaseManage: 'gascylinder.purchase.manage',
+    stockManage: 'gascylinder.stock.manage',
+    approve: 'gascylinder.approve',
+    report: 'gascylinder.report',
+  },
   report: {
     securityView: 'report.security.view',
     facility: 'report.facility',
