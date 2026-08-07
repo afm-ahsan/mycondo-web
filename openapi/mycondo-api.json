@@ -2639,6 +2639,76 @@
         }
       }
     },
+    "/api/v1/attendance-records": {
+      "get": {
+        "tags": [
+          "StaffAttendance"
+        ],
+        "parameters": [
+          {
+            "name": "workDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "staffMemberId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "onlyOpen",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfAttendanceRegisterEntryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/attendance-records/{id}/clock-out": {
       "post": {
         "tags": [
@@ -8417,6 +8487,121 @@
           }
         }
       },
+      "AttendanceRegisterEntryDto": {
+        "required": [
+          "attendanceRecordId",
+          "staffMemberId",
+          "staffMemberFullName",
+          "staffMemberRole",
+          "workDate",
+          "scheduledStartUtc",
+          "scheduledEndUtc",
+          "checkInUtc",
+          "checkOutUtc",
+          "workLocation",
+          "source",
+          "correctionRequested",
+          "correctionReason",
+          "approvedBy",
+          "approvedAtUtc",
+          "isLateArrival",
+          "isEarlyDeparture",
+          "overtimeMinutes"
+        ],
+        "type": "object",
+        "properties": {
+          "attendanceRecordId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "staffMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "staffMemberFullName": {
+            "type": "string"
+          },
+          "staffMemberRole": {
+            "type": "string"
+          },
+          "workDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "scheduledStartUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "scheduledEndUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "checkInUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "checkOutUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "workLocation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "source": {
+            "type": "string"
+          },
+          "correctionRequested": {
+            "type": "boolean"
+          },
+          "correctionReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "approvedBy": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "approvedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isLateArrival": {
+            "type": "boolean"
+          },
+          "isEarlyDeparture": {
+            "type": "boolean"
+          },
+          "overtimeMinutes": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "One row of the tenant-wide attendance register/currently-present view — see\r\nMyCondo.Domain.Features.Payroll.AttendanceRecords.AttendanceRegisterEntry for the rationale."
+      },
       "AuthenticatedUserDto": {
         "required": [
           "userId",
@@ -12621,6 +12806,61 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/AttendanceRecordDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedResultOfAttendanceRegisterEntryDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttendanceRegisterEntryDto"
             }
           },
           "page": {

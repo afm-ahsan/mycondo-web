@@ -9,7 +9,9 @@ import {
   Building,
   CalendarCheck,
   Captions,
+  Car,
   CheckCircle,
+  Clock,
   Code,
   Coffee,
   File as DocumentIcon,
@@ -23,7 +25,9 @@ import {
   Fuel,
   Ghost,
   Gift,
+  GraduationCap,
   Grid,
+  HardHat,
   Heart,
   HelpCircle,
   Kanban,
@@ -35,6 +39,7 @@ import {
   MessageSquare,
   Monitor,
   Network,
+  Package,
   PartyPopper,
   Users as PeopleIcon,
   Plug,
@@ -90,6 +95,117 @@ export const MENU_SIDEBAR: MenuConfig = [
             path: '/security/guests/currently-inside',
             permission: PERMISSIONS.report.securityView,
           },
+        ],
+      },
+      {
+        title: 'Vehicle Access',
+        icon: Car,
+        children: [
+          { title: 'Vehicle Directory', path: '/security/vehicles', permission: PERMISSIONS.vehicle.view },
+          { title: 'Register Vehicle', path: '/security/vehicles/new', permission: PERMISSIONS.vehicle.create },
+          {
+            title: 'Check In / Out',
+            path: '/security/vehicles/checkin-out',
+            permission: PERMISSIONS.vehicle.checkin,
+          },
+          {
+            title: 'Vehicles Currently Inside',
+            path: '/security/vehicles/currently-inside',
+            permission: PERMISSIONS.report.securityView,
+          },
+        ],
+      },
+      {
+        title: 'Domestic Staff',
+        icon: HardHat,
+        children: [
+          {
+            title: 'Directory',
+            path: '/security/domestic-workers',
+            permission: PERMISSIONS.domesticWorker.view,
+          },
+          {
+            title: 'Register Worker',
+            path: '/security/domestic-workers/new',
+            permission: PERMISSIONS.domesticWorker.manage,
+          },
+          {
+            title: 'Check In / Out',
+            path: '/security/domestic-workers/checkin-out',
+            permission: PERMISSIONS.domesticWorker.checkin,
+          },
+          {
+            title: 'Currently Inside',
+            path: '/security/domestic-workers/currently-inside',
+            permission: PERMISSIONS.report.securityView,
+          },
+        ],
+      },
+      {
+        title: 'Service Providers',
+        icon: GraduationCap,
+        children: [
+          {
+            title: 'Directory',
+            path: '/security/service-providers',
+            permission: PERMISSIONS.serviceProvider.view,
+          },
+          {
+            title: 'Register Provider',
+            path: '/security/service-providers/new',
+            permission: PERMISSIONS.serviceProvider.manage,
+          },
+          {
+            title: 'Check In / Out',
+            path: '/security/service-providers/checkin-out',
+            permission: PERMISSIONS.serviceProvider.checkin,
+          },
+          {
+            title: 'Currently Inside',
+            path: '/security/service-providers/currently-inside',
+            permission: PERMISSIONS.report.securityView,
+          },
+        ],
+      },
+      {
+        title: 'Staff Attendance',
+        icon: Clock,
+        children: [
+          {
+            title: 'Roster',
+            path: '/security/staff-attendance',
+            permission: PERMISSIONS.staffAttendance.view,
+          },
+          {
+            title: 'Register Staff Member',
+            path: '/security/staff-attendance/new',
+            permission: PERMISSIONS.staffAttendance.manage,
+          },
+          {
+            title: 'Attendance Register',
+            path: '/security/staff-attendance/records',
+            permission: PERMISSIONS.staffAttendance.view,
+          },
+          {
+            title: 'Currently Present',
+            path: '/security/staff-attendance/currently-present',
+            permission: PERMISSIONS.staffAttendance.view,
+          },
+        ],
+      },
+    ],
+  },
+  { heading: 'Front Desk' },
+  {
+    title: 'Front Desk',
+    icon: Package,
+    children: [
+      {
+        title: 'Parcels',
+        icon: Package,
+        children: [
+          { title: 'Parcel Register', path: '/security/parcels', permission: PERMISSIONS.parcel.view },
+          { title: 'Receive Parcel', path: '/security/parcels/new', permission: PERMISSIONS.parcel.receive },
         ],
       },
     ],

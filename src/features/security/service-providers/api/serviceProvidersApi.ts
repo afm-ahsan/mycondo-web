@@ -1,0 +1,25 @@
+import {
+  useDeleteApiV1ServiceProvidersAssignmentsByAssignmentIdMutation,
+  useGetApiV1AccessSessionsCurrentlyInsideQuery,
+  useGetApiV1ServiceProvidersByIdAssignmentsQuery,
+  useGetApiV1ServiceProvidersQuery,
+  usePostApiV1AccessSessionsServiceProvidersByIdCheckoutMutation,
+  usePostApiV1AccessSessionsServiceProvidersCheckinMutation,
+  usePostApiV1ServiceProvidersAssignmentsByAssignmentIdApproveMutation,
+  usePostApiV1ServiceProvidersByIdAssignmentsMutation,
+  usePostApiV1ServiceProvidersByIdStatusMutation,
+  usePostApiV1ServiceProvidersMutation,
+} from '@/api/generated/mycondoApi';
+
+// Friendlier re-exports of the OpenAPI-generated hooks (ADR-005), mirroring domesticWorkersApi.ts's
+// pattern — the two feature contracts are structurally identical, see the UX-2 discovery report.
+export const useRegisterServiceProvider = usePostApiV1ServiceProvidersMutation;
+export const useServiceProviders = useGetApiV1ServiceProvidersQuery;
+export const useSetProviderStatus = usePostApiV1ServiceProvidersByIdStatusMutation;
+export const useCreateProviderAssignment = usePostApiV1ServiceProvidersByIdAssignmentsMutation;
+export const useProviderAssignments = useGetApiV1ServiceProvidersByIdAssignmentsQuery;
+export const useApproveProviderAssignment = usePostApiV1ServiceProvidersAssignmentsByAssignmentIdApproveMutation;
+export const useDeactivateProviderAssignment = useDeleteApiV1ServiceProvidersAssignmentsByAssignmentIdMutation;
+export const useCheckInProvider = usePostApiV1AccessSessionsServiceProvidersCheckinMutation;
+export const useCheckOutProvider = usePostApiV1AccessSessionsServiceProvidersByIdCheckoutMutation;
+export const useCurrentlyInsideAccessSessions = useGetApiV1AccessSessionsCurrentlyInsideQuery;

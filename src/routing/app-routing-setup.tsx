@@ -30,10 +30,31 @@ import {
   SupplierComparisonPage,
 } from '@/features/operations';
 import {
+  AttendanceRegisterPage,
+  CurrentlyPresentStaffPage,
+  StaffMemberFormPage,
+  StaffRosterPage,
+} from '@/features/payroll';
+import {
+  CurrentlyInsideDomesticWorkersPage,
   CurrentlyInsideGuestsPage,
+  CurrentlyInsideServiceProvidersPage,
+  CurrentlyInsideVehiclesPage,
+  DomesticWorkerCheckInOutPage,
+  DomesticWorkerDirectoryPage,
+  DomesticWorkerFormPage,
   GuestCheckInOutPage,
   GuestDirectoryPage,
   GuestProfileFormPage,
+  ParcelDetailPage,
+  ParcelRegisterPage,
+  ReceiveParcelPage,
+  ServiceProviderCheckInOutPage,
+  ServiceProviderDirectoryPage,
+  ServiceProviderFormPage,
+  VehicleCheckInOutPage,
+  VehicleDirectoryPage,
+  VehicleFormPage,
 } from '@/features/security';
 import { CreateTenantPage } from '@/features/tenancy';
 import { DashboardPage } from '@/features/dashboard';
@@ -474,6 +495,158 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
                 <CurrentlyInsideGuestsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/vehicles"
+            element={
+              <RequirePermission permission={PERMISSIONS.vehicle.view} fallback={<AccessDeniedNotice />}>
+                <VehicleDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/vehicles/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.vehicle.create} fallback={<AccessDeniedNotice />}>
+                <VehicleFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/vehicles/checkin-out"
+            element={
+              <RequirePermission permission={PERMISSIONS.vehicle.checkin} fallback={<AccessDeniedNotice />}>
+                <VehicleCheckInOutPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/vehicles/currently-inside"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
+                <CurrentlyInsideVehiclesPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/domestic-workers"
+            element={
+              <RequirePermission permission={PERMISSIONS.domesticWorker.view} fallback={<AccessDeniedNotice />}>
+                <DomesticWorkerDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/domestic-workers/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.domesticWorker.manage} fallback={<AccessDeniedNotice />}>
+                <DomesticWorkerFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/domestic-workers/checkin-out"
+            element={
+              <RequirePermission permission={PERMISSIONS.domesticWorker.checkin} fallback={<AccessDeniedNotice />}>
+                <DomesticWorkerCheckInOutPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/domestic-workers/currently-inside"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
+                <CurrentlyInsideDomesticWorkersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/service-providers"
+            element={
+              <RequirePermission permission={PERMISSIONS.serviceProvider.view} fallback={<AccessDeniedNotice />}>
+                <ServiceProviderDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/service-providers/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.serviceProvider.manage} fallback={<AccessDeniedNotice />}>
+                <ServiceProviderFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/service-providers/checkin-out"
+            element={
+              <RequirePermission permission={PERMISSIONS.serviceProvider.checkin} fallback={<AccessDeniedNotice />}>
+                <ServiceProviderCheckInOutPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/service-providers/currently-inside"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
+                <CurrentlyInsideServiceProvidersPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/staff-attendance"
+            element={
+              <RequirePermission permission={PERMISSIONS.staffAttendance.view} fallback={<AccessDeniedNotice />}>
+                <StaffRosterPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/staff-attendance/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.staffAttendance.manage} fallback={<AccessDeniedNotice />}>
+                <StaffMemberFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/staff-attendance/records"
+            element={
+              <RequirePermission permission={PERMISSIONS.staffAttendance.view} fallback={<AccessDeniedNotice />}>
+                <AttendanceRegisterPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/staff-attendance/currently-present"
+            element={
+              <RequirePermission permission={PERMISSIONS.staffAttendance.view} fallback={<AccessDeniedNotice />}>
+                <CurrentlyPresentStaffPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/parcels"
+            element={
+              <RequirePermission permission={PERMISSIONS.parcel.view} fallback={<AccessDeniedNotice />}>
+                <ParcelRegisterPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/parcels/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.parcel.receive} fallback={<AccessDeniedNotice />}>
+                <ReceiveParcelPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/parcels/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.parcel.view} fallback={<AccessDeniedNotice />}>
+                <ParcelDetailPage />
               </RequirePermission>
             }
           />

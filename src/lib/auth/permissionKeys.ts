@@ -70,4 +70,51 @@ export const PERMISSIONS = {
     moveOut: 'occupancy-registration.move-out',
     securityView: 'occupancy-registration.security-view',
   },
+  // mycondo-api's Seed_Security_Permissions.cs — Vehicle Access.
+  vehicle: {
+    create: 'vehicle.create',
+    view: 'vehicle.view',
+    blockManage: 'vehicle.block.manage',
+    checkin: 'vehicle.checkin',
+    checkout: 'vehicle.checkout',
+    override: 'vehicle.override',
+  },
+  // mycondo-api's Seed_DomesticWorker_ServiceProvider_StaffAttendance_SebaVisitor_Permissions.cs.
+  // Note: named "domesticworker" (not "domesticstaff") to match what the API actually enforces.
+  domesticWorker: {
+    manage: 'domesticworker.manage',
+    view: 'domesticworker.view',
+    assignmentManage: 'domesticworker.assignment.manage',
+    checkin: 'domesticworker.checkin',
+    checkout: 'domesticworker.checkout',
+    override: 'domesticworker.override',
+  },
+  serviceProvider: {
+    manage: 'serviceprovider.manage',
+    view: 'serviceprovider.view',
+    assignmentManage: 'serviceprovider.assignment.manage',
+    checkin: 'serviceprovider.checkin',
+    checkout: 'serviceprovider.checkout',
+    override: 'serviceprovider.override',
+  },
+  staffAttendance: {
+    manage: 'staffattendance.manage',
+    view: 'staffattendance.view',
+    correct: 'staffattendance.correct',
+    approve: 'staffattendance.approve',
+  },
+  // mycondo-api's Seed_Parcel_Permissions.cs. The close endpoint (POST /parcels/{id}/close) is gated
+  // by parcel.return at the endpoint filter, but CloseParcelCommandHandler additionally requires
+  // parcel.escalate when the chosen Outcome is LostOrEscalated (a data-dependent bypass decision the
+  // filter can't make in advance) — same pattern as pool.override. Both permissions are needed to
+  // escalate; parcel.return alone covers Returned/Rejected outcomes.
+  parcel: {
+    view: 'parcel.view',
+    receive: 'parcel.receive',
+    update: 'parcel.update',
+    notify: 'parcel.notify',
+    handover: 'parcel.handover',
+    return: 'parcel.return',
+    escalate: 'parcel.escalate',
+  },
 } as const;
