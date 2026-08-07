@@ -38,7 +38,7 @@ import { formatDate } from '@/lib/helpers';
 import { useBookings } from '../../api/bookingsApi';
 import { useFacilities } from '../../api/facilitiesApi';
 import { BookingStatusBadge } from '../../components/BookingStatusBadge';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { PaymentStatusBadge } from '../../components/PaymentStatusBadge';
 import { formatBdt, formatTimeOfDay } from '../../lib/format';
 import { bookingStatusToneMap, type BookingStatus } from '../../lib/bookingStatus';
@@ -142,6 +142,9 @@ export function BookingListPage() {
     data: filteredItems,
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
+    // The API has no sort parameter on this query — DataGridColumnHeader would otherwise show a
+    // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
+    enableSorting: false,
     state: { pagination },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
@@ -152,7 +155,7 @@ export function BookingListPage() {
       <PageHeader
         title="Community Hall Bookings"
         crumbs={[{ label: 'Facilities' }, { label: 'Community Hall' }, { label: 'Booking List' }]}
-        actions={
+        primaryAction={
           <>
             <Button variant="outline" asChild>
               <Link to="../calendar">

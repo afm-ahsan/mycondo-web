@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { useGetApiV1VehiclesQuery } from '@/api/generated/mycondoApi';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { Button, ButtonArrow } from '@/components/ui/button';
 import {
   Command,
@@ -34,12 +35,7 @@ export function VehicleSelect({
 }: VehicleSelectProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
-  const [debouncedSearch, setDebouncedSearch] = useState('');
-
-  useEffect(() => {
-    const handle = setTimeout(() => setDebouncedSearch(inputValue.trim()), 300);
-    return () => clearTimeout(handle);
-  }, [inputValue]);
+  const debouncedSearch = useDebouncedValue(inputValue.trim());
 
   const { data, isFetching } = useGetApiV1VehiclesQuery(
     debouncedSearch.length >= 2 ? { search: debouncedSearch, page: 1, pageSize: 20 } : skipToken,

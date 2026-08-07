@@ -14,7 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { GeneratorSelect } from '@/components/shared/GeneratorSelect';
 import { formatDate } from '@/lib/helpers';
 import { useGeneratorMaintenanceDueReport, useGeneratorOperationalReport } from '../../api/reportsApi';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { formatBdt, formatNumber } from '../../lib/format';
 
 function firstDayOfMonth(): string {

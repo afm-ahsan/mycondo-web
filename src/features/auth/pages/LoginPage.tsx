@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Eye, EyeOff, LoaderCircleIcon } from 'lucide-react';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ApiError, toUserMessage } from '@/api/errors';
@@ -15,6 +15,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useAppDispatch } from '@/store/hooks';
 import { sessionStarted } from '@/store/slices/authSlice';
 import { setAccessToken } from '@/api/baseApi';
@@ -155,7 +156,7 @@ export function LoginPage() {
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting ? (
             <span className="flex items-center gap-2">
-              <LoaderCircleIcon className="h-4 w-4 animate-spin" /> Signing in...
+              <InlineSpinner /> Signing in...
             </span>
           ) : (
             'Sign In'

@@ -5,7 +5,8 @@ import { useForm } from 'react-hook-form';
 import { ApiError, toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   Form,
   FormControl,
@@ -65,10 +66,13 @@ export function CreateTenantPage() {
   }
 
   return (
-    <Card className="max-w-lg">
-      <CardHeader>
-        <CardTitle>Create Tenant</CardTitle>
-      </CardHeader>
+    <>
+      <PageHeader
+        title="Create Tenant"
+        description="Provision a brand-new tenant. Its first registrant becomes SuperAdmin automatically."
+        crumbs={[{ label: 'Administration' }, { label: 'Create Tenant' }]}
+      />
+      <Card className="max-w-lg">
       <CardContent>
         {error && (
           <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
@@ -125,7 +129,8 @@ export function CreateTenantPage() {
           </form>
         </Form>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 }
 

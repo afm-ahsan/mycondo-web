@@ -25,7 +25,7 @@ import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm
 import { useRequestBooking } from '../../api/bookingsApi';
 import { useFacility } from '../../api/facilitiesApi';
 import { AvailabilityPanel } from '../../components/AvailabilityPanel';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { bookingRequestSchema, type BookingRequestSchemaType } from '../../schemas/bookingRequestSchema';
 
 /**

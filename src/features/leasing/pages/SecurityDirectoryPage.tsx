@@ -13,7 +13,7 @@ import {
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { useOccupancySecurityView, useOccupancySecurityViews } from '../api/leasingApi';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 /**
  * Priority 2D — the restricted security-facing directory. Deliberately its own page (not a

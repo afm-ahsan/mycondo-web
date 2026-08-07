@@ -28,7 +28,7 @@ import { toUserMessage } from '@/api/errors';
 import { useGenerators } from '../../api/generatorsApi';
 import { useGeneratorFuelReceipts, useRecordFuelReceipt } from '../../api/generatorMaintenanceApi';
 import { FuelReceiptDialog } from '../../components/FuelReceiptDialog';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { formatBdt, formatNumber } from '../../lib/format';
 import type { GeneratorFuelReceiptDto } from '@/api/generated/mycondoApi';
 import type { FuelReceiptSchemaType } from '../../schemas/fuelReceiptSchema';
@@ -96,7 +96,7 @@ export function GeneratorFuelLogPage() {
       <PageHeader
         title="Generator Fuel Log"
         crumbs={[{ label: 'Operations' }, { label: 'Generator' }, { label: 'Fuel Log' }]}
-        actions={
+        primaryAction={
           <RequirePermission permission={PERMISSIONS.generator.fuelManage}>
             <Button onClick={() => setRecordOpen(true)}>
               <Plus /> Record Receipt

@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { useUpdateTenantRegistrationDraft } from '../api/leasingApi';
 import { primaryResidentSchema, type PrimaryResidentSchemaType } from '../schemas/primaryResidentSchema';
 
@@ -55,6 +56,8 @@ export function PrimaryResidentStep({
       emergencyContactPhone: defaultValues.emergencyContactPhone ?? '',
     },
   });
+
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   async function onSubmit(values: PrimaryResidentSchemaType) {
     setError(null);

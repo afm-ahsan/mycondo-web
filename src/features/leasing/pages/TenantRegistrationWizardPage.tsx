@@ -15,7 +15,7 @@ import { useTenantRegistration } from '../api/leasingApi';
 import { DocumentsStep } from '../components/DocumentsStep';
 import { HouseholdMembersStep } from '../components/HouseholdMembersStep';
 import { OccupancyDetailsStep } from '../components/OccupancyDetailsStep';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { PrimaryResidentStep } from '../components/PrimaryResidentStep';
 import { ReviewSubmitStep } from '../components/ReviewSubmitStep';
 import type { OccupancyDetailsSchemaType } from '../schemas/occupancyDetailsSchema';

@@ -30,7 +30,7 @@ import { useGenerators, useGeneratorSessions, useStartGeneratorSession, useStopG
 import { StartSessionDialog } from '../../components/StartSessionDialog';
 import { StopSessionDialog } from '../../components/StopSessionDialog';
 import { ManageGeneratorsDialog } from '../../components/ManageGeneratorsDialog';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { formatNumber } from '../../lib/format';
 import { generatorSessionStatusToneMap, type GeneratorSessionStatus } from '../../lib/status';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -129,6 +129,9 @@ export function GeneratorLogPage() {
     data: data?.items ?? [],
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
+    // The API has no sort parameter on this query — DataGridColumnHeader would otherwise show a
+    // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
+    enableSorting: false,
     state: { pagination },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
@@ -139,7 +142,7 @@ export function GeneratorLogPage() {
       <PageHeader
         title="Generator Operation Log"
         crumbs={[{ label: 'Operations' }, { label: 'Generator' }, { label: 'Operation Log' }]}
-        actions={
+        primaryAction={
           <>
             <RequirePermission permission={PERMISSIONS.generator.view}>
               <Button variant="outline" onClick={() => setManageOpen(true)}>

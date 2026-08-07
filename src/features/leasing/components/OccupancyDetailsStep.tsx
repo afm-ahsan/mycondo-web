@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import type { OccupancyRegistrationDto } from '@/api/generated/mycondoApi';
 import { useCreateTenantRegistration, useUpdateTenantRegistrationDraft } from '../api/leasingApi';
 import {
@@ -61,6 +62,8 @@ export function OccupancyDetailsStep({
   });
 
   const buildingId = form.watch('buildingId');
+
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   async function onSubmit(values: OccupancyDetailsSchemaType) {
     setError(null);

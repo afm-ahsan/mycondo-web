@@ -41,7 +41,7 @@ import { MaintenanceScheduleDialog } from '../../components/MaintenanceScheduleD
 import { CompleteMaintenanceDialog } from '../../components/CompleteMaintenanceDialog';
 import { BreakdownDialog } from '../../components/BreakdownDialog';
 import { ReasonDialog } from '../../components/ReasonDialog';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { formatBdt } from '../../lib/format';
 import type {
   GeneratorBreakdownRecordDto,

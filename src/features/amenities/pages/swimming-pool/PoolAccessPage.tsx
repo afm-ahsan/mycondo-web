@@ -30,7 +30,7 @@ import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm
 import { useFacilities } from '../../api/facilitiesApi';
 import { useCheckOutPoolSession, usePoolSessions, useCheckInPoolSession } from '../../api/poolApi';
 import { CapacityIndicator } from '../../components/CapacityIndicator';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { parseDenialReasons } from '../../lib/bookingStatus';
 import { poolCheckInSchema, type PoolCheckInSchemaType } from '../../schemas/poolCheckInSchema';
 import type { FacilityDto } from '@/api/generated/mycondoApi';

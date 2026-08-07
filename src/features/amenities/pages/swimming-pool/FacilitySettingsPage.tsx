@@ -37,7 +37,7 @@ import {
   useReactivateFacility,
   useUpdateFacilityConfiguration,
 } from '../../api/facilitiesApi';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { blackoutDateSchema, type BlackoutDateSchemaType } from '../../schemas/blackoutDateSchema';
 import { facilitySchema, type FacilitySchemaType } from '../../schemas/facilitySchema';
 import type { FacilityDto } from '@/api/generated/mycondoApi';
@@ -81,7 +81,7 @@ export function FacilitySettingsPage() {
       <PageHeader
         title="Closures / Settings"
         crumbs={[{ label: 'Facilities' }, { label: 'Swimming Pool' }, { label: 'Closures / Settings' }]}
-        actions={
+        primaryAction={
           <RequirePermission permission={PERMISSIONS.facility.manage}>
             <Button onClick={() => setCreateOpen(true)}>
               <Plus /> Create Facility

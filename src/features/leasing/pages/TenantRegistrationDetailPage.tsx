@@ -8,6 +8,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -23,7 +25,7 @@ import {
   useTenantRegistration,
   useVerifyTenantRegistrationByManagement,
 } from '../api/leasingApi';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { ReasonDialog } from '../components/ReasonDialog';
 import { StatusHistoryTimeline } from '../components/StatusHistoryTimeline';
 import { WorkerVehicleAssignmentsSection } from '../components/WorkerVehicleAssignmentsSection';
@@ -40,7 +42,13 @@ export function TenantRegistrationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const registrationId = id ?? '';
 
-  const { data: registration } = useTenantRegistration({ id: registrationId });
+  const {
+    data: registration,
+    isLoading: isLoadingRegistration,
+    isError: isRegistrationError,
+    error: registrationError,
+    refetch: refetchRegistration,
+  } = useTenantRegistration({ id: registrationId });
   const { data: members } = useHouseholdMembers({ id: registrationId });
 
   const [approveByOwner, { isLoading: isApprovingOwner }] = useApproveTenantRegistrationByOwner();
@@ -98,8 +106,18 @@ export function TenantRegistrationDetailPage() {
     }
   }
 
-  if (!registration) {
-    return <p className="text-muted-foreground text-sm">Loading…</p>;
+  if (isRegistrationError) {
+    return (
+      <ErrorState
+        title="Couldn't load this registration"
+        description={toUserMessage(registrationError)}
+        onRetry={refetchRegistration}
+      />
+    );
+  }
+
+  if (isLoadingRegistration || !registration) {
+    return <PageSkeleton />;
   }
 
   const activeMembers = members?.filter((m) => m.isActive) ?? [];
@@ -111,7 +129,7 @@ export function TenantRegistrationDetailPage() {
       <PageHeader
         title={registration.primaryFullName}
         crumbs={[{ label: 'Tenant Registrations', path: '/leasing/tenant-registrations' }, { label: registration.primaryFullName }]}
-        actions={
+        primaryAction={
           <>
             <Button variant="outline" asChild>
               <Link to={`/leasing/tenant-registrations/${registrationId}/print`}>Print</Link>
