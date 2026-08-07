@@ -1,0 +1,134 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { GeneratorSelect } from '@/components/shared/GeneratorSelect';
+import { fuelReceiptSchema, type FuelReceiptSchemaType } from '../schemas/fuelReceiptSchema';
+
+interface FuelReceiptDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  isSubmitting?: boolean;
+  onSubmit: (values: FuelReceiptSchemaType) => void;
+}
+
+export function FuelReceiptDialog({ open, onOpenChange, isSubmitting, onSubmit }: FuelReceiptDialogProps) {
+  const form = useForm<FuelReceiptSchemaType>({
+    resolver: zodResolver(fuelReceiptSchema),
+    defaultValues: {
+      generatorId: '',
+      receivedAtUtc: new Date().toISOString().slice(0, 10),
+      quantity: 0,
+      cost: undefined,
+      supplier: '',
+      remarks: '',
+    },
+  });
+
+  function handleOpenChange(next: boolean) {
+    if (!next) form.reset();
+    onOpenChange(next);
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Record Fuel Receipt</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="generatorId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Generator</FormLabel>
+                  <FormControl>
+                    <GeneratorSelect value={field.value} onValueChange={field.onChange} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="receivedAtUtc"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Received date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="quantity"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Quantity</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step="0.01" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="cost"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cost (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="number" min={0} step="0.01" {...field} value={field.value ?? ''} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="supplier"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Supplier (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Recording…' : 'Record Receipt'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}

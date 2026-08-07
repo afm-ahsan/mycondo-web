@@ -1,0 +1,205 @@
+import { useState } from 'react';
+import { skipToken } from '@reduxjs/toolkit/query/react';
+import { Pencil, Plus, Power, PowerOff } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { toUserMessage } from '@/api/errors';
+import {
+  useCreateGenerator,
+  useDeactivateGenerator,
+  useGenerators,
+  useReactivateGenerator,
+  useUpdateGenerator,
+} from '../api/generatorsApi';
+import { GeneratorFormDialog } from './GeneratorFormDialog';
+import type { GeneratorDto } from '@/api/generated/mycondoApi';
+import type { GeneratorSchemaType } from '../schemas/generatorSchema';
+
+interface ManageGeneratorsDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+/** Generator master list + create/edit/deactivate/reactivate — see GeneratorFormDialog's doc comment
+ * for why this lives here rather than as its own menu item. */
+export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsDialogProps) {
+  const { data, isFetching } = useGenerators(open ? { page: 1, pageSize: 100 } : skipToken);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingGenerator, setEditingGenerator] = useState<GeneratorDto | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [createGenerator, { isLoading: isCreating }] = useCreateGenerator();
+  const [updateGenerator, { isLoading: isUpdating }] = useUpdateGenerator();
+  const [deactivateGenerator] = useDeactivateGenerator();
+  const [reactivateGenerator] = useReactivateGenerator();
+
+  async function handleSubmit(values: GeneratorSchemaType) {
+    setErrorMessage(null);
+    try {
+      if (editingGenerator) {
+        await updateGenerator({
+          id: editingGenerator.generatorId,
+          updateGeneratorRequest: {
+            name: values.name,
+            model: values.model || null,
+            capacityKva: values.capacityKva ?? null,
+            location: values.location || null,
+          },
+        }).unwrap();
+      } else {
+        await createGenerator({
+          createGeneratorCommand: {
+            buildingId: values.buildingId,
+            name: values.name,
+            model: values.model || null,
+            capacityKva: values.capacityKva ?? null,
+            location: values.location || null,
+          },
+        }).unwrap();
+      }
+      setFormOpen(false);
+      setEditingGenerator(null);
+    } catch (err) {
+      setErrorMessage(toUserMessage(toApiError(err) ?? err));
+    }
+  }
+
+  async function handleToggleActive(generator: GeneratorDto) {
+    setErrorMessage(null);
+    try {
+      if (generator.isActive) {
+        await deactivateGenerator({ id: generator.generatorId }).unwrap();
+      } else {
+        await reactivateGenerator({ id: generator.generatorId }).unwrap();
+      }
+    } catch (err) {
+      setErrorMessage(toUserMessage(toApiError(err) ?? err));
+    }
+  }
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Manage Generators</DialogTitle>
+          </DialogHeader>
+
+          {errorMessage && <p className="text-destructive text-sm">{errorMessage}</p>}
+
+          <RequirePermission permission={PERMISSIONS.generator.manage}>
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                onClick={() => {
+                  setEditingGenerator(null);
+                  setFormOpen(true);
+                }}
+              >
+                <Plus /> New Generator
+              </Button>
+            </div>
+          </RequirePermission>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>Model</TableHead>
+                <TableHead>Capacity (kVA)</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead />
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {isFetching ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-muted-foreground text-center">
+                    Loading…
+                  </TableCell>
+                </TableRow>
+              ) : (data?.items ?? []).length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-muted-foreground text-center">
+                    No generators yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                (data?.items ?? []).map((generator) => (
+                  <TableRow key={generator.generatorId}>
+                    <TableCell>{generator.name}</TableCell>
+                    <TableCell>{generator.model ?? '—'}</TableCell>
+                    <TableCell>{generator.capacityKva ?? '—'}</TableCell>
+                    <TableCell>{generator.location ?? '—'}</TableCell>
+                    <TableCell>
+                      <Badge variant={generator.isActive ? 'primary' : 'secondary'} appearance="light">
+                        {generator.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <RequirePermission permission={PERMISSIONS.generator.manage}>
+                        <div className="flex gap-2">
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            aria-label="Edit generator"
+                            onClick={() => {
+                              setEditingGenerator(generator);
+                              setFormOpen(true);
+                            }}
+                          >
+                            <Pencil />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            aria-label={generator.isActive ? 'Deactivate generator' : 'Reactivate generator'}
+                            onClick={() => handleToggleActive(generator)}
+                          >
+                            {generator.isActive ? <PowerOff /> : <Power />}
+                          </Button>
+                        </div>
+                      </RequirePermission>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </DialogContent>
+      </Dialog>
+
+      <GeneratorFormDialog
+        open={formOpen}
+        onOpenChange={(next) => {
+          setFormOpen(next);
+          if (!next) setEditingGenerator(null);
+        }}
+        isSubmitting={isCreating || isUpdating}
+        onSubmit={handleSubmit}
+        initialValues={
+          editingGenerator
+            ? {
+                buildingId: editingGenerator.buildingId,
+                name: editingGenerator.name,
+                model: editingGenerator.model ?? undefined,
+                capacityKva: editingGenerator.capacityKva ?? undefined,
+                location: editingGenerator.location ?? undefined,
+              }
+            : undefined
+        }
+      />
+    </>
+  );
+}

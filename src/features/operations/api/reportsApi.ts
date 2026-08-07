@@ -1,0 +1,12 @@
+import {
+  useGetApiV1ReportsOperationsGasCylindersConsumptionQuery,
+  useGetApiV1ReportsOperationsGasCylindersSupplierComparisonQuery,
+  useGetApiV1ReportsOperationsGeneratorsMaintenanceDueQuery,
+  useGetApiV1ReportsOperationsGeneratorsOperationalQuery,
+} from '@/api/generated/mycondoApi';
+
+export const useGeneratorOperationalReport = useGetApiV1ReportsOperationsGeneratorsOperationalQuery;
+export const useGeneratorMaintenanceDueReport = useGetApiV1ReportsOperationsGeneratorsMaintenanceDueQuery;
+
+export const useSupplierComparisonReport = useGetApiV1ReportsOperationsGasCylindersSupplierComparisonQuery;
+export const useCylinderConsumptionReport = useGetApiV1ReportsOperationsGasCylindersConsumptionQuery;

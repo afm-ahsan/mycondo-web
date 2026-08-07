@@ -1,0 +1,16 @@
+import {
+  useGetApiV1CylinderReconciliationsQuery,
+  useGetApiV1CylinderStockMovementsCurrentQuery,
+  useGetApiV1CylinderStockMovementsQuery,
+  usePostApiV1CylinderReconciliationsMutation,
+  usePostApiV1CylinderStockMovementsAdjustmentsMutation,
+  usePostApiV1CylinderStockMovementsMutation,
+} from '@/api/generated/mycondoApi';
+
+export const useStockMovements = useGetApiV1CylinderStockMovementsQuery;
+export const useCurrentStock = useGetApiV1CylinderStockMovementsCurrentQuery;
+export const useRecordStockMovement = usePostApiV1CylinderStockMovementsMutation;
+export const useRecordStockAdjustment = usePostApiV1CylinderStockMovementsAdjustmentsMutation;
+
+export const useMonthlyReconciliations = useGetApiV1CylinderReconciliationsQuery;
+export const useCreateMonthlyReconciliation = usePostApiV1CylinderReconciliationsMutation;

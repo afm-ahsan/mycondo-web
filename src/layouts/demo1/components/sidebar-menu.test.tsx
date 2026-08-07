@@ -110,3 +110,66 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
     expect(screen.queryByText('Closures / Settings')).not.toBeInTheDocument();
   });
 });
+
+function operationsCount() {
+  return screen.queryAllByText('Operations').length;
+}
+
+describe('SidebarMenu — Operations group (Slice H)', () => {
+  it('shows the full Operations tree when the user holds every relevant permission', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SidebarMenu />, {
+      auth: {
+        user: makeUser([
+          'generator.operation.manage',
+          'generator.fuel.manage',
+          'generator.maintenance.manage',
+          'generator.report',
+          'gascylinder.purchase.manage',
+          'gascylinder.stock.manage',
+          'gascylinder.report',
+        ]),
+        isInitialized: true,
+      },
+    });
+
+    expect(operationsCount()).toBe(2);
+
+    await expandGroup(user, 'Operations');
+    expect(screen.getByText('Generator')).toBeInTheDocument();
+    expect(screen.getByText('Gas Cylinders')).toBeInTheDocument();
+
+    await expandGroup(user, 'Generator');
+    expect(screen.getByText('Operation Log')).toBeInTheDocument();
+    expect(screen.getByText('Fuel Log')).toBeInTheDocument();
+    expect(screen.getByText('Maintenance')).toBeInTheDocument();
+    expect(screen.getByText('Reports')).toBeInTheDocument();
+
+    await expandGroup(user, 'Gas Cylinders');
+    expect(screen.getByText('Purchases')).toBeInTheDocument();
+    expect(screen.getByText('Stock')).toBeInTheDocument();
+    expect(screen.getByText('Consumption')).toBeInTheDocument();
+    expect(screen.getByText('Supplier Comparison')).toBeInTheDocument();
+  });
+
+  it('hides the Generator branch but keeps Gas Cylinders when the user holds only gas-cylinder permissions', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SidebarMenu />, {
+      auth: { user: makeUser(['gascylinder.purchase.manage', 'gascylinder.report']), isInitialized: true },
+    });
+
+    expect(operationsCount()).toBe(2);
+
+    await expandGroup(user, 'Operations');
+    expect(screen.queryByText('Generator')).not.toBeInTheDocument();
+    expect(screen.getByText('Gas Cylinders')).toBeInTheDocument();
+  });
+
+  it('hides the entire Operations group when the user holds none of its permissions', () => {
+    renderWithProviders(<SidebarMenu />, {
+      auth: { user: makeUser(['visitor.view']), isInitialized: true },
+    });
+
+    expect(operationsCount()).toBe(0);
+  });
+});

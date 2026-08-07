@@ -1,0 +1,28 @@
+import {
+  useGetApiV1CylinderPurchasesByIdQuery,
+  useGetApiV1CylinderPurchasesQuery,
+  useGetApiV1GasCylinderSuppliersByIdQuery,
+  useGetApiV1GasCylinderSuppliersQuery,
+  usePostApiV1CylinderPurchasesByIdApproveMutation,
+  usePostApiV1CylinderPurchasesByIdMarkPaidMutation,
+  usePostApiV1CylinderPurchasesByIdRejectMutation,
+  usePostApiV1CylinderPurchasesMutation,
+  usePostApiV1GasCylinderSuppliersByIdDeactivateMutation,
+  usePostApiV1GasCylinderSuppliersByIdReactivateMutation,
+  usePostApiV1GasCylinderSuppliersMutation,
+  usePutApiV1GasCylinderSuppliersByIdMutation,
+} from '@/api/generated/mycondoApi';
+
+export const useSuppliers = useGetApiV1GasCylinderSuppliersQuery;
+export const useSupplier = useGetApiV1GasCylinderSuppliersByIdQuery;
+export const useCreateSupplier = usePostApiV1GasCylinderSuppliersMutation;
+export const useUpdateSupplier = usePutApiV1GasCylinderSuppliersByIdMutation;
+export const useDeactivateSupplier = usePostApiV1GasCylinderSuppliersByIdDeactivateMutation;
+export const useReactivateSupplier = usePostApiV1GasCylinderSuppliersByIdReactivateMutation;
+
+export const useCylinderPurchases = useGetApiV1CylinderPurchasesQuery;
+export const useCylinderPurchase = useGetApiV1CylinderPurchasesByIdQuery;
+export const useRecordCylinderPurchase = usePostApiV1CylinderPurchasesMutation;
+export const useApproveCylinderPurchase = usePostApiV1CylinderPurchasesByIdApproveMutation;
+export const useRejectCylinderPurchase = usePostApiV1CylinderPurchasesByIdRejectMutation;
+export const useMarkCylinderPurchasePaid = usePostApiV1CylinderPurchasesByIdMarkPaidMutation;
