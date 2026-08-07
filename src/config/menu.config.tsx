@@ -105,6 +105,23 @@ export const MENU_SIDEBAR: MenuConfig = [
       },
     ],
   },
+  { heading: 'Tenant Registration' },
+  {
+    title: 'Tenant Registration',
+    icon: UserCheck,
+    children: [
+      {
+        title: 'Registrations',
+        path: '/leasing/tenant-registrations',
+        permission: PERMISSIONS.occupancyRegistration.view,
+      },
+      {
+        title: 'New Registration',
+        path: '/leasing/tenant-registrations/new',
+        permission: PERMISSIONS.occupancyRegistration.create,
+      },
+    ],
+  },
   { heading: 'Facilities' },
   {
     title: 'Facilities',

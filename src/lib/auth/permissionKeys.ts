@@ -59,4 +59,14 @@ export const PERMISSIONS = {
     securityView: 'report.security.view',
     facility: 'report.facility',
   },
+  // mycondo-api's Seed_Leasing_Permissions.cs — Tenant Registration. Domain/permission names use
+  // "occupancyRegistration" to avoid colliding with this app's own multi-tenancy vocabulary; "Tenant
+  // Registration" remains the label used in UI copy and menu titles.
+  occupancyRegistration: {
+    view: 'occupancy-registration.view',
+    create: 'occupancy-registration.create',
+    ownerReview: 'occupancy-registration.owner-review',
+    verify: 'occupancy-registration.verify',
+    moveOut: 'occupancy-registration.move-out',
+  },
 } as const;

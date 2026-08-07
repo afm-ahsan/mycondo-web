@@ -1,0 +1,49 @@
+import {
+  useGetApiV1AttachmentsQuery,
+  useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery,
+  useGetApiV1OccupancyRegistrationsByIdQuery,
+  useGetApiV1OccupancyRegistrationsByIdStatusHistoryQuery,
+  useGetApiV1OccupancyRegistrationsQuery,
+  usePostApiV1AttachmentsMutation,
+  usePostApiV1HouseholdMembersByIdDeactivateMutation,
+  usePostApiV1OccupancyRegistrationsByIdActivateMutation,
+  usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation,
+  usePostApiV1OccupancyRegistrationsByIdManagementRejectMutation,
+  usePostApiV1OccupancyRegistrationsByIdManagementRequestCorrectionsMutation,
+  usePostApiV1OccupancyRegistrationsByIdManagementVerifyMutation,
+  usePostApiV1OccupancyRegistrationsByIdMoveOutMutation,
+  usePostApiV1OccupancyRegistrationsByIdOwnerApproveMutation,
+  usePostApiV1OccupancyRegistrationsByIdOwnerRejectMutation,
+  usePostApiV1OccupancyRegistrationsByIdOwnerRequestCorrectionsMutation,
+  usePostApiV1OccupancyRegistrationsByIdSubmitMutation,
+  usePostApiV1OccupancyRegistrationsMutation,
+  usePutApiV1OccupancyRegistrationsByIdMutation,
+  usePutApiV1OccupancyRegistrationsByIdPrimaryPhotoMutation,
+} from '@/api/generated/mycondoApi';
+
+// Friendlier re-exports of the OpenAPI-generated hooks (ADR-005). Domain/permission names use
+// "OccupancyRegistration" to avoid colliding with this app's own multi-tenancy vocabulary; "Tenant
+// Registration" is the label used everywhere in UI copy.
+export const useCreateTenantRegistration = usePostApiV1OccupancyRegistrationsMutation;
+export const useTenantRegistrations = useGetApiV1OccupancyRegistrationsQuery;
+export const useTenantRegistration = useGetApiV1OccupancyRegistrationsByIdQuery;
+export const useUpdateTenantRegistrationDraft = usePutApiV1OccupancyRegistrationsByIdMutation;
+export const useSetTenantRegistrationPrimaryPhoto = usePutApiV1OccupancyRegistrationsByIdPrimaryPhotoMutation;
+export const useSubmitTenantRegistration = usePostApiV1OccupancyRegistrationsByIdSubmitMutation;
+export const useApproveTenantRegistrationByOwner = usePostApiV1OccupancyRegistrationsByIdOwnerApproveMutation;
+export const useRequestTenantRegistrationCorrectionsByOwner =
+  usePostApiV1OccupancyRegistrationsByIdOwnerRequestCorrectionsMutation;
+export const useRejectTenantRegistrationByOwner = usePostApiV1OccupancyRegistrationsByIdOwnerRejectMutation;
+export const useVerifyTenantRegistrationByManagement = usePostApiV1OccupancyRegistrationsByIdManagementVerifyMutation;
+export const useRequestTenantRegistrationCorrectionsByManagement =
+  usePostApiV1OccupancyRegistrationsByIdManagementRequestCorrectionsMutation;
+export const useRejectTenantRegistrationByManagement =
+  usePostApiV1OccupancyRegistrationsByIdManagementRejectMutation;
+export const useActivateTenantRegistration = usePostApiV1OccupancyRegistrationsByIdActivateMutation;
+export const useMoveOutTenantRegistration = usePostApiV1OccupancyRegistrationsByIdMoveOutMutation;
+export const useTenantRegistrationStatusHistory = useGetApiV1OccupancyRegistrationsByIdStatusHistoryQuery;
+export const useHouseholdMembers = useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery;
+export const useAddHouseholdMember = usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation;
+export const useDeactivateHouseholdMember = usePostApiV1HouseholdMembersByIdDeactivateMutation;
+export const useTenantRegistrationDocuments = useGetApiV1AttachmentsQuery;
+export const useRecordTenantRegistrationDocument = usePostApiV1AttachmentsMutation;

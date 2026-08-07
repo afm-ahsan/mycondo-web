@@ -32,6 +32,36 @@
         }
       }
     },
+    "/api/v1/household-members/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "tags": [
@@ -7090,6 +7120,627 @@
           }
         }
       }
+    },
+    "/api/v1/occupancy-registrations": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateOccupancyRegistrationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "flatId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfOccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOccupancyRegistrationDraftRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/primary-photo": {
+      "put": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/submit": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/owner-approve": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/owner-request-corrections": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/owner-reject": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/management-verify": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/management-request-corrections": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/management-reject": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/activate": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/move-out": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MoveOutRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/status-history": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OccupancyRegistrationStatusHistoryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/household-members": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HouseholdMemberDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddHouseholdMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7230,6 +7881,43 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "AddHouseholdMemberRequest": {
+        "required": [
+          "fullName",
+          "relationshipToPrimary",
+          "dateOfBirth",
+          "phone",
+          "nationalIdNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipToPrimary": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -8831,6 +9519,84 @@
           }
         }
       },
+      "CreateOccupancyRegistrationCommand": {
+        "required": [
+          "flatId",
+          "occupancyType",
+          "primaryFullName",
+          "primaryPhone",
+          "primaryEmail",
+          "primaryNationalIdNumber",
+          "primaryDateOfBirth",
+          "primaryPermanentAddress",
+          "emergencyContactName",
+          "emergencyContactPhone",
+          "moveInExpectedDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyType": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryDateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "primaryPermanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "moveInExpectedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "CreateRatePlanCommand": {
         "required": [
           "buildingId",
@@ -10426,6 +11192,57 @@
           }
         }
       },
+      "HouseholdMemberDto": {
+        "required": [
+          "householdMemberId",
+          "occupancyRegistrationId",
+          "fullName",
+          "relationshipToPrimary",
+          "dateOfBirth",
+          "phone",
+          "nationalIdNumberMasked",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "householdMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipToPrimary": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
       "InspectBookingRequest": {
         "required": [
           "notes",
@@ -10948,6 +11765,229 @@
           "reconciledAtUtc": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "MoveOutRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OccupancyRegistrationDto": {
+        "required": [
+          "occupancyRegistrationId",
+          "flatId",
+          "primaryResidentId",
+          "occupancyType",
+          "primaryFullName",
+          "primaryPhone",
+          "primaryEmail",
+          "primaryNationalIdNumberMasked",
+          "primaryDateOfBirth",
+          "primaryPermanentAddress",
+          "emergencyContactName",
+          "emergencyContactPhone",
+          "primaryPhotoAttachmentId",
+          "moveInExpectedDate",
+          "status",
+          "submittedAtUtc",
+          "ownerReviewedAtUtc",
+          "managementVerifiedAtUtc",
+          "activatedAtUtc",
+          "movedOutAtUtc",
+          "moveOutReason",
+          "correctionsRequestedReason",
+          "rejectedReason"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primaryResidentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyType": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationalIdNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryDateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "primaryPermanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "moveInExpectedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "submittedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "ownerReviewedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "managementVerifiedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "activatedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "movedOutAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "moveOutReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "correctionsRequestedReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "rejectedReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "OccupancyRegistrationStatusHistoryDto": {
+        "required": [
+          "occupancyRegistrationStatusHistoryId",
+          "occupancyRegistrationId",
+          "fromStatus",
+          "toStatus",
+          "changedBy",
+          "changedAtUtc",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationStatusHistoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "toStatus": {
+            "type": "string"
+          },
+          "changedBy": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "changedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "reason": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -12131,6 +13171,61 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MonthlyCylinderReconciliationDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedResultOfOccupancyRegistrationDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OccupancyRegistrationDto"
             }
           },
           "page": {
@@ -13632,6 +14727,17 @@
           }
         }
       },
+      "ReasonRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "ReceiveParcelCommand": {
         "required": [
           "parcelReference",
@@ -14900,6 +16006,21 @@
           }
         }
       },
+      "SetPrimaryPhotoRequest": {
+        "required": [
+          "attachmentId"
+        ],
+        "type": "object",
+        "properties": {
+          "attachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "SetServiceProviderStatusRequest": {
         "required": [
           "status",
@@ -15262,6 +16383,75 @@
           }
         }
       },
+      "UpdateOccupancyRegistrationDraftRequest": {
+        "required": [
+          "primaryFullName",
+          "primaryPhone",
+          "primaryEmail",
+          "primaryNationalIdNumber",
+          "primaryDateOfBirth",
+          "primaryPermanentAddress",
+          "emergencyContactName",
+          "emergencyContactPhone",
+          "moveInExpectedDate"
+        ],
+        "type": "object",
+        "properties": {
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryDateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "primaryPermanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "moveInExpectedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "UpdateSupplierRequest": {
         "required": [
           "name",
@@ -15457,6 +16647,9 @@
   "tags": [
     {
       "name": "Roles"
+    },
+    {
+      "name": "Tenant Registrations"
     },
     {
       "name": "MyCondo.Api"

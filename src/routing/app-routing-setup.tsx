@@ -13,6 +13,11 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
 import {
+  TenantRegistrationDetailPage,
+  TenantRegistrationListPage,
+  TenantRegistrationWizardPage,
+} from '@/features/leasing';
+import {
   CylinderConsumptionPage,
   CylinderPurchaseListPage,
   CylinderStockPage,
@@ -594,6 +599,38 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.gasCylinder.report} fallback={<AccessDeniedNotice />}>
                 <SupplierComparisonPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/tenant-registrations"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.view} fallback={<AccessDeniedNotice />}>
+                <TenantRegistrationListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/tenant-registrations/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.create} fallback={<AccessDeniedNotice />}>
+                <TenantRegistrationWizardPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/tenant-registrations/:id/edit"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.create} fallback={<AccessDeniedNotice />}>
+                <TenantRegistrationWizardPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/tenant-registrations/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.view} fallback={<AccessDeniedNotice />}>
+                <TenantRegistrationDetailPage />
               </RequirePermission>
             }
           />
