@@ -122,6 +122,22 @@ regenerated OpenAPI client for this slice — every generated hook, computed fie
 (`totalKg`/`lineAmount`/`unitPricePerKg`/`grandTotal`), and permission string matched the backend
 exactly on the first regeneration.
 
+`src/features/leasing/` (as of 2026-08-07, Tenant Registration): a 5-step guided wizard (Property &
+Occupant → Contact & Identity → Household → Documents → Review & Submit) replacing the paper Flat
+Owner/Tenant Registration Form, plus a status-filterable list page and a detail/review page with the
+owner-review → management-verification → activate/move-out action set and a real status-history
+timeline (backend-persisted, not a timestamp reconstruction like `ApprovalTimeline`). Domain/permission
+names use `OccupancyRegistration`/`occupancy-registration.*` rather than `TenantRegistration` to avoid
+colliding with this app's own multi-tenancy vocabulary (`TenantId`, `tenant.manage`) — "Tenant
+Registration" remains the label used everywhere in UI copy and menu titles; see mycondo-api's
+`OccupancyRegistration` doc comment for the full rationale. **Known, disclosed limitation**: document
+upload records file metadata only (name/type/size against a synthetic storage key) — mycondo-api's
+`Attachments` feature has no real object-storage upload path yet (see `Attachment`'s doc comment); the
+wizard's Documents step says so plainly rather than pretending files are stored anywhere. Sensitive
+fields (National ID/passport) are masked server-side via `IdentityMasking`, matching the
+`GuestProfileDto`/`DomesticWorkerProfileDto` precedent — no unmasked value is ever returned by any
+endpoint this feature calls.
+
 ## Common Commands
 
 ```powershell
