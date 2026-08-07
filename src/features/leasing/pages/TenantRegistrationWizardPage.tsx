@@ -103,6 +103,7 @@ export function TenantRegistrationWizardPage() {
           <PrimaryResidentStep
             registrationId={registrationId}
             primaryFullName={registration?.primaryFullName ?? primaryFullName}
+            moveInExpectedDate={registration?.moveInExpectedDate ?? null}
             defaultValues={{
               primaryPhone: registration?.primaryPhone ?? undefined,
               primaryEmail: registration?.primaryEmail ?? undefined,
