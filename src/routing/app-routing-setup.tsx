@@ -1,4 +1,14 @@
 import { ClassicLayout } from '@/auth/layouts/classic';
+import {
+  BookingCalendarPage,
+  BookingDetailsPage,
+  BookingFormPage,
+  BookingListPage,
+  CurrentOccupancyPage,
+  FacilitySettingsPage,
+  PoolAccessPage,
+  UsageHistoryPage,
+} from '@/features/amenities';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
@@ -446,6 +456,70 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.report.securityView} fallback={<AccessDeniedNotice />}>
                 <CurrentlyInsideGuestsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/community-hall/calendar"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.bookingView} fallback={<AccessDeniedNotice />}>
+                <BookingCalendarPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/community-hall/bookings"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.bookingView} fallback={<AccessDeniedNotice />}>
+                <BookingListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/community-hall/bookings/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.bookingCreate} fallback={<AccessDeniedNotice />}>
+                <BookingFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/community-hall/bookings/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.bookingView} fallback={<AccessDeniedNotice />}>
+                <BookingDetailsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/swimming-pool/access"
+            element={
+              <RequirePermission permission={PERMISSIONS.pool.checkin} fallback={<AccessDeniedNotice />}>
+                <PoolAccessPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/swimming-pool/current"
+            element={
+              <RequirePermission permission={PERMISSIONS.pool.view} fallback={<AccessDeniedNotice />}>
+                <CurrentOccupancyPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/swimming-pool/history"
+            element={
+              <RequirePermission permission={PERMISSIONS.pool.view} fallback={<AccessDeniedNotice />}>
+                <UsageHistoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/swimming-pool/settings"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.manage} fallback={<AccessDeniedNotice />}>
+                <FacilitySettingsPage />
               </RequirePermission>
             }
           />
