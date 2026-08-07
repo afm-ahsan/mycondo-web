@@ -13,8 +13,10 @@ import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
 import {
+  SecurityDirectoryPage,
   TenantRegistrationDetailPage,
   TenantRegistrationListPage,
+  TenantRegistrationPrintPage,
   TenantRegistrationWizardPage,
 } from '@/features/leasing';
 import {
@@ -631,6 +633,22 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.occupancyRegistration.view} fallback={<AccessDeniedNotice />}>
                 <TenantRegistrationDetailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/tenant-registrations/:id/print"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.view} fallback={<AccessDeniedNotice />}>
+                <TenantRegistrationPrintPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/leasing/security-directory"
+            element={
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.securityView} fallback={<AccessDeniedNotice />}>
+                <SecurityDirectoryPage />
               </RequirePermission>
             }
           />

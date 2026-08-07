@@ -40,11 +40,20 @@ function registration(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
-function renderDetailPage(user: AuthUser, initialRegistration: ReturnType<typeof registration>) {
+function renderDetailPage(
+  user: AuthUser,
+  initialRegistration: ReturnType<typeof registration>,
+  extraHandlers: Parameters<typeof server.use> = [],
+) {
   server.use(
+    // MSW matches the FIRST handler in registration order — extraHandlers must come first so a
+    // test-specific override wins over these generic defaults.
+    ...extraHandlers,
     http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1`, () => HttpResponse.json(initialRegistration)),
     http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/household-members`, () => HttpResponse.json([])),
     http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/status-history`, () => HttpResponse.json([])),
+    http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/worker-assignments`, () => HttpResponse.json([])),
+    http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/vehicle-assignments`, () => HttpResponse.json([])),
   );
 
   const store = createStore({ auth: { user, isInitialized: true } });
@@ -65,7 +74,7 @@ const ownerUser: AuthUser = {
   name: 'Flat Owner',
   tenantId: 'tenant-1',
   roles: ['Owner'],
-  permissions: ['occupancy-registration.view', 'occupancy-registration.owner-review'],
+  permissions: ['occupancy-registration.view', 'occupancy-registration.owner-review', 'occupancy-registration.create'],
   buildingIds: [],
   buildingPermissions: [],
 };
@@ -115,5 +124,39 @@ describe('TenantRegistrationDetailPage', () => {
     await screen.findByRole('heading', { name: 'Karim Ahmed' });
     expect(screen.queryByRole('button', { name: /approve/i })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /reject/i })).not.toBeInTheDocument();
+  });
+
+  it('shows an assigned worker and can end the assignment', async () => {
+    let endCalled = false;
+    renderDetailPage(ownerUser, registration({ status: 'Active' }), [
+      http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/worker-assignments`, () =>
+        HttpResponse.json([
+          {
+            occupancyRegistrationWorkerAssignmentId: 'assign-1',
+            occupancyRegistrationId: 'reg-1',
+            domesticWorkerProfileId: 'worker-1',
+            workerFullName: 'Abdul Karim',
+            workerPhone: '01799999999',
+            workerType: 'Driver',
+            verificationStatus: 'Verified',
+            assignedAtUtc: '2026-08-01T00:00:00Z',
+            endedAtUtc: null,
+            isActive: true,
+          },
+        ]),
+      ),
+      http.post(`${API_BASE}/api/v1/worker-assignments/assign-1/end`, () => {
+        endCalled = true;
+        return HttpResponse.json({});
+      }),
+    ]);
+
+    const user = userEvent.setup();
+    const removeButton = await screen.findByRole('button', { name: 'Remove Abdul Karim' });
+    expect(screen.getByText('Driver')).toBeInTheDocument();
+
+    await user.click(removeButton);
+
+    await waitFor(() => expect(endCalled).toBe(true));
   });
 });

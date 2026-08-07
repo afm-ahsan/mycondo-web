@@ -3,7 +3,11 @@ import {
   useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery,
   useGetApiV1OccupancyRegistrationsByIdQuery,
   useGetApiV1OccupancyRegistrationsByIdStatusHistoryQuery,
+  useGetApiV1OccupancyRegistrationsByIdVehicleAssignmentsQuery,
+  useGetApiV1OccupancyRegistrationsByIdWorkerAssignmentsQuery,
   useGetApiV1OccupancyRegistrationsQuery,
+  useGetApiV1OccupancyRegistrationsSecurityByIdQuery,
+  useGetApiV1OccupancyRegistrationsSecurityQuery,
   usePostApiV1AttachmentsMutation,
   usePostApiV1HouseholdMembersByIdDeactivateMutation,
   usePostApiV1OccupancyRegistrationsByIdActivateMutation,
@@ -16,7 +20,11 @@ import {
   usePostApiV1OccupancyRegistrationsByIdOwnerRejectMutation,
   usePostApiV1OccupancyRegistrationsByIdOwnerRequestCorrectionsMutation,
   usePostApiV1OccupancyRegistrationsByIdSubmitMutation,
+  usePostApiV1OccupancyRegistrationsByIdVehicleAssignmentsMutation,
+  usePostApiV1OccupancyRegistrationsByIdWorkerAssignmentsMutation,
   usePostApiV1OccupancyRegistrationsMutation,
+  usePostApiV1VehicleAssignmentsByIdEndMutation,
+  usePostApiV1WorkerAssignmentsByIdEndMutation,
   usePutApiV1OccupancyRegistrationsByIdMutation,
   usePutApiV1OccupancyRegistrationsByIdPrimaryPhotoMutation,
 } from '@/api/generated/mycondoApi';
@@ -47,3 +55,11 @@ export const useAddHouseholdMember = usePostApiV1OccupancyRegistrationsByIdHouse
 export const useDeactivateHouseholdMember = usePostApiV1HouseholdMembersByIdDeactivateMutation;
 export const useTenantRegistrationDocuments = useGetApiV1AttachmentsQuery;
 export const useRecordTenantRegistrationDocument = usePostApiV1AttachmentsMutation;
+export const useWorkerAssignments = useGetApiV1OccupancyRegistrationsByIdWorkerAssignmentsQuery;
+export const useAssignWorker = usePostApiV1OccupancyRegistrationsByIdWorkerAssignmentsMutation;
+export const useEndWorkerAssignment = usePostApiV1WorkerAssignmentsByIdEndMutation;
+export const useVehicleAssignments = useGetApiV1OccupancyRegistrationsByIdVehicleAssignmentsQuery;
+export const useAssignVehicle = usePostApiV1OccupancyRegistrationsByIdVehicleAssignmentsMutation;
+export const useEndVehicleAssignment = usePostApiV1VehicleAssignmentsByIdEndMutation;
+export const useOccupancySecurityViews = useGetApiV1OccupancyRegistrationsSecurityQuery;
+export const useOccupancySecurityView = useGetApiV1OccupancyRegistrationsSecurityByIdQuery;

@@ -120,6 +120,11 @@ export const MENU_SIDEBAR: MenuConfig = [
         path: '/leasing/tenant-registrations/new',
         permission: PERMISSIONS.occupancyRegistration.create,
       },
+      {
+        title: 'Security Directory',
+        path: '/leasing/security-directory',
+        permission: PERMISSIONS.occupancyRegistration.securityView,
+      },
     ],
   },
   { heading: 'Facilities' },

@@ -26,6 +26,7 @@ import {
 import { PageHeader } from '../components/PageHeader';
 import { ReasonDialog } from '../components/ReasonDialog';
 import { StatusHistoryTimeline } from '../components/StatusHistoryTimeline';
+import { WorkerVehicleAssignmentsSection } from '../components/WorkerVehicleAssignmentsSection';
 import { tenantRegistrationStatusToneMap, type TenantRegistrationStatus } from '../lib/status';
 
 type DialogKind = 'owner-reject' | 'owner-corrections' | 'management-reject' | 'management-corrections' | 'move-out' | null;
@@ -111,13 +112,18 @@ export function TenantRegistrationDetailPage() {
         title={registration.primaryFullName}
         crumbs={[{ label: 'Tenant Registrations', path: '/leasing/tenant-registrations' }, { label: registration.primaryFullName }]}
         actions={
-          (registration.status === 'Draft' || registration.status === 'CorrectionsRequested') && (
-            <RequirePermission permission={PERMISSIONS.occupancyRegistration.create}>
-              <Button asChild>
-                <Link to={`/leasing/tenant-registrations/${registrationId}/edit`}>Continue Editing</Link>
-              </Button>
-            </RequirePermission>
-          )
+          <>
+            <Button variant="outline" asChild>
+              <Link to={`/leasing/tenant-registrations/${registrationId}/print`}>Print</Link>
+            </Button>
+            {(registration.status === 'Draft' || registration.status === 'CorrectionsRequested') && (
+              <RequirePermission permission={PERMISSIONS.occupancyRegistration.create}>
+                <Button asChild>
+                  <Link to={`/leasing/tenant-registrations/${registrationId}/edit`}>Continue Editing</Link>
+                </Button>
+              </RequirePermission>
+            )}
+          </>
         }
       />
 
@@ -183,6 +189,8 @@ export function TenantRegistrationDetailPage() {
               )}
             </CardContent>
           </Card>
+
+          <WorkerVehicleAssignmentsSection registrationId={registrationId} />
 
           <Card>
             <CardHeader>
@@ -283,7 +291,7 @@ export function TenantRegistrationDetailPage() {
         open={dialog === 'move-out'}
         onOpenChange={(open) => !open && setDialog(null)}
         title="Record Move-out"
-        description="This deactivates every active household member on this registration."
+        description="This deactivates every active household member, worker, and vehicle assignment on this registration."
         confirmLabel="Record Move-out"
         isSubmitting={isDialogSubmitting}
         onConfirm={handleReasonConfirm}

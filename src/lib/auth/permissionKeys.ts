@@ -68,5 +68,6 @@ export const PERMISSIONS = {
     ownerReview: 'occupancy-registration.owner-review',
     verify: 'occupancy-registration.verify',
     moveOut: 'occupancy-registration.move-out',
+    securityView: 'occupancy-registration.security-view',
   },
 } as const;

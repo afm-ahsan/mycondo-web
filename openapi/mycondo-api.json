@@ -62,6 +62,66 @@
         }
       }
     },
+    "/api/v1/worker-assignments/{id}/end": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationWorkerAssignmentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/vehicle-assignments/{id}/end": {
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationVehicleAssignmentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/": {
       "get": {
         "tags": [
@@ -7741,6 +7801,233 @@
           }
         }
       }
+    },
+    "/api/v1/occupancy-registrations/{id}/worker-assignments": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OccupancyRegistrationWorkerAssignmentDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignWorkerRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationWorkerAssignmentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/{id}/vehicle-assignments": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OccupancyRegistrationVehicleAssignmentDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVehicleRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationVehicleAssignmentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/security": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "flatId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfOccupancyRegistrationSecuritySummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/occupancy-registrations/security/{id}": {
+      "get": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OccupancyRegistrationSecurityViewDto"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -7949,6 +8236,30 @@
               "null",
               "string"
             ],
+            "format": "uuid"
+          }
+        }
+      },
+      "AssignVehicleRequest": {
+        "required": [
+          "vehicleId"
+        ],
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "AssignWorkerRequest": {
+        "required": [
+          "domesticWorkerProfileId"
+        ],
+        "type": "object",
+        "properties": {
+          "domesticWorkerProfileId": {
+            "type": "string",
             "format": "uuid"
           }
         }
@@ -11943,6 +12254,139 @@
           }
         }
       },
+      "OccupancyRegistrationSecuritySummaryDto": {
+        "required": [
+          "occupancyRegistrationId",
+          "flatNumber",
+          "buildingName",
+          "primaryFullName",
+          "primaryPhotoAttachmentId",
+          "status",
+          "accessEligible"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "accessEligible": {
+            "type": "boolean"
+          }
+        },
+        "description": "List-row shape for the security-facing directory — see\r\n            OccupancyRegistrationSecurityViewDto for the full detail shape and masking rules."
+      },
+      "OccupancyRegistrationSecurityViewDto": {
+        "required": [
+          "occupancyRegistrationId",
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "primaryFullName",
+          "primaryPhotoAttachmentId",
+          "occupancyType",
+          "status",
+          "accessEligible",
+          "activatedAtUtc",
+          "movedOutAtUtc",
+          "householdMembers",
+          "workers",
+          "vehicles"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "occupancyType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "accessEligible": {
+            "type": "boolean"
+          },
+          "activatedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "movedOutAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "householdMembers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityHouseholdMemberDto"
+            }
+          },
+          "workers": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityWorkerDto"
+            }
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityVehicleDto"
+            }
+          }
+        },
+        "description": "Deliberately restricted view of an OccupancyRegistration\r\nfor security staff — operational information only (name, photo, unit, occupancy/access status,\r\napproved household/workers/vehicles). Never includes National ID, passport, permanent address,\r\nemail, or any identity-document/lease data — see `GetOccupancyRegistrationSecurityViewQueryHandler`."
+      },
       "OccupancyRegistrationStatusHistoryDto": {
         "required": [
           "occupancyRegistrationStatusHistoryId",
@@ -11988,6 +12432,112 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "OccupancyRegistrationVehicleAssignmentDto": {
+        "required": [
+          "occupancyRegistrationVehicleAssignmentId",
+          "occupancyRegistrationId",
+          "vehicleId",
+          "registrationNumber",
+          "vehicleType",
+          "isBlocked",
+          "assignedAtUtc",
+          "endedAtUtc",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationVehicleAssignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "registrationNumber": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "type": "string"
+          },
+          "isBlocked": {
+            "type": "boolean"
+          },
+          "assignedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OccupancyRegistrationWorkerAssignmentDto": {
+        "required": [
+          "occupancyRegistrationWorkerAssignmentId",
+          "occupancyRegistrationId",
+          "domesticWorkerProfileId",
+          "workerFullName",
+          "workerPhone",
+          "workerType",
+          "verificationStatus",
+          "assignedAtUtc",
+          "endedAtUtc",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationWorkerAssignmentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "domesticWorkerProfileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "workerFullName": {
+            "type": "string"
+          },
+          "workerPhone": {
+            "type": "string"
+          },
+          "workerType": {
+            "type": "string"
+          },
+          "verificationStatus": {
+            "type": "string"
+          },
+          "assignedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -13226,6 +13776,61 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/OccupancyRegistrationDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedResultOfOccupancyRegistrationSecuritySummaryDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OccupancyRegistrationSecuritySummaryDto"
             }
           },
           "page": {
@@ -15795,6 +16400,55 @@
             "format": "date-time"
           },
           "status": {
+            "type": "string"
+          }
+        }
+      },
+      "SecurityHouseholdMemberDto": {
+        "required": [
+          "fullName",
+          "relationshipToPrimary"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipToPrimary": {
+            "type": "string"
+          }
+        }
+      },
+      "SecurityVehicleDto": {
+        "required": [
+          "registrationNumber",
+          "vehicleType"
+        ],
+        "type": "object",
+        "properties": {
+          "registrationNumber": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "type": "string"
+          }
+        }
+      },
+      "SecurityWorkerDto": {
+        "required": [
+          "fullName",
+          "workerType",
+          "verificationStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "workerType": {
+            "type": "string"
+          },
+          "verificationStatus": {
             "type": "string"
           }
         }
