@@ -14,7 +14,32 @@ export const PERMISSIONS = {
     checkin: 'visitor.checkin',
     checkout: 'visitor.checkout',
   },
+  // mycondo-api's Seed_Facility_Pool_Permissions.cs (Slice G) — Community Hall Booking.
+  facility: {
+    view: 'facility.view',
+    manage: 'facility.manage',
+    bookingView: 'facility.booking.view',
+    bookingCreate: 'facility.booking.create',
+    bookingApprove: 'facility.booking.approve',
+    bookingCancel: 'facility.booking.cancel',
+    bookingRefund: 'facility.booking.refund',
+    bookingInspect: 'facility.booking.inspect',
+  },
+  // mycondo-api's Seed_Facility_Pool_Permissions.cs (Slice G) — Swimming Pool Management.
+  // pool.override is checked mid-handler by the backend (a data-dependent bypass decision the
+  // endpoint filter can't make in advance), not enforced by any single endpoint's permission
+  // attribute — see CheckInPoolSessionCommandHandler. Still listed here so the frontend can gate the
+  // "override" UI affordance itself.
+  pool: {
+    view: 'pool.view',
+    manage: 'pool.manage',
+    checkin: 'pool.checkin',
+    checkout: 'pool.checkout',
+    override: 'pool.override',
+    incidentManage: 'pool.incident.manage',
+  },
   report: {
     securityView: 'report.security.view',
+    facility: 'report.facility',
   },
 } as const;

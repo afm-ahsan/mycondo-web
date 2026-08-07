@@ -92,10 +92,21 @@ When the conventions specify a rule, **follow it**. Project-specific overrides a
 `src/features/security/` (as of 2026-08-06): only `guests/` (Guest Register — directory, create,
 fast check-in/check-out, currently-inside view) is implemented. The backend's other `Features/
 Security/*` areas (Vehicles, DomesticWorkers, ServiceProviders, SebaVisits, Parcels) have a complete,
-wired API contract already but **no frontend UI yet** — do not assume they exist. Community Hall
-booking, Swimming Pool, Generator, and Gas Cylinder management have no backend implementation at all
-as of this date (confirmed by repo-wide search of `mycondo-api`) and are blocked on backend work
-before any frontend slice can start.
+wired API contract already but **no frontend UI yet** — do not assume they exist.
+
+`src/features/amenities/` (as of 2026-08-07, Slice G): Community Hall Booking (calendar, list, create,
+details with the full approve/reject/pay/check-in/complete/inspect/cancel/no-show action set) and
+Swimming Pool Management (search-and-check-in/out, current occupancy, usage history + incidents,
+combined facility settings) are implemented against `mycondo-api`'s `feat/slice-g-facilities` branch
+(not yet merged to `main` as of this date). **Known backend contract gaps discovered while building
+this slice** (not frontend omissions — nothing to build against): bookings have no update/edit
+endpoint (a Draft booking can only be Submitted or Cancelled, never field-edited — requirement "edit
+while status permits" is unimplementable until a backend PUT/PATCH exists), `RequestBookingCommand`
+has no `notes`/add-on-services field at all, there's no live per-slot availability-check endpoint
+(conflicts only surface as a 409 on the actual create call), and no audit-log/event endpoint for a
+booking's history (the UI timeline is built from the lifecycle timestamp fields already on
+`BookingDto`). Generator and Gas Cylinder management still have no backend implementation
+(unaffected by this slice, still blocked as before).
 
 ## Common Commands
 

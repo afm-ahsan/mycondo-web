@@ -21,3 +21,14 @@ if (!Element.prototype.releasePointerCapture) {
 if (!Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {};
 }
+
+// jsdom doesn't implement ResizeObserver either, and `cmdk`'s `Command` (used by ResidentSelect and
+// the pre-existing, previously-untested country-combobox.tsx) calls it on mount — same rationale as
+// the pointer-capture polyfills above.
+if (!globalThis.ResizeObserver) {
+  globalThis.ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

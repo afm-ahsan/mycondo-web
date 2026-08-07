@@ -28,12 +28,14 @@ import {
   HelpCircle,
   Kanban,
   Key,
+  Landmark,
   Layout,
   LayoutGrid,
   LifeBuoy,
   MessageSquare,
   Monitor,
   Network,
+  PartyPopper,
   Users as PeopleIcon,
   Plug,
   ScrollText,
@@ -51,6 +53,7 @@ import {
   UserCheck,
   UserCircle,
   Users,
+  Waves,
   Briefcase as WorkIcon,
   Zap,
 } from 'lucide-react';
@@ -95,6 +98,56 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Current Visitors',
             path: '/security/guests/currently-inside',
             permission: PERMISSIONS.report.securityView,
+          },
+        ],
+      },
+    ],
+  },
+  { heading: 'Facilities' },
+  {
+    title: 'Facilities',
+    icon: Landmark,
+    children: [
+      {
+        title: 'Community Hall',
+        icon: PartyPopper,
+        children: [
+          {
+            title: 'Booking Calendar',
+            path: '/facilities/community-hall/calendar',
+            permission: PERMISSIONS.facility.bookingView,
+          },
+          {
+            title: 'Booking List',
+            path: '/facilities/community-hall/bookings',
+            permission: PERMISSIONS.facility.bookingView,
+          },
+          {
+            title: 'New Booking',
+            path: '/facilities/community-hall/bookings/new',
+            permission: PERMISSIONS.facility.bookingCreate,
+          },
+        ],
+      },
+      {
+        title: 'Swimming Pool',
+        icon: Waves,
+        children: [
+          { title: 'Pool Access', path: '/facilities/swimming-pool/access', permission: PERMISSIONS.pool.checkin },
+          {
+            title: 'Current Users',
+            path: '/facilities/swimming-pool/current',
+            permission: PERMISSIONS.pool.view,
+          },
+          {
+            title: 'Usage History',
+            path: '/facilities/swimming-pool/history',
+            permission: PERMISSIONS.pool.view,
+          },
+          {
+            title: 'Closures / Settings',
+            path: '/facilities/swimming-pool/settings',
+            permission: PERMISSIONS.facility.manage,
           },
         ],
       },
