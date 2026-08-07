@@ -1,0 +1,24 @@
+import {
+  useDeleteApiV1DomesticWorkersAssignmentsByAssignmentIdMutation,
+  useGetApiV1AccessSessionsCurrentlyInsideQuery,
+  useGetApiV1DomesticWorkersByIdAssignmentsQuery,
+  useGetApiV1DomesticWorkersQuery,
+  usePostApiV1AccessSessionsDomesticWorkersByIdCheckoutMutation,
+  usePostApiV1AccessSessionsDomesticWorkersCheckinMutation,
+  usePostApiV1DomesticWorkersAssignmentsByAssignmentIdApproveMutation,
+  usePostApiV1DomesticWorkersByIdAssignmentsMutation,
+  usePostApiV1DomesticWorkersByIdStatusMutation,
+  usePostApiV1DomesticWorkersMutation,
+} from '@/api/generated/mycondoApi';
+
+// Friendlier re-exports of the OpenAPI-generated hooks (ADR-005), mirroring guestsApi.ts's pattern.
+export const useRegisterDomesticWorker = usePostApiV1DomesticWorkersMutation;
+export const useDomesticWorkers = useGetApiV1DomesticWorkersQuery;
+export const useSetWorkerStatus = usePostApiV1DomesticWorkersByIdStatusMutation;
+export const useCreateWorkerAssignment = usePostApiV1DomesticWorkersByIdAssignmentsMutation;
+export const useWorkerAssignments = useGetApiV1DomesticWorkersByIdAssignmentsQuery;
+export const useApproveWorkerAssignment = usePostApiV1DomesticWorkersAssignmentsByAssignmentIdApproveMutation;
+export const useDeactivateWorkerAssignment = useDeleteApiV1DomesticWorkersAssignmentsByAssignmentIdMutation;
+export const useCheckInWorker = usePostApiV1AccessSessionsDomesticWorkersCheckinMutation;
+export const useCheckOutWorker = usePostApiV1AccessSessionsDomesticWorkersByIdCheckoutMutation;
+export const useCurrentlyInsideAccessSessions = useGetApiV1AccessSessionsCurrentlyInsideQuery;
