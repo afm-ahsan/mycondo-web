@@ -22,6 +22,7 @@ import { primaryResidentSchema, type PrimaryResidentSchemaType } from '../schema
 interface PrimaryResidentStepProps {
   registrationId: string;
   primaryFullName: string;
+  moveInExpectedDate: string | null;
   defaultValues: Partial<PrimaryResidentSchemaType>;
   onSaved: (values: PrimaryResidentSchemaType) => void;
   onBack: () => void;
@@ -33,6 +34,7 @@ interface PrimaryResidentStepProps {
 export function PrimaryResidentStep({
   registrationId,
   primaryFullName,
+  moveInExpectedDate,
   defaultValues,
   onSaved,
   onBack,
@@ -69,7 +71,7 @@ export function PrimaryResidentStep({
           primaryPermanentAddress: values.primaryPermanentAddress || null,
           emergencyContactName: values.emergencyContactName || null,
           emergencyContactPhone: values.emergencyContactPhone || null,
-          moveInExpectedDate: null,
+          moveInExpectedDate,
         },
       }).unwrap();
       onSaved(values);
