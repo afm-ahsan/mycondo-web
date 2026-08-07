@@ -13,7 +13,7 @@ import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import type { OccupancyRegistrationDto } from '@/api/generated/mycondoApi';
 import { useTenantRegistrations } from '../api/leasingApi';
-import { PageHeader } from '../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { tenantRegistrationStatusToneMap, type TenantRegistrationStatus } from '../lib/status';
 
 const STATUS_FILTERS: { value: string; label: string }[] = [
@@ -85,7 +85,7 @@ export function TenantRegistrationListPage() {
       <PageHeader
         title="Tenant Registrations"
         crumbs={[{ label: 'Tenant Registrations' }]}
-        actions={
+        primaryAction={
           <RequirePermission permission={PERMISSIONS.occupancyRegistration.create}>
             <Button asChild>
               <Link to="/leasing/tenant-registrations/new">

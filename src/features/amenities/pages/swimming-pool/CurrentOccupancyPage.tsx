@@ -9,7 +9,7 @@ import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatTimeOfDay } from '../../lib/format';
 import { useCheckOutPoolSession, usePoolSessions } from '../../api/poolApi';
 import { CapacityIndicator } from '../../components/CapacityIndicator';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useFacilities } from '../../api/facilitiesApi';
 
 export function CurrentOccupancyPage() {

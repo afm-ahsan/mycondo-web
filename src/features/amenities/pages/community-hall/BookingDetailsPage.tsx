@@ -31,7 +31,7 @@ import { DepositSummaryPanel } from '../../components/DepositSummaryPanel';
 import { InspectBookingDialog } from '../../components/InspectBookingDialog';
 import { InspectionPanel } from '../../components/InspectionPanel';
 import { OverrideReasonDialog } from '../../components/OverrideReasonDialog';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { PaymentStatusBadge } from '../../components/PaymentStatusBadge';
 import { formatBdt } from '../../lib/format';
 import type { BookingStatus } from '../../lib/bookingStatus';
@@ -95,7 +95,7 @@ export function BookingDetailsPage() {
           { label: 'Community Hall', path: '../bookings' },
           { label: booking.bookingId.slice(0, 8) },
         ]}
-        actions={
+        primaryAction={
           <div className="flex items-center gap-2">
             <BookingStatusBadge status={status} />
             <PaymentStatusBadge booking={booking} />

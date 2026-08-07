@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCylinderConsumptionReport } from '../../api/reportsApi';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 function firstDayOfMonth(): string {
   const now = new Date();

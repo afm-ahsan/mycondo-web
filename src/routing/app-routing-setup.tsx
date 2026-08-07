@@ -36,6 +36,7 @@ import {
   GuestProfileFormPage,
 } from '@/features/security';
 import { CreateTenantPage } from '@/features/tenancy';
+import { DashboardPage } from '@/features/dashboard';
 import { AccessDeniedNotice } from '@/components/shared/AccessDeniedNotice';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { RequireAuth } from '@/lib/auth/RequireAuth';
@@ -82,7 +83,7 @@ import {
   AuthAccountDeactivatedPage,
   AuthWelcomeMessagePage,
 } from '@/pages/auth';
-import { DefaultPage, Demo1DarkSidebarPage } from '@/pages/dashboards';
+import { Demo1DarkSidebarPage } from '@/pages/dashboards';
 import {
   NetworkAppRosterPage,
   NetworkAuthorPage,
@@ -139,7 +140,7 @@ export function AppRoutingSetup() {
     <Routes>
       <Route element={<RequireAuth><Outlet /></RequireAuth>}>
         <Route element={<Demo1Layout />}>
-          <Route path="/" element={<DefaultPage />} />
+          <Route path="/" element={<DashboardPage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route
             path="/public-profile/profiles/default/"

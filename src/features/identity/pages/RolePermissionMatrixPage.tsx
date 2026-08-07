@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { LoaderCircleIcon, PlusIcon } from 'lucide-react';
+import { PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -34,6 +34,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import {
   useAssignRoleToUser,
   useCreateRole,
@@ -60,7 +62,13 @@ export function RolePermissionMatrixPage() {
   const selectedRole = roles?.find((r) => r.roleId === selectedRoleId) ?? null;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <>
+      <PageHeader
+        title="Roles & Permissions"
+        description="Manage roles, their permission grants, and who holds them."
+        crumbs={[{ label: 'Administration' }, { label: 'Roles & Permissions' }]}
+      />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
       <Card className="lg:col-span-1">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Roles</CardTitle>
@@ -71,7 +79,7 @@ export function RolePermissionMatrixPage() {
         <CardContent className="space-y-1">
           {isLoadingRoles && (
             <div className="flex items-center gap-2 text-muted-foreground py-4">
-              <LoaderCircleIcon className="h-4 w-4 animate-spin" /> Loading roles...
+              <InlineSpinner /> Loading roles...
             </div>
           )}
           {roles?.map((role) => (
@@ -108,7 +116,8 @@ export function RolePermissionMatrixPage() {
           </Card>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
@@ -233,7 +242,7 @@ function RolePermissionsPanel({ roleId, roleName }: { roleId: string; roleName: 
       <CardContent>
         {isLoading && (
           <div className="flex items-center gap-2 text-muted-foreground py-4">
-            <LoaderCircleIcon className="h-4 w-4 animate-spin" /> Loading permissions...
+            <InlineSpinner /> Loading permissions...
           </div>
         )}
         {!isLoading && (
@@ -317,7 +326,7 @@ function RoleAssignmentsPanel({ roleId, roleName }: { roleId: string; roleName: 
       <CardContent className="space-y-4">
         {isLoadingAssignments && (
           <div className="flex items-center gap-2 text-muted-foreground py-2">
-            <LoaderCircleIcon className="h-4 w-4 animate-spin" /> Loading assignments...
+            <InlineSpinner /> Loading assignments...
           </div>
         )}
 

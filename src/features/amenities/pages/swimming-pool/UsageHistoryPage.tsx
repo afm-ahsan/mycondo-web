@@ -49,7 +49,7 @@ import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { usePoolIncidents, usePoolSessions, useReportPoolIncident } from '../../api/poolApi';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { PoolSessionStatusBadge } from '../../components/PoolSessionStatusBadge';
 import { formatBdt, formatDuration, formatTimeOfDay } from '../../lib/format';
 import { type PoolSessionStatus } from '../../lib/bookingStatus';
@@ -114,6 +114,9 @@ export function UsageHistoryPage() {
     data: data?.items ?? [],
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
+    // The API has no sort parameter on this query — DataGridColumnHeader would otherwise show a
+    // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
+    enableSorting: false,
     state: { pagination },
     onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),

@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   type ColumnDef,
   getCoreRowModel,
   type PaginationState,
+  type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { LogIn, Plus, Search, Users as UsersIcon, X } from 'lucide-react';
+import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
@@ -34,6 +35,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
+import { SearchInput } from '@/components/shared/SearchInput';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useBlockGuest, useGuests, useUnblockGuest } from '../api/guestsApi';
@@ -44,17 +48,43 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Blocked'> = {
   Blocked: { label: 'Blocked', variant: 'destructive' },
 };
 
+const GUEST_DIRECTORY_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
+
 export function GuestDirectoryPage() {
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [search, setSearch] = useState('');
+  const [filters, setFilters] = useUrlFilters(GUEST_DIRECTORY_FILTER_DEFAULTS);
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
+    pageSize: Number(filters.pageSize) || 10,
+  };
+
+  const [search, setSearch] = useState(filters.search);
+  const debouncedSearch = useDebouncedValue(search);
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    // Skip on mount — the debounced value on first render is whatever the URL already had, and
+    // committing it here would wipe out an existing `?page=` from a shared/refreshed link.
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setFilters({ search: debouncedSearch, page: '1' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the settled search should retrigger this, not every filters/setFilters identity change
+  }, [debouncedSearch]);
+
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = typeof updater === 'function' ? updater(pagination) : updater;
+    setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
+  }
+
   const [blockTarget, setBlockTarget] = useState<GuestProfileDto | null>(null);
   const [blockReason, setBlockReason] = useState('');
 
   const { data, isFetching } = useGuests({
-    search: search || undefined,
+    search: debouncedSearch || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
   });
+  const isSearchPending = search !== debouncedSearch;
   const [blockGuest, { isLoading: isBlocking }] = useBlockGuest();
   const [unblockGuest, { isLoading: isUnblocking }] = useUnblockGuest();
 
@@ -144,8 +174,11 @@ export function GuestDirectoryPage() {
     data: data?.items ?? [],
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
+    // The API has no sort parameter on this query — DataGridColumnHeader would otherwise show a
+    // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
+    enableSorting: false,
     state: { pagination },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -162,28 +195,13 @@ export function GuestDirectoryPage() {
           <CardHeader>
             <CardHeading>
               <CardTitle>Guest Register</CardTitle>
-              <div className="relative">
-                <Search className="size-4 text-muted-foreground absolute start-3 top-1/2 -translate-y-1/2" />
-                <Input
-                  placeholder="Search by name or mobile…"
-                  value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setPagination((p) => ({ ...p, pageIndex: 0 }));
-                  }}
-                  className="ps-9 w-64"
-                />
-                {search.length > 0 && (
-                  <Button
-                    mode="icon"
-                    variant="ghost"
-                    className="absolute end-1.5 top-1/2 -translate-y-1/2 h-6 w-6"
-                    onClick={() => setSearch('')}
-                  >
-                    <X />
-                  </Button>
-                )}
-              </div>
+              <SearchInput
+                value={search}
+                onChange={setSearch}
+                placeholder="Search by name or mobile…"
+                isSearching={isSearchPending}
+                className="w-64"
+              />
             </CardHeading>
             <CardToolbar>
               <Button variant="outline" asChild>

@@ -38,23 +38,31 @@ function mockSuccessfulRegistration() {
 }
 
 describe('RegisterPage', () => {
-  it('registers a new user and starts a session on success', async () => {
-    mockSuccessfulRegistration();
-    const user = userEvent.setup();
-    const { store } = renderWithProviders(<RegisterPage />);
+  it(
+    'registers a new user and starts a session on success',
+    async () => {
+      mockSuccessfulRegistration();
+      const user = userEvent.setup();
+      const { store } = renderWithProviders(<RegisterPage />);
 
-    await user.type(screen.getByLabelText(/organization/i), 'arp-flat-owners');
-    await user.type(screen.getByLabelText(/full name/i), 'New Owner');
-    await user.type(screen.getByLabelText(/^email$/i), 'new.owner@example.com');
-    await user.type(screen.getByLabelText(/^password$/i), 'Correct-Horse-Battery-9');
-    await user.type(screen.getByLabelText(/confirm password/i), 'Correct-Horse-Battery-9');
+      await user.type(screen.getByLabelText(/organization/i), 'arp-flat-owners');
+      await user.type(screen.getByLabelText(/full name/i), 'New Owner');
+      await user.type(screen.getByLabelText(/^email$/i), 'new.owner@example.com');
+      await user.type(screen.getByLabelText(/^password$/i), 'Correct-Horse-Battery-9');
+      await user.type(screen.getByLabelText(/confirm password/i), 'Correct-Horse-Battery-9');
 
-    await user.click(screen.getByRole('button', { name: /create account/i }));
+      await user.click(screen.getByRole('button', { name: /create account/i }));
 
-    await waitFor(() => {
-      expect(store.getState().auth.user?.email).toBe('new.owner@example.com');
-    });
-  });
+      await waitFor(() => {
+        expect(store.getState().auth.user?.email).toBe('new.owner@example.com');
+      });
+    },
+    // Five fields of simulated keystrokes + a submit round-trip routinely exceeds vitest's 5s
+    // default under full-suite CPU contention (passes in ~5s isolated, times out at 5000ms when
+    // 17 test files run in parallel) — not flaky assertions, just a slow interaction needing more
+    // headroom than the default.
+    15000,
+  );
 
   it('shows a field error when the email is already registered', async () => {
     server.use(

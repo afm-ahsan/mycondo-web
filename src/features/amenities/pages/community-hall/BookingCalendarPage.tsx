@@ -10,7 +10,7 @@ import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useBookings } from '../../api/bookingsApi';
 import { useBlackoutDates, useFacilities } from '../../api/facilitiesApi';
 import { BookingCalendar } from '../../components/BookingCalendar';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 
 export function BookingCalendarPage() {
   const navigate = useNavigate();
@@ -39,7 +39,7 @@ export function BookingCalendarPage() {
       <PageHeader
         title="Booking Calendar"
         crumbs={[{ label: 'Facilities' }, { label: 'Community Hall' }, { label: 'Booking Calendar' }]}
-        actions={
+        primaryAction={
           <>
             <Button variant="outline" onClick={() => navigate('../bookings')}>
               <List /> List

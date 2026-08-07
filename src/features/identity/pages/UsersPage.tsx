@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { LoaderCircleIcon } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -13,7 +12,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -24,10 +23,16 @@ import {
 } from '@/components/ui/table';
 import { toUserMessage } from '@/api/errors';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { useDisableUser, useUsers } from '../api/identityApi';
 
+const USERS_COLUMN_COUNT = 4;
+
 export function UsersPage() {
-  const { data: users, isLoading, isError, error } = useUsers();
+  const { data: users, isLoading, isError, error, refetch } = useUsers();
   const [disableUser, { isLoading: isDisabling }] = useDisableUser();
   const [pendingUserId, setPendingUserId] = useState<string | null>(null);
 
@@ -43,26 +48,23 @@ export function UsersPage() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Users</CardTitle>
-      </CardHeader>
+    <>
+      <PageHeader
+        title="Users"
+        description="Everyone with an account in this tenant."
+        crumbs={[{ label: 'Administration' }, { label: 'Users' }]}
+      />
+      <Card>
       <CardContent>
-        {isLoading && (
-          <div className="flex items-center gap-2 text-muted-foreground py-6">
-            <LoaderCircleIcon className="h-4 w-4 animate-spin" /> Loading users...
-          </div>
-        )}
-
         {isError && (
-          <p className="text-sm text-destructive py-6">{toUserMessage(error)}</p>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         )}
 
-        {!isLoading && !isError && users?.length === 0 && (
-          <p className="text-sm text-muted-foreground py-6">No users yet.</p>
+        {!isError && !isLoading && users?.length === 0 && (
+          <EmptyState title="No users yet" description="Users appear here once someone registers for this tenant." />
         )}
 
-        {!isLoading && !isError && users && users.length > 0 && (
+        {!isError && (isLoading || (users && users.length > 0)) && (
           <Table>
             <TableHeader>
               <TableRow>
@@ -75,31 +77,35 @@ export function UsersPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {users.map((user) => (
-                <TableRow key={user.userId}>
-                  <TableCell>{user.fullName}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.isActive ? 'success' : 'destructive'} appearance="light">
-                      {user.isActive ? 'Active' : 'Disabled'}
-                    </Badge>
-                  </TableCell>
-                  <RequirePermission permission="user.disable">
-                    <TableCell className="text-right">
-                      {user.isActive && (
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          disabled={isDisabling}
-                          onClick={() => setPendingUserId(user.userId)}
-                        >
-                          Disable
-                        </Button>
-                      )}
+              {isLoading ? (
+                <TableSkeleton columns={USERS_COLUMN_COUNT} />
+              ) : (
+                users!.map((user) => (
+                  <TableRow key={user.userId}>
+                    <TableCell>{user.fullName}</TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
+                      <Badge variant={user.isActive ? 'success' : 'destructive'} appearance="light">
+                        {user.isActive ? 'Active' : 'Disabled'}
+                      </Badge>
                     </TableCell>
-                  </RequirePermission>
-                </TableRow>
-              ))}
+                    <RequirePermission permission="user.disable">
+                      <TableCell className="text-right">
+                        {user.isActive && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            disabled={isDisabling}
+                            onClick={() => setPendingUserId(user.userId)}
+                          >
+                            Disable
+                          </Button>
+                        )}
+                      </TableCell>
+                    </RequirePermission>
+                  </TableRow>
+                ))
+              )}
             </TableBody>
           </Table>
         )}
@@ -124,6 +130,7 @@ export function UsersPage() {
           </AlertDialogContent>
         </AlertDialog>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 }

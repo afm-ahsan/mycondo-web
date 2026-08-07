@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { useAddHouseholdMember, useDeactivateHouseholdMember, useHouseholdMembers } from '../api/leasingApi';
 import { householdMemberSchema, type HouseholdMemberSchemaType } from '../schemas/householdMemberSchema';
 
@@ -38,6 +39,8 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
     resolver: zodResolver(householdMemberSchema),
     defaultValues: { fullName: '', relationshipToPrimary: '', dateOfBirth: '', phone: '', nationalIdNumber: '' },
   });
+
+  useUnsavedChangesGuard(form.formState.isDirty);
 
   async function onSubmit(values: HouseholdMemberSchemaType) {
     setError(null);

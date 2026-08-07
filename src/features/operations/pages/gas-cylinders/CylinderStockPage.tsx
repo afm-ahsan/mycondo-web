@@ -37,7 +37,7 @@ import {
 import { StockMovementDialog } from '../../components/StockMovementDialog';
 import { StockAdjustmentDialog } from '../../components/StockAdjustmentDialog';
 import { ReconciliationDialog } from '../../components/ReconciliationDialog';
-import { PageHeader } from '../../components/PageHeader';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { cylinderStockMovementTypeToneMap, type CylinderStockMovementType } from '../../lib/status';
 import type { CylinderStockMovementDto } from '@/api/generated/mycondoApi';
 import type { StockAdjustmentSchemaType, StockMovementSchemaType } from '../../schemas/stockSchema';
@@ -140,7 +140,7 @@ export function CylinderStockPage() {
       <PageHeader
         title="Gas Cylinder Stock"
         crumbs={[{ label: 'Operations' }, { label: 'Gas Cylinders' }, { label: 'Stock' }]}
-        actions={
+        primaryAction={
           <RequirePermission permission={PERMISSIONS.gasCylinder.stockManage}>
             <Button variant="outline" onClick={() => setReconciliationDialogOpen(true)}>
               <Scale /> Reconcile
