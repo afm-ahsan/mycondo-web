@@ -84,11 +84,13 @@ function booking(overrides: Partial<Record<string, unknown>> = {}) {
 describe('BookingCalendarPage', () => {
   it('requests server-side fromDate/toDate matching the visible grid range, not a client-filtered large page', async () => {
     mockFacilities();
-    let receivedArgs: { fromDate: string | null; toDate: string | null; pageSize: string | null } | null = null;
+    const receivedArgsRef: {
+      current: { fromDate: string | null; toDate: string | null; pageSize: string | null } | null;
+    } = { current: null };
     server.use(
       http.get(`${API_BASE}/api/v1/facility-bookings`, ({ request }) => {
         const url = new URL(request.url);
-        receivedArgs = {
+        receivedArgsRef.current = {
           fromDate: url.searchParams.get('fromDate'),
           toDate: url.searchParams.get('toDate'),
           pageSize: url.searchParams.get('pageSize'),
@@ -100,12 +102,14 @@ describe('BookingCalendarPage', () => {
 
     renderWithProviders(<BookingCalendarPage />, { auth: { user: viewerUser, isInitialized: true } });
 
-    await waitFor(() => expect(receivedArgs).not.toBeNull());
+    await waitFor(() => expect(receivedArgsRef.current).not.toBeNull());
     // A real date range is sent (both bounds present) — the calendar no longer relies on fetching
     // an arbitrary large page and filtering client-side.
-    expect(receivedArgs?.fromDate).toBeTruthy();
-    expect(receivedArgs?.toDate).toBeTruthy();
-    expect(new Date(receivedArgs!.toDate!).getTime()).toBeGreaterThan(new Date(receivedArgs!.fromDate!).getTime());
+    expect(receivedArgsRef.current?.fromDate).toBeTruthy();
+    expect(receivedArgsRef.current?.toDate).toBeTruthy();
+    expect(new Date(receivedArgsRef.current!.toDate!).getTime()).toBeGreaterThan(
+      new Date(receivedArgsRef.current!.fromDate!).getTime(),
+    );
 
     // The booking is discoverable in both the (CSS-hidden-on-desktop) agenda list and the grid —
     // both consume the same single fetch, proving no separate fetching/business logic per breakpoint.

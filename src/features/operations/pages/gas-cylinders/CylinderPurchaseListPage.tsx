@@ -1,11 +1,14 @@
 import { useMemo, useState } from 'react';
 import {
   type ColumnDef,
+  functionalUpdate,
   getCoreRowModel,
   type PaginationState,
+  type Updater,
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, Plus, Users } from 'lucide-react';
+import { toast } from 'sonner';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -65,8 +68,8 @@ export function CylinderPurchaseListPage() {
   const [markPaidTarget, setMarkPaidTarget] = useState<CylinderPurchaseDto | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
-    const next = updater(pagination);
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = functionalUpdate(updater, pagination);
     setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
   }
 
@@ -131,6 +134,7 @@ export function CylinderPurchaseListPage() {
     setErrorMessage(null);
     try {
       await approvePurchase({ id: approveTarget.cylinderPurchaseId }).unwrap();
+      toast.success(`Purchase ${approveTarget.invoiceNumber} approved.`);
       setApproveTarget(null);
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));
@@ -142,6 +146,7 @@ export function CylinderPurchaseListPage() {
     setErrorMessage(null);
     try {
       await rejectPurchase({ id: rejectingPurchaseId, rejectCylinderPurchaseRequest: { reason } }).unwrap();
+      toast.success('Purchase rejected.');
       setRejectingPurchaseId(null);
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));
@@ -153,6 +158,7 @@ export function CylinderPurchaseListPage() {
     setErrorMessage(null);
     try {
       await markPaid({ id: markPaidTarget.cylinderPurchaseId }).unwrap();
+      toast.success(`Purchase ${markPaidTarget.invoiceNumber} marked as paid.`);
       setMarkPaidTarget(null);
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));

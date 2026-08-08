@@ -21,6 +21,7 @@ import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import {
   useCheckInGuest,
@@ -60,10 +61,19 @@ export function GuestCheckInOutPage() {
   }
 
   return (
-    <div className="space-y-4 max-w-xl">
+    <>
+      <PageHeader
+        title="Guest Check-in / Check-out"
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Visitor Management' },
+          { label: 'Check In / Out' },
+        ]}
+      />
+      <div className="space-y-4 max-w-xl">
       <Card>
         <CardHeader>
-          <CardTitle>Guest Check-in / Check-out</CardTitle>
+          <CardTitle as="h2">Guest Check-in / Check-out</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex gap-2">
@@ -98,7 +108,7 @@ export function GuestCheckInOutPage() {
       {guest && (
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle as="h2" className="flex items-center gap-2">
               {guest.fullName}
               <StatusBadge status={guest.isBlocked ? 'Blocked' : 'Active'} toneMap={blockedToneMap} />
             </CardTitle>
@@ -135,7 +145,8 @@ export function GuestCheckInOutPage() {
           </CardContent>
         </Card>
       )}
-    </div>
+      </div>
+    </>
   );
 }
 

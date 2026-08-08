@@ -4,6 +4,7 @@ import { AlertCircle, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
+import type { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -35,7 +36,7 @@ export function RatePlanFormPage({ utilityType }: RatePlanFormPageProps) {
   const [createRatePlan, { isLoading }] = useCreateRatePlan();
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<CreateRatePlanSchemaType>({
+  const form = useForm<z.input<typeof createRatePlanSchema>, unknown, CreateRatePlanSchemaType>({
     resolver: zodResolver(createRatePlanSchema),
     defaultValues: {
       buildingId: searchParams.get('buildingId') ?? '',

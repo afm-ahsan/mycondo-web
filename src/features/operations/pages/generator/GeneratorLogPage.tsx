@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
 import {
   type ColumnDef,
+  functionalUpdate,
   getCoreRowModel,
   type PaginationState,
+  type Updater,
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertCircle, Plus, Settings2 } from 'lucide-react';
@@ -57,8 +59,8 @@ export function GeneratorLogPage() {
   const [stoppingSessionId, setStoppingSessionId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
-    const next = updater(pagination);
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = functionalUpdate(updater, pagination);
     setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
   }
 

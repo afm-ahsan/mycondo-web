@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { useGetApiV1VehiclesQuery } from '@/api/generated/mycondoApi';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -24,6 +24,10 @@ interface VehicleSelectProps {
   onChange: (vehicle: VehicleSelectValue | null) => void;
   disabled?: boolean;
   placeholder?: string;
+  id?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: ComponentProps<'button'>['aria-invalid'];
+  'aria-required'?: boolean;
 }
 
 /** Search-first vehicle picker (`GET /api/v1/vehicles?search=`) — mirrors `ResidentSelect`/`WorkerSelect`. */
@@ -32,6 +36,10 @@ export function VehicleSelect({
   onChange,
   disabled,
   placeholder = 'Search by registration number…',
+  id,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: VehicleSelectProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -53,6 +61,10 @@ export function VehicleSelect({
           aria-expanded={open}
           disabled={disabled}
           className="w-full"
+          id={id}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
+          aria-required={ariaRequired}
         >
           {value ? (
             <span className="truncate">

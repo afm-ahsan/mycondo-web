@@ -2,6 +2,7 @@ import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
+import { axe } from 'vitest-axe';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -172,6 +173,30 @@ describe('BookingListPage', () => {
     // Rendered row count matches the server's reported total for the filtered result — no
     // client-side filtering shrinking the visible rows below what the count/pagination claim.
     expect(screen.getAllByText('Birthday party')).toHaveLength(1);
+  });
+
+  it('has no detectable axe violations with populated rows', async () => {
+    mockFacilities();
+    server.use(
+      http.get(`${API_BASE}/api/v1/facility-bookings`, () =>
+        HttpResponse.json({ items: [sampleBooking], page: 1, pageSize: 10, total: 1 }),
+      ),
+      // Also mock buildings — otherwise BuildingSelect never leaves its loading/disabled state
+      // (an unlabeled disabled combobox trigger), which fails axe for an unrelated, unrepresentative
+      // reason unrelated to the page's real steady-state markup.
+      http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+        HttpResponse.json({ items: [{ buildingId: 'bld-1', name: 'Tower A', code: 'A', address: null }], page: 1, pageSize: 100, total: 1 }),
+      ),
+    );
+
+    const { container } = renderWithProviders(<BookingListPage />, {
+      auth: { user: viewerUser, isInitialized: true },
+    });
+
+    await waitFor(() => expect(screen.getByText('Main Hall')).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText('All buildings')).toBeInTheDocument());
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   it('debounces the event-type search before sending it as a server-side filter', async () => {

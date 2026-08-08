@@ -39,7 +39,7 @@ export function UtilitiesSummarySection() {
   const gas = consumption.data?.find((l) => l.utilityType === 'Gas');
   const unbilledCount = (status.data ?? [])
     .filter((l) => UNBILLED_STATUSES.has(l.status))
-    .reduce((sum, l) => sum + l.count, 0);
+    .reduce((sum, l) => sum + Number(l.count), 0);
 
   const isFetching = consumption.isFetching || status.isFetching;
   const isError = consumption.isError || status.isError;
@@ -52,7 +52,7 @@ export function UtilitiesSummarySection() {
     <Card>
       <CardHeader>
         <CardHeading>
-          <CardTitle>Utilities</CardTitle>
+          <CardTitle as="h2">Utilities</CardTitle>
         </CardHeading>
       </CardHeader>
       <CardContent>

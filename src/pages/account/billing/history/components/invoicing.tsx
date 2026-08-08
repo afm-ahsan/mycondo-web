@@ -251,7 +251,7 @@ const Invoicing = () => {
         placeholder="Filter..."
         value={(column.getFilterValue() as string) ?? ''}
         onChange={(event) => column.setFilterValue(event.target.value)}
-        size="sm"
+        variant="sm"
         className="max-w-40"
       />
     );

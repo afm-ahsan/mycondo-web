@@ -16,7 +16,7 @@ interface ReasonDialogProps {
   title: string;
   description?: string;
   confirmLabel?: string;
-  confirmVariant?: 'default' | 'destructive';
+  confirmVariant?: 'primary' | 'destructive';
   isSubmitting?: boolean;
   onConfirm: (reason: string) => void;
 }
@@ -34,7 +34,7 @@ export function ReasonDialog({
   title,
   description,
   confirmLabel = 'Confirm',
-  confirmVariant = 'default',
+  confirmVariant = 'primary',
   isSubmitting,
   onConfirm,
 }: ReasonDialogProps) {

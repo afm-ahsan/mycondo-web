@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router-dom';
+import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { MENU_SIDEBAR } from '@/config/menu.config';
 import { useMenu } from '@/hooks/use-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -65,8 +66,10 @@ export function Demo1Layout() {
       <div className="wrapper flex grow flex-col">
         <Header />
 
-        <main className="grow pt-5" role="content">
-          <Outlet />
+        <main className="grow pt-5">
+          <Suspense fallback={<PageSkeleton />}>
+            <Outlet />
+          </Suspense>
         </main>
 
         <Footer />

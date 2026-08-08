@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import type { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
@@ -243,8 +245,9 @@ function FacilityFormDialog({
   const [createFacility, { isLoading: isCreating }] = useCreateFacility();
   const [updateFacility, { isLoading: isUpdating }] = useUpdateFacilityConfiguration();
   const isEdit = !!facility;
+  const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<FacilitySchemaType>({
+  const form = useForm<z.input<typeof facilitySchema>, unknown, FacilitySchemaType>({
     resolver: zodResolver(facilitySchema),
     values: facility
       ? {
@@ -260,7 +263,8 @@ function FacilityFormDialog({
           cancellationDeadlineHours: Number(facility.cancellationDeadlineHours),
           cancellationDeductionPercentage: Number(facility.cancellationDeductionPercentage),
           guestFeeAmount: facility.guestFeeAmount ? Number(facility.guestFeeAmount) : undefined,
-          minimumAgeUnaccompanied: facility.minimumAgeUnaccompanied ?? undefined,
+          minimumAgeUnaccompanied:
+            facility.minimumAgeUnaccompanied != null ? Number(facility.minimumAgeUnaccompanied) : undefined,
           requiresSafetyAcknowledgement: facility.requiresSafetyAcknowledgement,
           blocksEntryIfAccountOverdue: facility.blocksEntryIfAccountOverdue,
         }
@@ -281,6 +285,7 @@ function FacilityFormDialog({
   const facilityType = form.watch('facilityType');
 
   async function onSubmit(values: FacilitySchemaType) {
+    setError(null);
     try {
       if (isEdit && facility) {
         await updateFacility({
@@ -328,7 +333,12 @@ function FacilityFormDialog({
     } catch (err) {
       const apiError = toApiError(err);
       const handled = applyApiErrorToForm(form, apiError);
-      if (!handled) toast.error(toUserMessage(apiError ?? err));
+      // Field-level errors (e.g. a specific financial-field validation failure) stay inline via
+      // FormMessage above; anything that can't be mapped to a field — a business-rule rejection on
+      // the financial values as a whole — gets a persistent alert instead of a toast, since a toast
+      // disappearing after a few seconds isn't enough time to read and correct a financial-config
+      // mistake mid-form.
+      if (!handled) setError(toUserMessage(apiError ?? err));
     }
   }
 
@@ -338,6 +348,14 @@ function FacilityFormDialog({
         <DialogHeader>
           <DialogTitle>{isEdit ? `Edit ${facility?.name}` : 'Create facility'}</DialogTitle>
         </DialogHeader>
+        {error && (
+          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+            <AlertIcon>
+              <AlertCircle />
+            </AlertIcon>
+            <AlertTitle>{error}</AlertTitle>
+          </Alert>
+        )}
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             {!isEdit && (

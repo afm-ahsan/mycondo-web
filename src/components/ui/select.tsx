@@ -68,10 +68,29 @@ export interface SelectTriggerProps
     VariantProps<typeof selectTriggerVariants> {}
 
 function SelectTrigger({ className, children, size, ...props }: SelectTriggerProps) {
+  // `role="combobox"` (set by Radix's Trigger) is not a "name from content" ARIA role, so the
+  // placeholder text SelectValue renders visibly when nothing is selected does NOT, by itself,
+  // give the trigger an accessible name — every caller across the app would otherwise need its own
+  // `aria-label` to fix this individually. Deriving it here from SelectValue's own `placeholder`
+  // prop (when the caller hasn't already set an explicit aria-label/aria-labelledby) fixes it once,
+  // for every existing and future `<Select>` usage, with no per-caller change required.
+  let derivedLabel: string | undefined;
+  if (!props['aria-label'] && !props['aria-labelledby']) {
+    React.Children.forEach(children, (child) => {
+      if (isValidElement<{ placeholder?: ReactNode }>(child) && child.type === SelectValue) {
+        const placeholder = child.props.placeholder;
+        if (typeof placeholder === 'string') {
+          derivedLabel = placeholder;
+        }
+      }
+    });
+  }
+
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(selectTriggerVariants({ size }), className)}
+      aria-label={derivedLabel}
       {...props}
     >
       {children}

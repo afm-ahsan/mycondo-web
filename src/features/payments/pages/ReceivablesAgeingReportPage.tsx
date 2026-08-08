@@ -1,5 +1,7 @@
 import type { ApexOptions } from 'apexcharts';
+import { Printer } from 'lucide-react';
 import ApexChart from 'react-apexcharts';
+import { Button } from '@/components/ui/button';
 import {
   Card,
   CardHeader,
@@ -57,16 +59,33 @@ export function ReceivablesAgeingReportPage() {
 
   return (
     <>
+      {/* Print-only: everything outside #print-root (sidebar, header, filter inputs) is hidden via
+          this page-local override — same pattern as TenantRegistrationPrintPage. No PDF library or
+          export architecture involved, just the browser's own print pipeline. */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #print-root, #print-root * { visibility: visible; }
+          #print-root { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0; }
+          #print-hide-on-print { display: none !important; }
+        }
+      `}</style>
+
       <PageHeader
         title="Receivables Ageing"
         crumbs={[{ label: 'Billing & Collections' }, { label: 'Reports' }, { label: 'Receivables Ageing' }]}
       />
 
-      <Card className="mb-4">
+      <Card className="mb-4" id="print-hide-on-print">
         <CardHeader>
           <CardHeading>
             <CardTitle>Filters</CardTitle>
           </CardHeading>
+          <CardToolbar>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer /> Print
+            </Button>
+          </CardToolbar>
         </CardHeader>
         <div className="flex flex-wrap gap-4 p-4">
           <div className="space-y-1 w-full sm:w-56">
@@ -87,7 +106,7 @@ export function ReceivablesAgeingReportPage() {
       {isError ? (
         <ErrorState description="Couldn't load the receivables ageing report." onRetry={refetch} />
       ) : (
-        <div className="space-y-4">
+        <div id="print-root" className="space-y-4">
           {data && data.buckets.length > 0 && (
             <Card>
               <CardHeader>

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,7 +29,7 @@ interface FuelReceiptDialogProps {
 }
 
 export function FuelReceiptDialog({ open, onOpenChange, isSubmitting, onSubmit }: FuelReceiptDialogProps) {
-  const form = useForm<FuelReceiptSchemaType>({
+  const form = useForm<z.input<typeof fuelReceiptSchema>, unknown, FuelReceiptSchemaType>({
     resolver: zodResolver(fuelReceiptSchema),
     defaultValues: {
       generatorId: '',

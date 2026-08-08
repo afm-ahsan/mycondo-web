@@ -108,6 +108,7 @@ export function SidebarMenu() {
           key={index}
           value={item.path || ''}
           className="text-sm font-medium"
+          asChild
         >
           <Link
             to={item.path || '#'}
@@ -130,6 +131,8 @@ export function SidebarMenu() {
         key={index}
         value={`disabled-${index}`}
         className="text-sm font-medium"
+        disabled
+        aria-disabled="true"
       >
         {item.icon && <item.icon data-slot="accordion-menu-icon" />}
         <span data-slot="accordion-menu-title">{item.title}</span>
@@ -205,6 +208,7 @@ export function SidebarMenu() {
           key={index}
           value={item.path || ''}
           className="text-[13px]"
+          asChild
         >
           <Link to={item.path || '#'}>{item.title}</Link>
         </AccordionMenuItem>
@@ -222,6 +226,8 @@ export function SidebarMenu() {
         key={index}
         value={`disabled-child-${level}-${index}`}
         className="text-[13px]"
+        disabled
+        aria-disabled="true"
       >
         <span data-slot="accordion-menu-title">{item.title}</span>
         {item.disabled && (

@@ -139,6 +139,8 @@ export function LoginPage() {
                   variant="ghost"
                   mode="icon"
                   onClick={() => setPasswordVisible(!passwordVisible)}
+                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
+                  aria-pressed={passwordVisible}
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 >
                   {passwordVisible ? (

@@ -34,7 +34,12 @@ jobs:
       - name: Test (Vitest — PF-5)
         run: npm run test
 
-      - name: Build (includes strict TypeScript typecheck)
+      # tsc -b (project-reference build mode) is required here — a bare `tsc` against this
+      # solution-style tsconfig.json (files: [], references: [...]) silently checks zero files.
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Build
         run: npm run build
 
       # Playwright E2E is deferred to a later verification slice — needs a running backend, not just

@@ -41,7 +41,7 @@ export function ExecutiveSummarySection() {
     return null;
   }
 
-  const currentlyInsideTotal = security.data?.currentlyInside.reduce((sum, c) => sum + c.count, 0) ?? 0;
+  const currentlyInsideTotal = security.data?.currentlyInside.reduce((sum, c) => sum + Number(c.count), 0) ?? 0;
   const totalBookings = (utilization.data ?? []).reduce((sum, l) => sum + Number(l.totalBookings), 0);
 
   return (
@@ -60,7 +60,7 @@ export function ExecutiveSummarySection() {
             value={financial.data?.overdueInvoiceCount ?? 0}
             icon={AlertTriangle}
             isLoading={financial.isFetching}
-            tone={financial.data && financial.data.overdueInvoiceCount > 0 ? 'destructive' : 'primary'}
+            tone={financial.data && Number(financial.data.overdueInvoiceCount) > 0 ? 'destructive' : 'primary'}
           />
         </>
       )}

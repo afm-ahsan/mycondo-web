@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,7 +29,7 @@ interface MaintenanceScheduleDialogProps {
 }
 
 export function MaintenanceScheduleDialog({ open, onOpenChange, isSubmitting, onSubmit }: MaintenanceScheduleDialogProps) {
-  const form = useForm<MaintenanceScheduleSchemaType>({
+  const form = useForm<z.input<typeof maintenanceScheduleSchema>, unknown, MaintenanceScheduleSchemaType>({
     resolver: zodResolver(maintenanceScheduleSchema),
     defaultValues: { generatorId: '', nextDueDate: '', nextDueHourMeterReading: undefined },
   });
