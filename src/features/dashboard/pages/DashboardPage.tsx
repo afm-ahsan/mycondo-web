@@ -2,6 +2,12 @@ import { type LucideIcon, Building, Landmark, ShieldUser, UserCheck, Zap } from 
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ExecutiveSummarySection } from '../components/ExecutiveSummarySection';
+import { FacilitiesSummarySection } from '../components/FacilitiesSummarySection';
+import { FinancialSummarySection } from '../components/FinancialSummarySection';
+import { OperationsSummarySection } from '../components/OperationsSummarySection';
+import { SecuritySummarySection } from '../components/SecuritySummarySection';
+import { UtilitiesSummarySection } from '../components/UtilitiesSummarySection';
 import { hasPermission } from '@/lib/auth/permissions';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useAppSelector } from '@/store/hooks';
@@ -56,10 +62,14 @@ const SECTIONS: DashboardSection[] = [
 
 /**
  * The MyCondo landing page — replaces the Metronic e-commerce demo dashboard that previously
- * rendered at `/`. Deliberately just a permission-aware set of entry points into what's actually
- * built, not a KPI dashboard: every number on a card here would either be fabricated in the browser
- * or need a backend aggregation endpoint that doesn't exist yet (see the UX-0 discovery report's API
- * Gap Analysis). Real KPI/trend cards belong in UX-5, once those endpoints exist.
+ * rendered at `/`. As of UX-5, a real KPI dashboard: every number below comes from a backend
+ * aggregation endpoint designed for that purpose (Financial/Security/Facilities/Utilities/Operations
+ * summary reports) — never from re-aggregating a paginated page or a browser-side calculation. Each
+ * module section is independently permission-gated (a widget never fetches when the viewer lacks the
+ * underlying permission) and independently fails (one section's load error never blanks the others —
+ * see DashboardPage.test.tsx). Executive Summary is a frontend composition reading the same RTK Query
+ * cache entries the sections below it use, not its own endpoint. Quick Actions (below) is kept as the
+ * permission-filtered navigation grid this page always had.
  */
 export function DashboardPage() {
   const user = useAppSelector((s) => s.auth.user);
@@ -71,6 +81,17 @@ export function DashboardPage() {
         title={`Welcome${user?.name ? `, ${user.name}` : ''}`}
         description="Jump into what you work with most."
       />
+
+      <div className="space-y-4 mb-6">
+        <ExecutiveSummarySection />
+        <FinancialSummarySection />
+        <SecuritySummarySection />
+        <FacilitiesSummarySection />
+        <UtilitiesSummarySection />
+        <OperationsSummarySection />
+      </div>
+
+      <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
       {visibleSections.length === 0 ? (
         <Card>
           <CardContent className="py-10 text-center text-sm text-muted-foreground">

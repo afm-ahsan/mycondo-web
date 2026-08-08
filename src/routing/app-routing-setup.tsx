@@ -22,9 +22,17 @@ import {
   ServiceChargeRuleDirectoryPage,
   ServiceChargeRuleFormPage,
 } from '@/features/billing';
-import { PaymentDetailPage, PaymentListPage, RecordPaymentPage, ResidentLedgerPage } from '@/features/payments';
+import {
+  FinancialSummaryReportPage,
+  PaymentDetailPage,
+  PaymentListPage,
+  ReceivablesAgeingReportPage,
+  RecordPaymentPage,
+  ResidentLedgerPage,
+} from '@/features/payments';
 import {
   ConsumptionHistoryReportPage,
+  ConsumptionSummaryReportPage,
   MeterDirectoryPage,
   RatePlanDirectoryPage,
   RatePlanFormPage,
@@ -753,6 +761,22 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/billing/reports/financial-summary"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.financialView} fallback={<AccessDeniedNotice />}>
+                <FinancialSummaryReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/reports/receivables-ageing"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.financialView} fallback={<AccessDeniedNotice />}>
+                <ReceivablesAgeingReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/utilities/electricity/meters"
             element={
               <RequirePermission permission={PERMISSIONS.utility.meterView} fallback={<AccessDeniedNotice />}>
@@ -877,6 +901,14 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
                 <ConsumptionHistoryReportPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/reports/consumption-summary"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.report} fallback={<AccessDeniedNotice />}>
+                <ConsumptionSummaryReportPage />
               </RequirePermission>
             }
           />

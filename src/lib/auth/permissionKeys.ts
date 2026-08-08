@@ -58,6 +58,9 @@ export const PERMISSIONS = {
   report: {
     securityView: 'report.security.view',
     facility: 'report.facility',
+    // mycondo-api's Seed_Permission_Catalogue.cs — pre-existing, previously unconsumed by any
+    // endpoint until UX-5's Financial Summary/Receivables Ageing reports.
+    financialView: 'report.financial.view',
   },
   // mycondo-api's Seed_Leasing_Permissions.cs — Tenant Registration. Domain/permission names use
   // "occupancyRegistration" to avoid colliding with this app's own multi-tenancy vocabulary; "Tenant
@@ -146,5 +149,8 @@ export const PERMISSIONS = {
     readingRecord: 'utility.reading.record',
     readingFinalize: 'utility.reading.finalize',
     readingCorrect: 'utility.reading.correct',
+    // mycondo-api's Seed_UtilityReport_Permission.cs (UX-5) — gates the 3 tenant-wide consumption/
+    // reading-status/meter-status aggregate reports, separate from utility.reading.view (per-meter).
+    report: 'utility.report',
   },
 } as const;

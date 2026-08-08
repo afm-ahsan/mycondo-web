@@ -1,0 +1,9 @@
+import {
+  useGetApiV1ReportsUtilitiesConsumptionSummaryQuery,
+  useGetApiV1ReportsUtilitiesMeterStatusSummaryQuery,
+  useGetApiV1ReportsUtilitiesReadingStatusSummaryQuery,
+} from '@/api/generated/mycondoApi';
+
+export const useConsumptionSummaryReport = useGetApiV1ReportsUtilitiesConsumptionSummaryQuery;
+export const useReadingStatusSummaryReport = useGetApiV1ReportsUtilitiesReadingStatusSummaryQuery;
+export const useMeterStatusSummaryReport = useGetApiV1ReportsUtilitiesMeterStatusSummaryQuery;
