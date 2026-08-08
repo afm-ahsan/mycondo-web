@@ -18,7 +18,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
-import { ConfirmActionDialog } from '../components/ConfirmActionDialog';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { RequestCorrectionDialog } from '../components/RequestCorrectionDialog';
 import { StaffMemberPicker } from '../components/StaffMemberPicker';
 import { useApproveCorrection, useAttendanceRegister, useClockOut } from '../api/staffAttendanceApi';

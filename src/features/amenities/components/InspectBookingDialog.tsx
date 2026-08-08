@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { formatBdt } from '../lib/format';
+import { formatBdt } from '@/lib/helpers';
 import { inspectBookingSchema, type InspectBookingSchemaType } from '../schemas/bookingActionSchemas';
 
 interface InspectBookingDialogProps {

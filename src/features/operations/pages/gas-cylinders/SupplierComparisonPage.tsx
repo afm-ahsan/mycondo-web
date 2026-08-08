@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useSupplierComparisonReport } from '../../api/reportsApi';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt, formatNumber } from '../../lib/format';
+import { formatBdt, formatNumber } from '@/lib/helpers';
 
 function firstDayOfMonth(): string {
   const now = new Date();

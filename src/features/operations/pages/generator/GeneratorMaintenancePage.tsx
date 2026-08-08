@@ -42,7 +42,7 @@ import { CompleteMaintenanceDialog } from '../../components/CompleteMaintenanceD
 import { BreakdownDialog } from '../../components/BreakdownDialog';
 import { ReasonDialog } from '../../components/ReasonDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt } from '../../lib/format';
+import { formatBdt } from '@/lib/helpers';
 import type {
   GeneratorBreakdownRecordDto,
   GeneratorMaintenanceScheduleDto,

@@ -5,6 +5,7 @@ import {
   Bell,
   Bitcoin,
   Book,
+  BookOpen,
   Briefcase,
   Building,
   CalendarCheck,
@@ -23,6 +24,7 @@ import {
   Flag,
   Flame,
   Fuel,
+  Gauge,
   Ghost,
   Gift,
   GraduationCap,
@@ -35,6 +37,7 @@ import {
   Landmark,
   Layout,
   LayoutGrid,
+  Lightbulb,
   LifeBuoy,
   MessageSquare,
   Monitor,
@@ -43,7 +46,9 @@ import {
   PartyPopper,
   Users as PeopleIcon,
   Plug,
+  Receipt,
   Settings,
+  Wallet,
   Share2,
   Shield,
   ShieldOff,
@@ -229,6 +234,119 @@ export const MENU_SIDEBAR: MenuConfig = [
         title: 'Security Directory',
         path: '/leasing/security-directory',
         permission: PERMISSIONS.occupancyRegistration.securityView,
+      },
+    ],
+  },
+  { heading: 'Billing & Collections' },
+  {
+    title: 'Billing & Collections',
+    icon: Receipt,
+    children: [
+      {
+        title: 'Service Charges',
+        icon: FileText,
+        children: [
+          {
+            title: 'Rules',
+            path: '/billing/service-charge-rules',
+            permission: PERMISSIONS.billing.ruleView,
+          },
+          {
+            title: 'New Rule',
+            path: '/billing/service-charge-rules/new',
+            permission: PERMISSIONS.billing.ruleManage,
+          },
+          {
+            title: 'Invoices',
+            path: '/billing/invoices',
+            permission: PERMISSIONS.billing.invoiceView,
+          },
+          {
+            title: 'Generate Billing Run',
+            path: '/billing/generate-batch',
+            permission: PERMISSIONS.billing.invoiceGenerate,
+          },
+        ],
+      },
+      {
+        title: 'Payments & Receipts',
+        icon: Wallet,
+        children: [
+          { title: 'Payments', path: '/billing/payments', permission: PERMISSIONS.payment.view },
+          { title: 'Record Payment', path: '/billing/payments/new', permission: PERMISSIONS.payment.record },
+        ],
+      },
+      {
+        title: 'Resident Ledger',
+        icon: BookOpen,
+        path: '/billing/ledger',
+        permission: PERMISSIONS.payment.view,
+      },
+      {
+        title: 'Outstanding Invoices',
+        icon: AlertCircle,
+        path: '/billing/outstanding-invoices',
+        permission: PERMISSIONS.billing.invoiceView,
+      },
+      {
+        title: 'Electricity',
+        icon: Lightbulb,
+        children: [
+          { title: 'Meters', path: '/utilities/electricity/meters', permission: PERMISSIONS.utility.meterView },
+          {
+            title: 'Readings',
+            path: '/utilities/electricity/readings',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Record Reading',
+            path: '/utilities/electricity/readings/new',
+            permission: PERMISSIONS.utility.readingRecord,
+          },
+          {
+            title: 'Rate Plans',
+            path: '/utilities/electricity/rate-plans',
+            permission: PERMISSIONS.utility.ratePlanView,
+          },
+          {
+            title: 'Billed vs Unbilled',
+            path: '/utilities/electricity/reports/billed-vs-unbilled',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Consumption History',
+            path: '/utilities/electricity/reports/consumption-history',
+            permission: PERMISSIONS.utility.readingView,
+          },
+        ],
+      },
+      {
+        title: 'Gas',
+        icon: Gauge,
+        children: [
+          { title: 'Meters', path: '/utilities/gas/meters', permission: PERMISSIONS.utility.meterView },
+          { title: 'Readings', path: '/utilities/gas/readings', permission: PERMISSIONS.utility.readingView },
+          {
+            title: 'Record Reading',
+            path: '/utilities/gas/readings/new',
+            permission: PERMISSIONS.utility.readingRecord,
+          },
+          {
+            title: 'Rate Plans',
+            path: '/utilities/gas/rate-plans',
+            permission: PERMISSIONS.utility.ratePlanView,
+          },
+          {
+            title: 'Billed vs Unbilled',
+            path: '/utilities/gas/reports/billed-vs-unbilled',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Consumption History',
+            path: '/utilities/gas/reports/consumption-history',
+            permission: PERMISSIONS.utility.readingView,
+          },
+        ],
       },
     ],
   },

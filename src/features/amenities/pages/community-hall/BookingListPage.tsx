@@ -40,7 +40,8 @@ import { useFacilities } from '../../api/facilitiesApi';
 import { BookingStatusBadge } from '../../components/BookingStatusBadge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PaymentStatusBadge } from '../../components/PaymentStatusBadge';
-import { formatBdt, formatTimeOfDay } from '../../lib/format';
+import { formatBdt } from '@/lib/helpers';
+import { formatTimeOfDay } from '../../lib/format';
 import { bookingStatusToneMap, type BookingStatus } from '../../lib/bookingStatus';
 import type { BookingDto } from '@/api/generated/mycondoApi';
 

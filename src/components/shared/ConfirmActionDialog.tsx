@@ -21,11 +21,13 @@ interface ConfirmActionDialogProps {
 }
 
 /**
- * Lightweight confirm-before-mutating step for attendance actions (Clock Out, Approve Correction),
- * built on the app's existing AlertDialog convention (see UsersPage's Disable confirmation) — not a
- * new dialog framework. Unlike that precedent, the confirm button calls `event.preventDefault()` to
- * stop Radix's default close-on-click, so the dialog stays open and shows the loading state while the
- * mutation is in flight; the caller closes it (via `onOpenChange(false)`) once the mutation settles.
+ * Lightweight confirm-before-mutating step, built on the app's existing AlertDialog convention (see
+ * UsersPage's Disable confirmation) — not a new dialog framework. The confirm button calls
+ * `event.preventDefault()` to stop Radix's default close-on-click, so the dialog stays open and shows
+ * the loading state while the mutation is in flight; the caller closes it (via `onOpenChange(false)`)
+ * once the mutation settles. Promoted here from payroll (UX-2) once a second feature (utilities,
+ * UX-3) needed the identical pattern — feature-local status/domain logic stays in each feature; this
+ * component itself has none.
  */
 export function ConfirmActionDialog({
   open,
