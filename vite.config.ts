@@ -25,6 +25,12 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
-    chunkSizeWarningLimit: 3000,
+    // UX-6: raised from Vite's 500 kB default (not left at the old 3000, which was masking the
+    // pre-split single 3.48 MB bundle rather than reflecting a real ceiling). After route-level
+    // code splitting, the largest legitimate chunks are the shared entry (~910 kB raw, React +
+    // Redux + RTK Query + Router + Radix UI baseline) and the apexcharts vendor chunk (~580 kB,
+    // isolated to report pages that actually render charts) — 1000 kB gives headroom for those
+    // without hiding a regression back toward one giant bundle.
+    chunkSizeWarningLimit: 1000,
   },
 });

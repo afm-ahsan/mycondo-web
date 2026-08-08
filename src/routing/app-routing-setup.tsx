@@ -1,190 +1,181 @@
+import { Suspense } from 'react';
 import { ClassicLayout } from '@/auth/layouts/classic';
-import {
-  BookingCalendarPage,
-  BookingDetailsPage,
-  BookingFormPage,
-  BookingListPage,
-  BookingRevenueReportPage,
-  CurrentOccupancyPage,
-  FacilitySettingsPage,
-  FacilityUtilizationReportPage,
-  PoolAccessPage,
-  PoolDailyUsageReportPage,
-  UsageHistoryPage,
-} from '@/features/amenities';
-import { LoginPage } from '@/features/auth/pages/LoginPage';
-import { RegisterPage } from '@/features/auth/pages/RegisterPage';
-import {
-  BatchBillingPage,
-  InvoiceDetailPage,
-  InvoiceListPage,
-  OutstandingInvoicesPage,
-  ServiceChargeRuleDirectoryPage,
-  ServiceChargeRuleFormPage,
-} from '@/features/billing';
-import {
-  FinancialSummaryReportPage,
-  PaymentDetailPage,
-  PaymentListPage,
-  ReceivablesAgeingReportPage,
-  RecordPaymentPage,
-  ResidentLedgerPage,
-} from '@/features/payments';
-import {
-  ConsumptionHistoryReportPage,
-  ConsumptionSummaryReportPage,
-  MeterDirectoryPage,
-  RatePlanDirectoryPage,
-  RatePlanFormPage,
-  ReadingCapturePage,
-  ReadingDetailPage,
-  ReadingRegisterPage,
-  ReadingStatusReportPage,
-} from '@/features/utilities';
-import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
-import {
-  SecurityDirectoryPage,
-  TenantRegistrationDetailPage,
-  TenantRegistrationListPage,
-  TenantRegistrationPrintPage,
-  TenantRegistrationWizardPage,
-} from '@/features/leasing';
-import {
-  CylinderConsumptionPage,
-  CylinderPurchaseListPage,
-  CylinderStockPage,
-  GeneratorFuelLogPage,
-  GeneratorLogPage,
-  GeneratorMaintenancePage,
-  GeneratorReportsPage,
-  SupplierComparisonPage,
-} from '@/features/operations';
-import {
-  AttendanceRegisterPage,
-  CurrentlyPresentStaffPage,
-  StaffMemberFormPage,
-  StaffRosterPage,
-} from '@/features/payroll';
-import {
-  CurrentlyInsideDomesticWorkersPage,
-  CurrentlyInsideGuestsPage,
-  CurrentlyInsideServiceProvidersPage,
-  CurrentlyInsideVehiclesPage,
-  DomesticWorkerCheckInOutPage,
-  DomesticWorkerDirectoryPage,
-  DomesticWorkerFormPage,
-  GuestCheckInOutPage,
-  GuestDirectoryPage,
-  GuestProfileFormPage,
-  ParcelDetailPage,
-  ParcelRegisterPage,
-  ReceiveParcelPage,
-  ServiceProviderCheckInOutPage,
-  ServiceProviderDirectoryPage,
-  ServiceProviderFormPage,
-  VehicleCheckInOutPage,
-  VehicleDirectoryPage,
-  VehicleFormPage,
-} from '@/features/security';
-import { CreateTenantPage } from '@/features/tenancy';
-import { DashboardPage } from '@/features/dashboard';
 import { AccessDeniedNotice } from '@/components/shared/AccessDeniedNotice';
+import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { RequireAuth } from '@/lib/auth/RequireAuth';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
-import {
-  AccountActivityPage,
-  AccountAllowedIPAddressesPage,
-  AccountApiKeysPage,
-  AccountAppearancePage,
-  AccountBackupAndRecoveryPage,
-  AccountBasicPage,
-  AccountCompanyProfilePage,
-  AccountCurrentSessionsPage,
-  AccountDeviceManagementPage,
-  AccountEnterprisePage,
-  AccountGetStartedPage,
-  AccountHistoryPage,
-  AccountImportMembersPage,
-  AccountIntegrationsPage,
-  AccountInviteAFriendPage,
-  AccountMembersStarterPage,
-  AccountNotificationsPage,
-  AccountOverviewPage,
-  AccountPermissionsCheckPage,
-  AccountPermissionsTogglePage,
-  AccountPlansPage,
-  AccountPrivacySettingsPage,
-  AccountRolesPage,
-  AccountSecurityGetStartedPage,
-  AccountSecurityLogPage,
-  AccountSettingsEnterprisePage,
-  AccountSettingsModalPage,
-  AccountSettingsPlainPage,
-  AccountSettingsSidebarPage,
-  AccountTeamInfoPage,
-  AccountTeamMembersPage,
-  AccountTeamsPage,
-  AccountTeamsStarterPage,
-  AccountUserProfilePage,
-} from '@/pages/account';
-import {
-  AuthAccountDeactivatedPage,
-  AuthWelcomeMessagePage,
-} from '@/pages/auth';
-import { Demo1DarkSidebarPage } from '@/pages/dashboards';
-import {
-  NetworkAppRosterPage,
-  NetworkAuthorPage,
-  NetworkGetStartedPage,
-  NetworkMarketAuthorsPage,
-  NetworkMiniCardsPage,
-  NetworkNFTPage,
-  NetworkSaasUsersPage,
-  NetworkSocialPage,
-  NetworkStoreClientsPage,
-  NetworkUserCardsTeamCrewPage,
-  NetworkUserTableTeamCrewPage,
-  NetworkVisitorsPage,
-} from '@/pages/network';
-import {
-  CampaignsCardPage,
-  CampaignsListPage,
-  ProfileActivityPage,
-  ProfileBloggerPage,
-  ProfileCompanyPage,
-  ProfileCreatorPage,
-  ProfileCRMPage,
-  ProfileDefaultPage,
-  ProfileEmptyPage,
-  ProfileFeedsPage,
-  ProfileGamerPage,
-  ProfileModalPage,
-  ProfileNetworkPage,
-  ProfileNFTPage,
-  ProfilePlainPage,
-  ProfileTeamsPage,
-  ProfileWorksPage,
-  ProjectColumn2Page,
-  ProjectColumn3Page,
-} from '@/pages/public-profile';
-import { AllProductsPage, DashboardPage } from '@/pages/store-admin';
-import {
-  MyOrdersPage,
-  OrderPlacedPage,
-  OrderReceiptPage,
-  OrderSummaryPage,
-  PaymentMethodPage,
-  ProductDetailsPage,
-  SearchResultsGridPage,
-  SearchResultsListPage,
-  ShippingInfoPage,
-  StoreClientPage,
-  WishlistPage,
-} from '@/pages/store-client';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
+import { lazyPage } from './lazyPage';
+
+// Dashboard
+const DashboardPage = lazyPage(() => import('@/features/dashboard'), 'DashboardPage');
+
+// Auth
+const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'LoginPage');
+const RegisterPage = lazyPage(() => import('@/features/auth/pages/RegisterPage'), 'RegisterPage');
+const AuthWelcomeMessagePage = lazyPage(() => import('@/pages/auth'), 'AuthWelcomeMessagePage');
+const AuthAccountDeactivatedPage = lazyPage(() => import('@/pages/auth'), 'AuthAccountDeactivatedPage');
+
+// Security
+const security = () => import('@/features/security');
+const GuestDirectoryPage = lazyPage(security, 'GuestDirectoryPage');
+const GuestProfileFormPage = lazyPage(security, 'GuestProfileFormPage');
+const GuestCheckInOutPage = lazyPage(security, 'GuestCheckInOutPage');
+const CurrentlyInsideGuestsPage = lazyPage(security, 'CurrentlyInsideGuestsPage');
+const VehicleDirectoryPage = lazyPage(security, 'VehicleDirectoryPage');
+const VehicleFormPage = lazyPage(security, 'VehicleFormPage');
+const VehicleCheckInOutPage = lazyPage(security, 'VehicleCheckInOutPage');
+const CurrentlyInsideVehiclesPage = lazyPage(security, 'CurrentlyInsideVehiclesPage');
+const DomesticWorkerDirectoryPage = lazyPage(security, 'DomesticWorkerDirectoryPage');
+const DomesticWorkerFormPage = lazyPage(security, 'DomesticWorkerFormPage');
+const DomesticWorkerCheckInOutPage = lazyPage(security, 'DomesticWorkerCheckInOutPage');
+const CurrentlyInsideDomesticWorkersPage = lazyPage(security, 'CurrentlyInsideDomesticWorkersPage');
+const ServiceProviderDirectoryPage = lazyPage(security, 'ServiceProviderDirectoryPage');
+const ServiceProviderFormPage = lazyPage(security, 'ServiceProviderFormPage');
+const ServiceProviderCheckInOutPage = lazyPage(security, 'ServiceProviderCheckInOutPage');
+const CurrentlyInsideServiceProvidersPage = lazyPage(security, 'CurrentlyInsideServiceProvidersPage');
+const ParcelRegisterPage = lazyPage(security, 'ParcelRegisterPage');
+const ReceiveParcelPage = lazyPage(security, 'ReceiveParcelPage');
+const ParcelDetailPage = lazyPage(security, 'ParcelDetailPage');
+
+// Leasing
+const leasing = () => import('@/features/leasing');
+const TenantRegistrationListPage = lazyPage(leasing, 'TenantRegistrationListPage');
+const TenantRegistrationWizardPage = lazyPage(leasing, 'TenantRegistrationWizardPage');
+const TenantRegistrationDetailPage = lazyPage(leasing, 'TenantRegistrationDetailPage');
+const TenantRegistrationPrintPage = lazyPage(leasing, 'TenantRegistrationPrintPage');
+const SecurityDirectoryPage = lazyPage(leasing, 'SecurityDirectoryPage');
+
+// Billing & Payments
+const billing = () => import('@/features/billing');
+const ServiceChargeRuleDirectoryPage = lazyPage(billing, 'ServiceChargeRuleDirectoryPage');
+const ServiceChargeRuleFormPage = lazyPage(billing, 'ServiceChargeRuleFormPage');
+const InvoiceListPage = lazyPage(billing, 'InvoiceListPage');
+const InvoiceDetailPage = lazyPage(billing, 'InvoiceDetailPage');
+const BatchBillingPage = lazyPage(billing, 'BatchBillingPage');
+const OutstandingInvoicesPage = lazyPage(billing, 'OutstandingInvoicesPage');
+
+const payments = () => import('@/features/payments');
+const PaymentListPage = lazyPage(payments, 'PaymentListPage');
+const RecordPaymentPage = lazyPage(payments, 'RecordPaymentPage');
+const PaymentDetailPage = lazyPage(payments, 'PaymentDetailPage');
+const ResidentLedgerPage = lazyPage(payments, 'ResidentLedgerPage');
+const FinancialSummaryReportPage = lazyPage(payments, 'FinancialSummaryReportPage');
+const ReceivablesAgeingReportPage = lazyPage(payments, 'ReceivablesAgeingReportPage');
+
+// Utilities
+const utilities = () => import('@/features/utilities');
+const MeterDirectoryPage = lazyPage(utilities, 'MeterDirectoryPage');
+const ReadingRegisterPage = lazyPage(utilities, 'ReadingRegisterPage');
+const ReadingCapturePage = lazyPage(utilities, 'ReadingCapturePage');
+const ReadingDetailPage = lazyPage(utilities, 'ReadingDetailPage');
+const RatePlanDirectoryPage = lazyPage(utilities, 'RatePlanDirectoryPage');
+const RatePlanFormPage = lazyPage(utilities, 'RatePlanFormPage');
+const ReadingStatusReportPage = lazyPage(utilities, 'ReadingStatusReportPage');
+const ConsumptionHistoryReportPage = lazyPage(utilities, 'ConsumptionHistoryReportPage');
+const ConsumptionSummaryReportPage = lazyPage(utilities, 'ConsumptionSummaryReportPage');
+
+// Facilities (amenities)
+const amenities = () => import('@/features/amenities');
+const BookingCalendarPage = lazyPage(amenities, 'BookingCalendarPage');
+const BookingListPage = lazyPage(amenities, 'BookingListPage');
+const BookingFormPage = lazyPage(amenities, 'BookingFormPage');
+const BookingDetailsPage = lazyPage(amenities, 'BookingDetailsPage');
+const PoolAccessPage = lazyPage(amenities, 'PoolAccessPage');
+const CurrentOccupancyPage = lazyPage(amenities, 'CurrentOccupancyPage');
+const UsageHistoryPage = lazyPage(amenities, 'UsageHistoryPage');
+const FacilitySettingsPage = lazyPage(amenities, 'FacilitySettingsPage');
+const FacilityUtilizationReportPage = lazyPage(amenities, 'FacilityUtilizationReportPage');
+const BookingRevenueReportPage = lazyPage(amenities, 'BookingRevenueReportPage');
+const PoolDailyUsageReportPage = lazyPage(amenities, 'PoolDailyUsageReportPage');
+
+// Operations
+const operations = () => import('@/features/operations');
+const GeneratorLogPage = lazyPage(operations, 'GeneratorLogPage');
+const GeneratorFuelLogPage = lazyPage(operations, 'GeneratorFuelLogPage');
+const GeneratorMaintenancePage = lazyPage(operations, 'GeneratorMaintenancePage');
+const GeneratorReportsPage = lazyPage(operations, 'GeneratorReportsPage');
+const CylinderPurchaseListPage = lazyPage(operations, 'CylinderPurchaseListPage');
+const CylinderStockPage = lazyPage(operations, 'CylinderStockPage');
+const CylinderConsumptionPage = lazyPage(operations, 'CylinderConsumptionPage');
+const SupplierComparisonPage = lazyPage(operations, 'SupplierComparisonPage');
+
+// Payroll & Admin
+const payroll = () => import('@/features/payroll');
+const StaffRosterPage = lazyPage(payroll, 'StaffRosterPage');
+const StaffMemberFormPage = lazyPage(payroll, 'StaffMemberFormPage');
+const AttendanceRegisterPage = lazyPage(payroll, 'AttendanceRegisterPage');
+const CurrentlyPresentStaffPage = lazyPage(payroll, 'CurrentlyPresentStaffPage');
+
+const identity = () => import('@/features/identity');
+const UsersPage = lazyPage(identity, 'UsersPage');
+const RolePermissionMatrixPage = lazyPage(identity, 'RolePermissionMatrixPage');
+
+const CreateTenantPage = lazyPage(() => import('@/features/tenancy'), 'CreateTenantPage');
+
+// Metronic template demo/scaffold pages — reachable by direct URL only (no live menu link, see
+// UX-6 cleanup discovery), kept per governance but not worth their weight in the main bundle.
+const Demo1DarkSidebarPage = lazyPage(() => import('@/pages/dashboards'), 'Demo1DarkSidebarPage');
+
+const account = () => import('@/pages/account');
+const AccountGetStartedPage = lazyPage(account, 'AccountGetStartedPage');
+const AccountUserProfilePage = lazyPage(account, 'AccountUserProfilePage');
+const AccountCompanyProfilePage = lazyPage(account, 'AccountCompanyProfilePage');
+const AccountSettingsSidebarPage = lazyPage(account, 'AccountSettingsSidebarPage');
+const AccountSettingsEnterprisePage = lazyPage(account, 'AccountSettingsEnterprisePage');
+const AccountSettingsPlainPage = lazyPage(account, 'AccountSettingsPlainPage');
+const AccountSettingsModalPage = lazyPage(account, 'AccountSettingsModalPage');
+const AccountBasicPage = lazyPage(account, 'AccountBasicPage');
+const AccountEnterprisePage = lazyPage(account, 'AccountEnterprisePage');
+const AccountPlansPage = lazyPage(account, 'AccountPlansPage');
+const AccountHistoryPage = lazyPage(account, 'AccountHistoryPage');
+const AccountSecurityGetStartedPage = lazyPage(account, 'AccountSecurityGetStartedPage');
+const AccountOverviewPage = lazyPage(account, 'AccountOverviewPage');
+const AccountAllowedIPAddressesPage = lazyPage(account, 'AccountAllowedIPAddressesPage');
+const AccountPrivacySettingsPage = lazyPage(account, 'AccountPrivacySettingsPage');
+const AccountDeviceManagementPage = lazyPage(account, 'AccountDeviceManagementPage');
+const AccountBackupAndRecoveryPage = lazyPage(account, 'AccountBackupAndRecoveryPage');
+const AccountCurrentSessionsPage = lazyPage(account, 'AccountCurrentSessionsPage');
+const AccountSecurityLogPage = lazyPage(account, 'AccountSecurityLogPage');
+const AccountTeamsStarterPage = lazyPage(account, 'AccountTeamsStarterPage');
+const AccountTeamsPage = lazyPage(account, 'AccountTeamsPage');
+const AccountTeamInfoPage = lazyPage(account, 'AccountTeamInfoPage');
+const AccountMembersStarterPage = lazyPage(account, 'AccountMembersStarterPage');
+const AccountTeamMembersPage = lazyPage(account, 'AccountTeamMembersPage');
+const AccountImportMembersPage = lazyPage(account, 'AccountImportMembersPage');
+const AccountRolesPage = lazyPage(account, 'AccountRolesPage');
+const AccountPermissionsTogglePage = lazyPage(account, 'AccountPermissionsTogglePage');
+const AccountPermissionsCheckPage = lazyPage(account, 'AccountPermissionsCheckPage');
+const AccountIntegrationsPage = lazyPage(account, 'AccountIntegrationsPage');
+const AccountNotificationsPage = lazyPage(account, 'AccountNotificationsPage');
+const AccountApiKeysPage = lazyPage(account, 'AccountApiKeysPage');
+const AccountAppearancePage = lazyPage(account, 'AccountAppearancePage');
+const AccountInviteAFriendPage = lazyPage(account, 'AccountInviteAFriendPage');
+const AccountActivityPage = lazyPage(account, 'AccountActivityPage');
+
+const publicProfile = () => import('@/pages/public-profile');
+const ProfileDefaultPage = lazyPage(publicProfile, 'ProfileDefaultPage');
+const ProfileCreatorPage = lazyPage(publicProfile, 'ProfileCreatorPage');
+const ProfileCompanyPage = lazyPage(publicProfile, 'ProfileCompanyPage');
+const ProfileNFTPage = lazyPage(publicProfile, 'ProfileNFTPage');
+const ProfileBloggerPage = lazyPage(publicProfile, 'ProfileBloggerPage');
+const ProfileCRMPage = lazyPage(publicProfile, 'ProfileCRMPage');
+const ProfileGamerPage = lazyPage(publicProfile, 'ProfileGamerPage');
+const ProfileFeedsPage = lazyPage(publicProfile, 'ProfileFeedsPage');
+const ProfilePlainPage = lazyPage(publicProfile, 'ProfilePlainPage');
+const ProfileModalPage = lazyPage(publicProfile, 'ProfileModalPage');
+const ProjectColumn3Page = lazyPage(publicProfile, 'ProjectColumn3Page');
+const ProjectColumn2Page = lazyPage(publicProfile, 'ProjectColumn2Page');
+const ProfileWorksPage = lazyPage(publicProfile, 'ProfileWorksPage');
+const ProfileTeamsPage = lazyPage(publicProfile, 'ProfileTeamsPage');
+const ProfileNetworkPage = lazyPage(publicProfile, 'ProfileNetworkPage');
+const ProfileActivityPage = lazyPage(publicProfile, 'ProfileActivityPage');
+const CampaignsCardPage = lazyPage(publicProfile, 'CampaignsCardPage');
+const CampaignsListPage = lazyPage(publicProfile, 'CampaignsListPage');
+const ProfileEmptyPage = lazyPage(publicProfile, 'ProfileEmptyPage');
 
 export function AppRoutingSetup() {
   return (
@@ -379,97 +370,12 @@ export function AppRoutingSetup() {
           />
           <Route path="/account/activity" element={<AccountActivityPage />} />
           <Route
-            path="/network/get-started"
-            element={<NetworkGetStartedPage />}
-          />
-          <Route
-            path="/network/user-cards/mini-cards"
-            element={<NetworkMiniCardsPage />}
-          />
-          <Route
-            path="/network/user-cards/team-crew"
-            element={<NetworkUserCardsTeamCrewPage />}
-          />
-          <Route
-            path="/network/user-cards/author"
-            element={<NetworkAuthorPage />}
-          />
-          <Route path="/network/user-cards/nft" element={<NetworkNFTPage />} />
-          <Route
-            path="/network/user-cards/social"
-            element={<NetworkSocialPage />}
-          />
-          <Route
-            path="/network/user-table/team-crew"
-            element={<NetworkUserTableTeamCrewPage />}
-          />
-          <Route
-            path="/network/user-table/app-roster"
-            element={<NetworkAppRosterPage />}
-          />
-          <Route
-            path="/network/user-table/market-authors"
-            element={<NetworkMarketAuthorsPage />}
-          />
-          <Route
-            path="/network/user-table/saas-users"
-            element={<NetworkSaasUsersPage />}
-          />
-          <Route
-            path="/network/user-table/store-clients"
-            element={<NetworkStoreClientsPage />}
-          />
-          <Route
-            path="/network/user-table/visitors"
-            element={<NetworkVisitorsPage />}
-          />
-          <Route
             path="/auth/welcome-message"
             element={<AuthWelcomeMessagePage />}
           />
           <Route
             path="/auth/account-deactivated"
             element={<AuthAccountDeactivatedPage />}
-          />
-          <Route path="/store-client/home" element={<StoreClientPage />} />
-          <Route
-            path="/store-client/search-results-grid"
-            element={<SearchResultsGridPage />}
-          />
-          <Route
-            path="/store-client/search-results-list"
-            element={<SearchResultsListPage />}
-          />
-          <Route
-            path="/store-client/product-details"
-            element={<ProductDetailsPage />}
-          />
-          <Route path="/store-client/wishlist" element={<WishlistPage />} />
-          <Route
-            path="/store-client/checkout/order-summary"
-            element={<OrderSummaryPage />}
-          />
-          <Route
-            path="/store-client/checkout/shipping-info"
-            element={<ShippingInfoPage />}
-          />
-          <Route
-            path="/store-client/checkout/payment-method"
-            element={<PaymentMethodPage />}
-          />
-          <Route
-            path="/store-client/checkout/order-placed"
-            element={<OrderPlacedPage />}
-          />
-          <Route path="/store-client/my-orders" element={<MyOrdersPage />} />
-          <Route
-            path="/store-client/order-receipt"
-            element={<OrderReceiptPage />}
-          />
-          <Route path="/store-admin/dashboard" element={<DashboardPage />} />
-          <Route
-            path="/store-admin/inventory/all-products"
-            element={<AllProductsPage />}
           />
           <Route path="/auth/get-started" element={<AccountGetStartedPage />} />
           <Route
@@ -1116,8 +1022,22 @@ export function AppRoutingSetup() {
       </Route>
       <Route path="error/*" element={<ErrorRouting />} />
       <Route element={<ClassicLayout />}>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <LoginPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <RegisterPage />
+            </Suspense>
+          }
+        />
       </Route>
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
