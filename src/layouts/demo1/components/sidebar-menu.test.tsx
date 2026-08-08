@@ -121,10 +121,12 @@ describe('SidebarMenu — Operations group (Slice H)', () => {
     renderWithProviders(<SidebarMenu />, {
       auth: {
         user: makeUser([
+          'generator.view',
           'generator.operation.manage',
           'generator.fuel.manage',
           'generator.maintenance.manage',
           'generator.report',
+          'gascylinder.view',
           'gascylinder.purchase.manage',
           'gascylinder.stock.manage',
           'gascylinder.report',

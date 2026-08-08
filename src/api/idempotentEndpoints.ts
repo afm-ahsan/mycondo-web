@@ -1,8 +1,11 @@
 import { baseApi } from './baseApi';
 import type {
+  BookingDto,
+  CancelBookingRequest,
   CorrectReadingRequest,
   GenerateInvoiceBatchCommand,
   GenerateInvoiceBatchResultDto,
+  InspectBookingRequest,
   InvoiceDto,
   LedgerEntryDto,
   PaymentDto,
@@ -16,9 +19,12 @@ import type {
 const IDEMPOTENCY_HEADER = 'X-Idempotency-Key';
 
 /**
- * Hand-authored siblings for the 7 backend endpoints that require `X-Idempotency-Key`
+ * Hand-authored siblings for the 11 backend endpoints that require `X-Idempotency-Key`
  * (RecordPayment, ReversePayment, GenerateInvoiceBatch, VoidInvoice, RecordOpeningBalance,
- * BillReading, CorrectReading — see ADR/UX-3 plan "Idempotency Design"). `@rtk-query/codegen-openapi`
+ * BillReading, CorrectReading — see ADR/UX-3 plan "Idempotency Design"; plus ConfirmBookingPayment,
+ * InspectBooking, CancelBooking, MarkBookingNoShow — added in UX-4 after auditing every
+ * Facilities/Operations mutation endpoint for `.RequireIdempotencyKey()` and finding these 4 were the
+ * only ones requiring it, none of which the Web was sending — see UX-4 discovery report). `@rtk-query/codegen-openapi`
  * has no per-call mechanism for a header value supplied outside the typed command payload, and these
  * commands must never carry the key as an extra body field (that would corrupt the backend's own
  * request-hash check). Injected into the SAME `baseApi` the generated file itself uses
@@ -144,6 +150,63 @@ export const idempotentApi = baseApi.injectEndpoints({
       // case, never a wrong one — the safe default per "financial correctness over speed".
       invalidatesTags: ['Readings', 'Invoices', 'ResidentAccounts'],
     }),
+
+    confirmBookingPaymentIdempotent: build.mutation<BookingDto, { id: string; idempotencyKey: string }>({
+      query: ({ id, idempotencyKey }) => ({
+        url: `/api/v1/facility-bookings/${id}/confirm-payment`,
+        method: 'POST',
+        headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+      }),
+      // ConfirmBookingPaymentCommandHandler bills the booking-charge invoice (ResidentReceivable) and
+      // posts the deposit-collection ledger entry in the same transaction — confirmed by reading the
+      // handler directly. Affects the resident's invoices/balance, not just the booking record.
+      invalidatesTags: ['Facility Bookings', 'Invoices', 'ResidentAccounts'],
+    }),
+
+    inspectBookingIdempotent: build.mutation<
+      BookingDto,
+      { id: string; inspectBookingRequest: InspectBookingRequest; idempotencyKey: string }
+    >({
+      query: ({ id, inspectBookingRequest, idempotencyKey }) => ({
+        url: `/api/v1/facility-bookings/${id}/inspect`,
+        method: 'POST',
+        body: inspectBookingRequest,
+        headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+      }),
+      // InspectBookingCommandHandler settles the held deposit (RefundableDepositsHeld ->
+      // CashOrBank/AssociationRevenue) — confirmed by reading the handler directly. None of those
+      // account types are ResidentReceivable, so this never affects a resident's own ledger/balance
+      // view; only the booking record itself changes.
+      invalidatesTags: ['Facility Bookings'],
+    }),
+
+    cancelBookingIdempotent: build.mutation<
+      BookingDto,
+      { id: string; cancelBookingRequest: CancelBookingRequest; idempotencyKey: string }
+    >({
+      query: ({ id, cancelBookingRequest, idempotencyKey }) => ({
+        url: `/api/v1/facility-bookings/${id}/cancel`,
+        method: 'POST',
+        body: cancelBookingRequest,
+        headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+      }),
+      // CancelBookingCommandHandler settles the held deposit the same way InspectBooking does
+      // (RefundableDepositsHeld -> CashOrBank/AssociationRevenue only) — confirmed by reading the
+      // handler directly. No ResidentReceivable line, so no ResidentAccounts effect.
+      invalidatesTags: ['Facility Bookings'],
+    }),
+
+    markBookingNoShowIdempotent: build.mutation<BookingDto, { id: string; idempotencyKey: string }>({
+      query: ({ id, idempotencyKey }) => ({
+        url: `/api/v1/facility-bookings/${id}/mark-no-show`,
+        method: 'POST',
+        headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+      }),
+      // MarkBookingNoShowCommandHandler settles the held deposit identically to Cancel's
+      // within-deadline path (RefundableDepositsHeld -> CashOrBank/AssociationRevenue only) —
+      // confirmed by reading the handler directly. No ResidentAccounts effect.
+      invalidatesTags: ['Facility Bookings'],
+    }),
   }),
   overrideExisting: false,
 });
@@ -156,4 +219,8 @@ export const {
   useRecordOpeningBalanceIdempotentMutation,
   useBillReadingIdempotentMutation,
   useCorrectReadingIdempotentMutation,
+  useConfirmBookingPaymentIdempotentMutation,
+  useInspectBookingIdempotentMutation,
+  useCancelBookingIdempotentMutation,
+  useMarkBookingNoShowIdempotentMutation,
 } = idempotentApi;

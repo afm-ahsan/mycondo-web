@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -72,7 +72,7 @@ describe('CylinderPurchaseListPage', () => {
     expect(screen.getAllByText(/30,200/).length).toBeGreaterThan(0);
   });
 
-  it('approves a pending purchase', async () => {
+  it('approves a pending purchase only after confirmation', async () => {
     let approveCalled = false;
     renderPage(purchase({ approvalStatus: 'PendingApproval' }));
     server.use(
@@ -85,7 +85,35 @@ describe('CylinderPurchaseListPage', () => {
     const user = userEvent.setup();
     await user.click(await screen.findByRole('button', { name: 'Approve' }));
 
+    // Clicking the row action opens a confirmation — it must not fire immediately.
+    expect(approveCalled).toBe(false);
+    expect(screen.getByText('Approve this purchase?')).toBeInTheDocument();
+    expect(screen.getAllByText('INV-001').length).toBeGreaterThan(0);
+
+    const dialog = screen.getByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Approve' }));
+
     await waitFor(() => expect(approveCalled).toBe(true));
+  });
+
+  it('marks an approved, unpaid purchase as paid only after confirmation', async () => {
+    let markPaidCalled = false;
+    renderPage(purchase({ approvalStatus: 'Approved', paymentStatus: 'Unpaid' }));
+    server.use(
+      http.post(`${API_BASE}/api/v1/cylinder-purchases/purchase-1/mark-paid`, () => {
+        markPaidCalled = true;
+        return HttpResponse.json(purchase({ approvalStatus: 'Approved', paymentStatus: 'Paid' }));
+      }),
+    );
+
+    const user = userEvent.setup();
+    await user.click(await screen.findByRole('button', { name: 'Mark Paid' }));
+
+    expect(markPaidCalled).toBe(false);
+    const dialog = screen.getByRole('alertdialog');
+    await user.click(within(dialog).getByRole('button', { name: 'Mark Paid' }));
+
+    await waitFor(() => expect(markPaidCalled).toBe(true));
   });
 
   it('rejects a pending purchase with a reason', async () => {

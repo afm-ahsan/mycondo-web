@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -17,6 +18,7 @@ import {
 } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -24,10 +26,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import {
   useBlackoutDates,
   useCreateBlackoutDate,
@@ -42,6 +49,9 @@ import { blackoutDateSchema, type BlackoutDateSchemaType } from '../../schemas/b
 import { facilitySchema, type FacilitySchemaType } from '../../schemas/facilitySchema';
 import type { FacilityDto } from '@/api/generated/mycondoApi';
 
+const SETTINGS_FILTER_DEFAULTS = { type: '__all__' };
+const SETTINGS_COLUMN_COUNT = 5;
+
 /**
  * Manages both Community Hall and Swimming Pool facilities — the menu tree only has a
  * "Closures/Settings" slot under Swimming Pool, but Facility is one backend entity for both types, so
@@ -49,28 +59,35 @@ import type { FacilityDto } from '@/api/generated/mycondoApi';
  * `AskUserQuestion` before this slice was built, see Slice G plan §"Two placement decisions").
  */
 export function FacilitySettingsPage() {
-  const [typeFilter, setTypeFilter] = useState<string>('__all__');
+  const [filters, setFilters] = useUrlFilters(SETTINGS_FILTER_DEFAULTS);
   const [editTarget, setEditTarget] = useState<FacilityDto | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [blackoutTarget, setBlackoutTarget] = useState<FacilityDto | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<FacilityDto | null>(null);
 
   const { data, isFetching, refetch } = useFacilities({
-    facilityType: typeFilter === '__all__' ? undefined : typeFilter,
+    facilityType: filters.type === '__all__' ? undefined : filters.type,
     page: 1,
     pageSize: 100,
   });
-  const [deactivate] = useDeactivateFacility();
+  const [deactivate, { isLoading: isDeactivating }] = useDeactivateFacility();
   const [reactivate] = useReactivateFacility();
 
-  async function toggleActive(facility: FacilityDto) {
+  async function handleDeactivate() {
+    if (!deactivateTarget) return;
     try {
-      if (facility.isActive) {
-        await deactivate({ id: facility.facilityId }).unwrap();
-        toast.success(`${facility.name} deactivated.`);
-      } else {
-        await reactivate({ id: facility.facilityId }).unwrap();
-        toast.success(`${facility.name} reactivated.`);
-      }
+      await deactivate({ id: deactivateTarget.facilityId }).unwrap();
+      toast.success(`${deactivateTarget.name} deactivated.`);
+      setDeactivateTarget(null);
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    }
+  }
+
+  async function handleReactivate(facility: FacilityDto) {
+    try {
+      await reactivate({ id: facility.facilityId }).unwrap();
+      toast.success(`${facility.name} reactivated.`);
     } catch (err) {
       toast.error(toUserMessage(err));
     }
@@ -96,7 +113,7 @@ export function FacilitySettingsPage() {
             <CardTitle>Facilities</CardTitle>
           </CardHeading>
           <CardToolbar>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <Select value={filters.type} onValueChange={(type) => setFilters({ type })}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
@@ -109,47 +126,62 @@ export function FacilitySettingsPage() {
           </CardToolbar>
         </CardHeader>
         <CardTable>
-          {isFetching ? (
-            <p className="p-6 text-sm text-muted-foreground">Loading…</p>
-          ) : !data || data.items.length === 0 ? (
-            <p className="p-6 text-sm text-muted-foreground">No facilities configured yet.</p>
+          {!isFetching && (!data || data.items.length === 0) ? (
+            <EmptyState title="No facilities configured yet" description="Create a Community Hall or Swimming Pool facility to get started." />
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b text-muted-foreground">
-                  <th className="p-3 text-start">Name</th>
-                  <th className="p-3 text-start">Type</th>
-                  <th className="p-3 text-start">Capacity</th>
-                  <th className="p-3 text-start">Status</th>
-                  <th className="p-3 text-start" />
-                </tr>
-              </thead>
-              <tbody>
-                {data.items.map((facility) => (
-                  <tr key={facility.facilityId} className="border-b last:border-0">
-                    <td className="p-3 font-medium">{facility.name}</td>
-                    <td className="p-3">{facility.facilityType}</td>
-                    <td className="p-3">{facility.capacity}</td>
-                    <td className="p-3">{facility.isActive ? 'Active' : 'Inactive'}</td>
-                    <td className="p-3">
-                      <RequirePermission permission={PERMISSIONS.facility.manage}>
-                        <div className="flex gap-2">
-                          <Button size="sm" variant="outline" onClick={() => setEditTarget(facility)}>
-                            Edit
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => setBlackoutTarget(facility)}>
-                            Closures
-                          </Button>
-                          <Button size="sm" variant="outline" onClick={() => toggleActive(facility)}>
-                            {facility.isActive ? 'Deactivate' : 'Reactivate'}
-                          </Button>
-                        </div>
-                      </RequirePermission>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <ScrollArea>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Capacity</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {isFetching ? (
+                    <TableSkeleton columns={SETTINGS_COLUMN_COUNT} />
+                  ) : (
+                    (data?.items ?? []).map((facility) => (
+                      <TableRow key={facility.facilityId}>
+                        <TableCell className="font-medium">{facility.name}</TableCell>
+                        <TableCell>{facility.facilityType}</TableCell>
+                        <TableCell>{facility.capacity}</TableCell>
+                        <TableCell>
+                          <Badge variant={facility.isActive ? 'success' : 'secondary'} appearance="light">
+                            {facility.isActive ? 'Active' : 'Inactive'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <RequirePermission permission={PERMISSIONS.facility.manage}>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => setEditTarget(facility)}>
+                                Edit
+                              </Button>
+                              <Button size="sm" variant="outline" onClick={() => setBlackoutTarget(facility)}>
+                                Closures
+                              </Button>
+                              {facility.isActive ? (
+                                <Button size="sm" variant="outline" onClick={() => setDeactivateTarget(facility)}>
+                                  Deactivate
+                                </Button>
+                              ) : (
+                                <Button size="sm" variant="outline" onClick={() => handleReactivate(facility)}>
+                                  Reactivate
+                                </Button>
+                              )}
+                            </div>
+                          </RequirePermission>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           )}
         </CardTable>
       </Card>
@@ -175,6 +207,23 @@ export function FacilitySettingsPage() {
         facility={blackoutTarget}
         open={blackoutTarget !== null}
         onOpenChange={(open) => !open && setBlackoutTarget(null)}
+      />
+      <ConfirmActionDialog
+        open={deactivateTarget !== null}
+        onOpenChange={(open) => !open && setDeactivateTarget(null)}
+        title="Deactivate this facility?"
+        description={
+          deactivateTarget && (
+            <>
+              Deactivating <strong>{deactivateTarget.name}</strong> blocks all future bookings/access until it is reactivated. Existing
+              bookings/sessions are not affected.
+            </>
+          )
+        }
+        confirmLabel="Deactivate"
+        loadingLabel="Deactivating..."
+        isLoading={isDeactivating}
+        onConfirm={handleDeactivate}
       />
     </div>
   );

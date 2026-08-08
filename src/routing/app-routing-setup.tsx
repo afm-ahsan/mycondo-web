@@ -4,9 +4,12 @@ import {
   BookingDetailsPage,
   BookingFormPage,
   BookingListPage,
+  BookingRevenueReportPage,
   CurrentOccupancyPage,
   FacilitySettingsPage,
+  FacilityUtilizationReportPage,
   PoolAccessPage,
+  PoolDailyUsageReportPage,
   UsageHistoryPage,
 } from '@/features/amenities';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
@@ -942,9 +945,33 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/facilities/reports/utilization"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.facility} fallback={<AccessDeniedNotice />}>
+                <FacilityUtilizationReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/reports/booking-revenue"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.facility} fallback={<AccessDeniedNotice />}>
+                <BookingRevenueReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/facilities/reports/pool-daily-usage"
+            element={
+              <RequirePermission permission={PERMISSIONS.report.facility} fallback={<AccessDeniedNotice />}>
+                <PoolDailyUsageReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/operations/generator/log"
             element={
-              <RequirePermission permission={PERMISSIONS.generator.operationManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.generator.view} fallback={<AccessDeniedNotice />}>
                 <GeneratorLogPage />
               </RequirePermission>
             }
@@ -952,7 +979,7 @@ export function AppRoutingSetup() {
           <Route
             path="/operations/generator/fuel"
             element={
-              <RequirePermission permission={PERMISSIONS.generator.fuelManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.generator.view} fallback={<AccessDeniedNotice />}>
                 <GeneratorFuelLogPage />
               </RequirePermission>
             }
@@ -960,7 +987,7 @@ export function AppRoutingSetup() {
           <Route
             path="/operations/generator/maintenance"
             element={
-              <RequirePermission permission={PERMISSIONS.generator.maintenanceManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.generator.view} fallback={<AccessDeniedNotice />}>
                 <GeneratorMaintenancePage />
               </RequirePermission>
             }
@@ -976,7 +1003,7 @@ export function AppRoutingSetup() {
           <Route
             path="/operations/gas-cylinders/purchases"
             element={
-              <RequirePermission permission={PERMISSIONS.gasCylinder.purchaseManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.gasCylinder.view} fallback={<AccessDeniedNotice />}>
                 <CylinderPurchaseListPage />
               </RequirePermission>
             }
@@ -984,7 +1011,7 @@ export function AppRoutingSetup() {
           <Route
             path="/operations/gas-cylinders/stock"
             element={
-              <RequirePermission permission={PERMISSIONS.gasCylinder.stockManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.gasCylinder.view} fallback={<AccessDeniedNotice />}>
                 <CylinderStockPage />
               </RequirePermission>
             }
@@ -992,7 +1019,7 @@ export function AppRoutingSetup() {
           <Route
             path="/operations/gas-cylinders/consumption"
             element={
-              <RequirePermission permission={PERMISSIONS.gasCylinder.stockManage} fallback={<AccessDeniedNotice />}>
+              <RequirePermission permission={PERMISSIONS.gasCylinder.report} fallback={<AccessDeniedNotice />}>
                 <CylinderConsumptionPage />
               </RequirePermission>
             }

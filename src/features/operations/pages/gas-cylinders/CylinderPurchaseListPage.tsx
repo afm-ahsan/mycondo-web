@@ -5,7 +5,8 @@ import {
   type PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus, Users } from 'lucide-react';
+import { AlertCircle, Plus, Users } from 'lucide-react';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,13 +20,18 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { SupplierSelect } from '@/components/shared/SupplierSelect';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
-import { formatDate } from '@/lib/helpers';
+import { formatDate, formatNumber } from '@/lib/helpers';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { toUserMessage } from '@/api/errors';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import {
   useApproveCylinderPurchase,
   useCreateSupplier,
@@ -36,24 +42,36 @@ import {
   useSuppliers,
 } from '../../api/gasCylinderApi';
 import { CylinderPurchaseDialog } from '../../components/CylinderPurchaseDialog';
+import { RatePerKg } from '../../components/RatePerKg';
 import { SupplierDialog } from '../../components/SupplierDialog';
-import { ReasonDialog } from '../../components/ReasonDialog';
+import { ReasonDialog } from '@/components/shared/ReasonDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt, formatNumber } from '@/lib/helpers';
 import { cylinderPurchaseApprovalStatusToneMap, cylinderPurchasePaymentStatusToneMap, type CylinderPurchaseApprovalStatus, type CylinderPurchasePaymentStatus } from '../../lib/status';
 import type { CylinderPurchaseDto } from '@/api/generated/mycondoApi';
 import type { CylinderPurchaseSchemaType, SupplierSchemaType } from '../../schemas/gasCylinderSchema';
 
+const PURCHASES_FILTER_DEFAULTS = { supplierId: '', page: '1', pageSize: '10' };
+
 export function CylinderPurchaseListPage() {
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [supplierId, setSupplierId] = useState<string | undefined>();
+  const [filters, setFilters] = useUrlFilters(PURCHASES_FILTER_DEFAULTS);
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
+    pageSize: Number(filters.pageSize) || 10,
+  };
   const [purchaseDialogOpen, setPurchaseDialogOpen] = useState(false);
   const [supplierDialogOpen, setSupplierDialogOpen] = useState(false);
   const [rejectingPurchaseId, setRejectingPurchaseId] = useState<string | null>(null);
+  const [approveTarget, setApproveTarget] = useState<CylinderPurchaseDto | null>(null);
+  const [markPaidTarget, setMarkPaidTarget] = useState<CylinderPurchaseDto | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data, isFetching, isError } = useCylinderPurchases({
-    supplierId,
+  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
+    const next = updater(pagination);
+    setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
+  }
+
+  const { data, isFetching, isError, refetch } = useCylinderPurchases({
+    supplierId: filters.supplierId || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
   });
@@ -108,10 +126,12 @@ export function CylinderPurchaseListPage() {
     }
   }
 
-  async function handleApprove(id: string) {
+  async function handleApprove() {
+    if (!approveTarget) return;
     setErrorMessage(null);
     try {
-      await approvePurchase({ id }).unwrap();
+      await approvePurchase({ id: approveTarget.cylinderPurchaseId }).unwrap();
+      setApproveTarget(null);
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));
     }
@@ -128,10 +148,12 @@ export function CylinderPurchaseListPage() {
     }
   }
 
-  async function handleMarkPaid(id: string) {
+  async function handleMarkPaid() {
+    if (!markPaidTarget) return;
     setErrorMessage(null);
     try {
-      await markPaid({ id }).unwrap();
+      await markPaid({ id: markPaidTarget.cylinderPurchaseId }).unwrap();
+      setMarkPaidTarget(null);
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));
     }
@@ -144,10 +166,10 @@ export function CylinderPurchaseListPage() {
     { id: 'cylinderType', header: 'Cylinder type', cell: ({ row }) => row.original.cylinderType },
     { id: 'quantity', header: 'Quantity', cell: ({ row }) => row.original.quantity },
     { id: 'weight', header: 'Weight (kg)', cell: ({ row }) => formatNumber(row.original.cylinderWeightKg) },
-    { id: 'rate', header: 'Rate', cell: ({ row }) => formatBdt(row.original.ratePerCylinder) },
+    { id: 'rate', header: 'Rate', cell: ({ row }) => <MoneyDisplay amount={row.original.ratePerCylinder} /> },
     { id: 'totalKg', header: 'Total kg', cell: ({ row }) => formatNumber(row.original.totalKg) },
-    { id: 'unitPricePerKg', header: 'Unit price/kg', cell: ({ row }) => formatBdt(row.original.unitPricePerKg) },
-    { id: 'grandTotal', header: 'Amount', cell: ({ row }) => formatBdt(row.original.grandTotal) },
+    { id: 'unitPricePerKg', header: 'Unit price', cell: ({ row }) => <RatePerKg amount={row.original.unitPricePerKg} /> },
+    { id: 'grandTotal', header: 'Amount', cell: ({ row }) => <MoneyDisplay amount={row.original.grandTotal} /> },
     {
       id: 'paymentStatus',
       header: 'Payment',
@@ -167,7 +189,7 @@ export function CylinderPurchaseListPage() {
           <div className="flex gap-2">
             {purchase.approvalStatus === 'PendingApproval' && (
               <RequirePermission permission={PERMISSIONS.gasCylinder.approve}>
-                <Button size="sm" variant="outline" disabled={isApproving} onClick={() => handleApprove(purchase.cylinderPurchaseId)}>
+                <Button size="sm" variant="outline" onClick={() => setApproveTarget(purchase)}>
                   Approve
                 </Button>
                 <Button size="sm" variant="outline" onClick={() => setRejectingPurchaseId(purchase.cylinderPurchaseId)}>
@@ -177,7 +199,7 @@ export function CylinderPurchaseListPage() {
             )}
             {purchase.approvalStatus === 'Approved' && purchase.paymentStatus === 'Unpaid' && (
               <RequirePermission permission={PERMISSIONS.gasCylinder.purchaseManage}>
-                <Button size="sm" variant="outline" disabled={isMarkingPaid} onClick={() => handleMarkPaid(purchase.cylinderPurchaseId)}>
+                <Button size="sm" variant="outline" onClick={() => setMarkPaidTarget(purchase)}>
                   Mark Paid
                 </Button>
               </RequirePermission>
@@ -195,7 +217,7 @@ export function CylinderPurchaseListPage() {
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
     state: { pagination },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -216,28 +238,46 @@ export function CylinderPurchaseListPage() {
         }
       />
 
-      {(isError || errorMessage) && (
-        <p className="text-destructive text-sm mb-2">{errorMessage ?? 'Failed to load purchases. Please try again.'}</p>
+      {errorMessage && (
+        <Alert variant="destructive" appearance="light" className="mb-2" onClose={() => setErrorMessage(null)}>
+          <AlertIcon>
+            <AlertCircle />
+          </AlertIcon>
+          <AlertTitle>{errorMessage}</AlertTitle>
+        </Alert>
       )}
 
-      <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No purchases yet." tableLayout={{ cellBorder: true }}>
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Purchases</CardTitle>
-            </CardHeading>
-            <CardToolbar>
-              <SupplierSelect value={supplierId} onValueChange={setSupplierId} placeholder="All suppliers" />
-            </CardToolbar>
-          </CardHeader>
-          <CardTable>
-            <DataGridTable />
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description="Failed to load purchases. Please try again." onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No purchases yet." tableLayout={{ cellBorder: true }}>
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Purchases</CardTitle>
+              </CardHeading>
+              <CardToolbar>
+                <SupplierSelect
+                  value={filters.supplierId || undefined}
+                  onValueChange={(id) => setFilters({ supplierId: id, page: '1' })}
+                  placeholder="All suppliers"
+                />
+              </CardToolbar>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <CylinderPurchaseDialog open={purchaseDialogOpen} onOpenChange={setPurchaseDialogOpen} isSubmitting={isRecording} onSubmit={handleRecordPurchase} />
       <SupplierDialog open={supplierDialogOpen} onOpenChange={setSupplierDialogOpen} isSubmitting={isCreatingSupplier} onSubmit={handleCreateSupplier} />
@@ -249,6 +289,41 @@ export function CylinderPurchaseListPage() {
         confirmVariant="destructive"
         isSubmitting={isRejecting}
         onConfirm={handleReject}
+      />
+      <ConfirmActionDialog
+        open={approveTarget !== null}
+        onOpenChange={(open) => !open && setApproveTarget(null)}
+        title="Approve this purchase?"
+        description={
+          approveTarget && (
+            <>
+              Approve invoice <strong>{approveTarget.invoiceNumber}</strong> from{' '}
+              <strong>{supplierNameById[approveTarget.supplierId] ?? 'this supplier'}</strong> for{' '}
+              <MoneyDisplay amount={approveTarget.grandTotal} />. This unlocks Mark Paid for the purchase.
+            </>
+          )
+        }
+        confirmLabel="Approve"
+        loadingLabel="Approving..."
+        isLoading={isApproving}
+        onConfirm={handleApprove}
+      />
+      <ConfirmActionDialog
+        open={markPaidTarget !== null}
+        onOpenChange={(open) => !open && setMarkPaidTarget(null)}
+        title="Mark this purchase as paid?"
+        description={
+          markPaidTarget && (
+            <>
+              Mark invoice <strong>{markPaidTarget.invoiceNumber}</strong> (<MoneyDisplay amount={markPaidTarget.grandTotal} />) as paid. This
+              cannot be undone from this screen.
+            </>
+          )
+        }
+        confirmLabel="Mark Paid"
+        loadingLabel="Saving..."
+        isLoading={isMarkingPaid}
+        onConfirm={handleMarkPaid}
       />
     </>
   );

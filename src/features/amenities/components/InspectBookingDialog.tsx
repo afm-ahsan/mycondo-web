@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { formatBdt } from '@/lib/helpers';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { inspectBookingSchema, type InspectBookingSchemaType } from '../schemas/bookingActionSchemas';
 
 interface InspectBookingDialogProps {
@@ -56,7 +56,7 @@ export function InspectBookingDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <p className="text-muted-foreground text-sm">Deposit held: {formatBdt(depositAmount)}</p>
+            <p className="text-muted-foreground text-sm">Deposit held: <MoneyDisplay amount={depositAmount} /></p>
             <FormField
               control={form.control}
               name="notes"
