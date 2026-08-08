@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ComponentProps } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { useGetApiV1DomesticWorkersQuery } from '@/api/generated/mycondoApi';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -25,6 +25,10 @@ interface WorkerSelectProps {
   onChange: (worker: WorkerSelectValue | null) => void;
   disabled?: boolean;
   placeholder?: string;
+  id?: string;
+  'aria-describedby'?: string;
+  'aria-invalid'?: ComponentProps<'button'>['aria-invalid'];
+  'aria-required'?: boolean;
 }
 
 /**
@@ -37,6 +41,10 @@ export function WorkerSelect({
   onChange,
   disabled,
   placeholder = 'Search by worker name or mobile…',
+  id,
+  'aria-describedby': ariaDescribedBy,
+  'aria-invalid': ariaInvalid,
+  'aria-required': ariaRequired,
 }: WorkerSelectProps) {
   const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -58,6 +66,10 @@ export function WorkerSelect({
           aria-expanded={open}
           disabled={disabled}
           className="w-full"
+          id={id}
+          aria-describedby={ariaDescribedBy}
+          aria-invalid={ariaInvalid}
+          aria-required={ariaRequired}
         >
           {value ? (
             <span className="truncate">

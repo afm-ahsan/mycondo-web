@@ -40,7 +40,7 @@ export function OperationsSummarySection() {
     <Card>
       <CardHeader>
         <CardHeading>
-          <CardTitle>Operations</CardTitle>
+          <CardTitle as="h2">Operations</CardTitle>
         </CardHeading>
       </CardHeader>
       <CardContent>

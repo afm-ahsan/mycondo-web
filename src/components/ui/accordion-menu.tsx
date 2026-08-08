@@ -221,6 +221,8 @@ function AccordionMenuItem({
     onClick?: React.MouseEventHandler<HTMLElement>;
   }) {
   const { classNames, selectedValue, matchPath, onItemClick } = React.useContext(AccordionMenuContext);
+  const isSelected = matchPath(props.value as string) || selectedValue === props.value;
+
   return (
     <AccordionPrimitive.Item className="flex" {...props}>
       <AccordionPrimitive.Header className="flex w-full">
@@ -236,19 +238,34 @@ function AccordionMenuItem({
             if (onClick) {
               onClick(e);
             }
-            e.preventDefault();
-          }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+
+            // With asChild, this trigger's props are merged directly onto a real interactive
+            // child (e.g. a react-router-dom <Link>) instead of wrapping it in a <button> —
+            // eliminates invalid nested-interactive markup and lets that child's own click
+            // handling (which already respects Ctrl/Cmd/middle-click to open in a new tab)
+            // run unobstructed. Without asChild there's no real anchor underneath, so this
+            // trigger is the only thing driving the (non-navigating) accordion toggle and
+            // preventDefault is still needed there.
+            if (!asChild) {
               e.preventDefault();
-              const target = e.currentTarget as HTMLElement;
-              const firstChild = target.firstElementChild as HTMLElement | null;
-              if (firstChild) {
-                firstChild.click();
-              }
             }
           }}
-          data-selected={matchPath(props.value as string) || selectedValue === props.value ? 'true' : undefined}
+          onKeyDown={
+            asChild
+              ? undefined
+              : (e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const target = e.currentTarget as HTMLElement;
+                    const firstChild = target.firstElementChild as HTMLElement | null;
+                    if (firstChild) {
+                      firstChild.click();
+                    }
+                  }
+                }
+          }
+          data-selected={isSelected ? 'true' : undefined}
+          aria-current={isSelected ? 'page' : undefined}
         >
           {children}
         </AccordionPrimitive.Trigger>

@@ -1,6 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { screen, waitFor } from '@testing-library/react';
+import { axe } from 'vitest-axe';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -106,6 +107,19 @@ describe('DashboardPage — permission gating', () => {
     expect(await screen.findByText('Operations')).toBeInTheDocument();
     expect(screen.getByText('Generator maintenance due')).toBeInTheDocument();
     expect(screen.queryByText('Gas cylinder stock')).not.toBeInTheDocument();
+  });
+});
+
+describe('DashboardPage — accessibility smoke', () => {
+  it('has no detectable axe violations with a full set of report permissions', async () => {
+    mockAllReportEndpoints();
+    const { container } = renderWithProviders(<DashboardPage />, {
+      auth: { user: makeUser(ALL_REPORT_PERMISSIONS), isInitialized: true },
+    });
+
+    await waitFor(() => expect(screen.getByText('Financial')).toBeInTheDocument());
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });
 

@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ColumnDef,
+  functionalUpdate,
   getCoreRowModel,
   type PaginationState,
+  type Updater,
   useReactTable,
 } from '@tanstack/react-table';
 import { CalendarDays, Plus } from 'lucide-react';
@@ -84,8 +86,8 @@ export function BookingListPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps -- only the settled event type should retrigger this
   }, [debouncedEventType]);
 
-  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
-    const next = updater(pagination);
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = functionalUpdate(updater, pagination);
     setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
   }
 
@@ -146,7 +148,7 @@ export function BookingListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Actions',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" asChild>
           <Link to={row.original.bookingId}>View</Link>
@@ -206,7 +208,7 @@ export function BookingListPage() {
         <Card>
           <CardHeader>
             <CardHeading>
-              <CardTitle>Bookings</CardTitle>
+              <CardTitle as="h2">Bookings</CardTitle>
             </CardHeading>
             <CardToolbar className="flex flex-wrap gap-2">
               <FacilitySelect

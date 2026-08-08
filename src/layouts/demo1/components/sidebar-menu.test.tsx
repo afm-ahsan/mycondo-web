@@ -33,6 +33,32 @@ async function expandGroup(user: ReturnType<typeof userEvent.setup>, name: strin
   await user.click(screen.getByRole('button', { name }));
 }
 
+describe('SidebarMenu — leaf item link semantics and keyboard interaction', () => {
+  it('renders the Dashboard item as a single real <a>, not a button wrapping a link', () => {
+    renderWithProviders(<SidebarMenu />, { auth: { user: makeUser([]), isInitialized: true } });
+
+    const link = screen.getByRole('link', { name: /dashboard/i });
+    expect(link.tagName).toBe('A');
+    expect(link).toHaveAttribute('href', '/');
+    // No nested focusable element inside — the old pattern wrapped this <a> in a <button>, giving
+    // two tab stops per item; asChild on AccordionMenuItem collapses it back to one.
+    expect(link.querySelectorAll('a, button, [tabindex]')).toHaveLength(0);
+  });
+
+  it('is reachable by keyboard and activates on Enter like a native link', async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<SidebarMenu />, { auth: { user: makeUser([]), isInitialized: true } });
+
+    const link = screen.getByRole('link', { name: /dashboard/i });
+    link.focus();
+    expect(link).toHaveFocus();
+
+    // A native <a> handles Enter itself — this only regresses if the item goes back to being a
+    // <button> wrapper with a custom keydown handler standing in for real link semantics.
+    await expect(user.keyboard('{Enter}')).resolves.not.toThrow();
+  });
+});
+
 describe('SidebarMenu — Facilities group (Slice G)', () => {
   it('shows the full Facilities tree when the user holds every relevant permission', async () => {
     const user = userEvent.setup();

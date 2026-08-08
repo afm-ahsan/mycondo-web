@@ -56,23 +56,35 @@ const useFormField = () => {
 
 type FormItemContextValue = {
   id: string;
+  required?: boolean;
 };
 
 const FormItemContext = React.createContext<FormItemContextValue>({} as FormItemContextValue);
 
-function FormItem({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+interface FormItemProps extends React.HTMLAttributes<HTMLDivElement> {
+  /**
+   * Explicit, caller-declared flag — never derived from the Zod schema at runtime (that
+   * introspection is unreliable across the different `.optional()`/`.refine()`/discriminated-union
+   * shapes used across this app's schemas). Set it when the field is genuinely required; it drives
+   * both the visual "*" on FormLabel and `aria-required` on FormControl's wrapped input.
+   */
+  required?: boolean;
+}
+
+function FormItem({ className, required, ...props }: FormItemProps) {
   const id = React.useId();
   const { error } = useFormField();
 
   return (
-    <FormItemContext.Provider value={{ id }}>
+    <FormItemContext.Provider value={{ id, required }}>
       <div data-slot="form-item" className={cn('flex flex-col gap-2.5', className)} data-invalid={!!error} {...props} />
     </FormItemContext.Provider>
   );
 }
 
-function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+function FormLabel({ className, children, ...props }: React.ComponentProps<typeof LabelPrimitive.Root>) {
   const { formItemId } = useFormField();
+  const { required } = React.useContext(FormItemContext);
 
   return (
     <Label
@@ -80,12 +92,21 @@ function FormLabel({ className, ...props }: React.ComponentProps<typeof LabelPri
       className={cn('font-medium text-foreground', className)}
       htmlFor={formItemId}
       {...props}
-    />
+    >
+      {children}
+      {required && (
+        <span className="text-destructive" aria-hidden="true">
+          {' '}
+          *
+        </span>
+      )}
+    </Label>
   );
 }
 
 function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
   const { error, formItemId, formDescriptionId, formMessageId } = useFormField();
+  const { required } = React.useContext(FormItemContext);
 
   return (
     <Slot
@@ -93,6 +114,7 @@ function FormControl({ ...props }: React.ComponentProps<typeof Slot>) {
       id={formItemId}
       aria-describedby={!error ? `${formDescriptionId}` : `${formDescriptionId} ${formMessageId}`}
       aria-invalid={!!error}
+      aria-required={required || undefined}
       {...props}
     />
   );

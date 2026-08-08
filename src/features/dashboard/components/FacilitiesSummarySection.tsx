@@ -50,7 +50,7 @@ export function FacilitiesSummarySection() {
     <Card>
       <CardHeader>
         <CardHeading>
-          <CardTitle>Facilities</CardTitle>
+          <CardTitle as="h2">Facilities</CardTitle>
         </CardHeading>
       </CardHeader>
       <CardContent>

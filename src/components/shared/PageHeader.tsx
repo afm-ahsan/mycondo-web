@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { Fragment, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Breadcrumb,
@@ -45,7 +45,10 @@ export function PageHeader({
           <Breadcrumb>
             <BreadcrumbList>
               {crumbs.map((crumb, index) => (
-                <span key={crumb.label} className="flex items-center gap-1.5">
+                // BreadcrumbSeparator and BreadcrumbItem are both <li> — a Fragment (not a <span>)
+                // keeps them as direct children of the <ol> (BreadcrumbList); wrapping them in a
+                // real element here would make them invalid list content (axe: "list"/"listitem").
+                <Fragment key={crumb.label}>
                   {index > 0 && <BreadcrumbSeparator />}
                   <BreadcrumbItem>
                     {crumb.path ? (
@@ -56,7 +59,7 @@ export function PageHeader({
                       <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
                     )}
                   </BreadcrumbItem>
-                </span>
+                </Fragment>
               ))}
             </BreadcrumbList>
           </Breadcrumb>

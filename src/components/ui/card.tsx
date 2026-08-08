@@ -129,9 +129,22 @@ function CardToolbar({ className, ...props }: React.HTMLAttributes<HTMLDivElemen
   return <div data-slot="card-toolbar" className={cn('flex items-center gap-2.5', className)} {...props} />;
 }
 
-function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
+function CardTitle({
+  className,
+  as: Comp = 'h3',
+  ...props
+}: React.HTMLAttributes<HTMLHeadingElement> & {
+  /**
+   * Heading level, defaulting to `h3` (the original, unconditional behavior — unchanged for every
+   * existing caller). Pass `"h2"` when a Card is the top-level content section directly under a
+   * page's own `h1` (see PageHeader) and no other `h2` already fills that slot, so heading levels
+   * increase by exactly one instead of skipping — do not change this per-caller without checking
+   * the surrounding heading hierarchy first.
+   */
+  as?: 'h2' | 'h3' | 'h4';
+}) {
   return (
-    <h3
+    <Comp
       data-slot="card-title"
       className={cn('text-base font-semibold leading-none tracking-tight', className)}
       {...props}
