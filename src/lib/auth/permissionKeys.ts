@@ -117,4 +117,34 @@ export const PERMISSIONS = {
     return: 'parcel.return',
     escalate: 'parcel.escalate',
   },
+  // mycondo-api's Seed_Permission_Catalogue.cs — Service Charge Rules + Invoices (billing schema).
+  billing: {
+    ruleView: 'billing.rule.view',
+    ruleManage: 'billing.rule.manage',
+    invoiceView: 'billing.invoice.view',
+    invoiceGenerate: 'billing.invoice.generate',
+    invoiceVoid: 'billing.invoice.void',
+  },
+  // mycondo-api's Seed_Permission_Catalogue.cs + Seed_Payments_Permissions.cs (payments schema).
+  payment: {
+    view: 'payment.view',
+    record: 'payment.record',
+    reverse: 'payment.reverse',
+  },
+  residentAccount: {
+    view: 'residentaccount.view',
+    manage: 'residentaccount.manage',
+  },
+  // mycondo-api's Seed_Utility_Permissions.cs — shared across Electricity/Gas, discriminated by
+  // utilityType, not by a separate permission per utility.
+  utility: {
+    meterView: 'utility.meter.view',
+    meterManage: 'utility.meter.manage',
+    ratePlanView: 'utility.rateplan.view',
+    ratePlanManage: 'utility.rateplan.manage',
+    readingView: 'utility.reading.view',
+    readingRecord: 'utility.reading.record',
+    readingFinalize: 'utility.reading.finalize',
+    readingCorrect: 'utility.reading.correct',
+  },
 } as const;

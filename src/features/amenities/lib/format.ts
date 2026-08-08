@@ -1,17 +1,4 @@
-// No shared BDT/money formatter exists yet elsewhere in the app (mycondo-web has had no
-// billing/payments frontend work) — kept feature-local rather than promoted to `src/lib/`
-// speculatively; a natural candidate to centralize once Billing/Payments get frontend slices.
-const bdtFormatter = new Intl.NumberFormat('en-US', {
-  style: 'currency',
-  currency: 'BDT',
-  currencyDisplay: 'symbol',
-});
-
-export function formatBdt(amount: number | string | null | undefined): string {
-  if (amount === null || amount === undefined) return '—';
-  const numeric = typeof amount === 'string' ? Number(amount) : amount;
-  return Number.isFinite(numeric) ? bdtFormatter.format(numeric) : '—';
-}
+// formatBdt moved to src/lib/helpers.ts (UX-3) — import it from there now.
 
 export function formatTimeOfDay(iso: string | null | undefined): string {
   if (!iso) return '—';

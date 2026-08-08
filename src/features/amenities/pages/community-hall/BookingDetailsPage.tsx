@@ -33,7 +33,7 @@ import { InspectionPanel } from '../../components/InspectionPanel';
 import { OverrideReasonDialog } from '../../components/OverrideReasonDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PaymentStatusBadge } from '../../components/PaymentStatusBadge';
-import { formatBdt } from '../../lib/format';
+import { formatBdt } from '@/lib/helpers';
 import type { BookingStatus } from '../../lib/bookingStatus';
 
 type DialogKind = 'reject' | 'cancel' | 'inspect' | null;

@@ -31,7 +31,7 @@ import { StartSessionDialog } from '../../components/StartSessionDialog';
 import { StopSessionDialog } from '../../components/StopSessionDialog';
 import { ManageGeneratorsDialog } from '../../components/ManageGeneratorsDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatNumber } from '../../lib/format';
+import { formatNumber } from '@/lib/helpers';
 import { generatorSessionStatusToneMap, type GeneratorSessionStatus } from '../../lib/status';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { GeneratorSessionDto } from '@/api/generated/mycondoApi';

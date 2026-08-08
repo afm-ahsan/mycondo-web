@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBdt } from '../lib/format';
+import { formatBdt } from '@/lib/helpers';
 import type { FacilityDto } from '@/api/generated/mycondoApi';
 
 /**

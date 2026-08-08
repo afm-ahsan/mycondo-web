@@ -115,3 +115,24 @@ export function formatDateTime(input: Date | string | number): string {
     hour12: true,
   });
 }
+
+// Centralized here per UX-3 — previously duplicated byte-for-byte in amenities/lib/format.ts and
+// operations/lib/format.ts, each anticipating this exact consolidation once Billing/Payments got a
+// frontend slice.
+const bdtFormatter = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'BDT',
+  currencyDisplay: 'symbol',
+});
+
+export function formatBdt(amount: number | string | null | undefined): string {
+  if (amount === null || amount === undefined) return '—';
+  const numeric = typeof amount === 'string' ? Number(amount) : amount;
+  return Number.isFinite(numeric) ? bdtFormatter.format(numeric) : '—';
+}
+
+export function formatNumber(value: number | string | null | undefined, fractionDigits = 2): string {
+  if (value === null || value === undefined) return '—';
+  const numeric = typeof value === 'string' ? Number(value) : value;
+  return Number.isFinite(numeric) ? numeric.toFixed(fractionDigits) : '—';
+}

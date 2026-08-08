@@ -89,11 +89,25 @@ When the conventions specify a rule, **follow it**. Project-specific overrides a
 | `MyCondo.Modules.Amenities` (P2)  | `src/features/amenities/`  |
 | `MyCondo.Modules.Maintenance` (P2)| `src/features/maintenance/`|
 | `MyCondo.Modules.Operations` (P2) | `src/features/operations/` |
+| `MyCondo.Modules.Utilities`       | `src/features/utilities/`  |
 
 `src/features/security/` (as of 2026-08-06): only `guests/` (Guest Register — directory, create,
 fast check-in/check-out, currently-inside view) is implemented. The backend's other `Features/
 Security/*` areas (Vehicles, DomesticWorkers, ServiceProviders, SebaVisits, Parcels) have a complete,
 wired API contract already but **no frontend UI yet** — do not assume they exist.
+
+`src/features/utilities/` (as of 2026-08-08, UX-3): a single shared bounded context for Electricity
+and Gas — one `Meter`/`MeterAssignment`/`RatePlan`/`Reading` domain model, differentiated purely by a
+`utilityType` prop threaded through every page/component (`MeterDirectoryPage`, `ReadingRegisterPage`,
+`ReadingCapturePage`, `ReadingDetailPage`, `RatePlanDirectoryPage`, `RatePlanFormPage`), never
+duplicated per utility. Implements Meter install/assign/mark-faulty/reactivate/replace, the reading
+lifecycle (Draft → Reviewed → Finalized → Billed, plus terminal Corrected), and Rate Plan
+create/deactivate/end-effective-period (`RatePlanFormPage` is create-only — `RatePlanDto` is
+immutable after creation, same pattern as `ServiceChargeRule`). Billing (`billReadingIdempotent`) and
+Correction (`correctReadingIdempotent`) use the shared idempotency-key infrastructure since both can
+mutate an invoice and the resident ledger. The Reading Register is deliberately meter-scoped (pick a
+building, then a meter, to see its register) because `GET /api/v1/readings` has no `buildingId`/
+`utilityType` filter of its own — a disclosed, not-yet-closed API gap (see UX-3 evidence report).
 
 `src/features/amenities/` (as of 2026-08-07, Slice G — merged to `main` in both repos): Community
 Hall Booking (calendar, list, create, details with the full approve/reject/pay/check-in/complete/

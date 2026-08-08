@@ -11,6 +11,25 @@ import {
 } from '@/features/amenities';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { RegisterPage } from '@/features/auth/pages/RegisterPage';
+import {
+  BatchBillingPage,
+  InvoiceDetailPage,
+  InvoiceListPage,
+  OutstandingInvoicesPage,
+  ServiceChargeRuleDirectoryPage,
+  ServiceChargeRuleFormPage,
+} from '@/features/billing';
+import { PaymentDetailPage, PaymentListPage, RecordPaymentPage, ResidentLedgerPage } from '@/features/payments';
+import {
+  ConsumptionHistoryReportPage,
+  MeterDirectoryPage,
+  RatePlanDirectoryPage,
+  RatePlanFormPage,
+  ReadingCapturePage,
+  ReadingDetailPage,
+  ReadingRegisterPage,
+  ReadingStatusReportPage,
+} from '@/features/utilities';
 import { RolePermissionMatrixPage, UsersPage } from '@/features/identity';
 import {
   SecurityDirectoryPage,
@@ -647,6 +666,214 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.parcel.view} fallback={<AccessDeniedNotice />}>
                 <ParcelDetailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/service-charge-rules"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.ruleView} fallback={<AccessDeniedNotice />}>
+                <ServiceChargeRuleDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/service-charge-rules/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.ruleManage} fallback={<AccessDeniedNotice />}>
+                <ServiceChargeRuleFormPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/invoices"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.invoiceView} fallback={<AccessDeniedNotice />}>
+                <InvoiceListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/invoices/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.invoiceView} fallback={<AccessDeniedNotice />}>
+                <InvoiceDetailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/generate-batch"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.invoiceGenerate} fallback={<AccessDeniedNotice />}>
+                <BatchBillingPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/payments"
+            element={
+              <RequirePermission permission={PERMISSIONS.payment.view} fallback={<AccessDeniedNotice />}>
+                <PaymentListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/payments/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.payment.record} fallback={<AccessDeniedNotice />}>
+                <RecordPaymentPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/payments/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.payment.view} fallback={<AccessDeniedNotice />}>
+                <PaymentDetailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/outstanding-invoices"
+            element={
+              <RequirePermission permission={PERMISSIONS.billing.invoiceView} fallback={<AccessDeniedNotice />}>
+                <OutstandingInvoicesPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/billing/ledger"
+            element={
+              <RequirePermission permission={PERMISSIONS.payment.view} fallback={<AccessDeniedNotice />}>
+                <ResidentLedgerPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/meters"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.meterView} fallback={<AccessDeniedNotice />}>
+                <MeterDirectoryPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/readings"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingRegisterPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/readings/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingRecord} fallback={<AccessDeniedNotice />}>
+                <ReadingCapturePage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/readings/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingDetailPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/rate-plans"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.ratePlanView} fallback={<AccessDeniedNotice />}>
+                <RatePlanDirectoryPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/rate-plans/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.ratePlanManage} fallback={<AccessDeniedNotice />}>
+                <RatePlanFormPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/reports/billed-vs-unbilled"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingStatusReportPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/electricity/reports/consumption-history"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ConsumptionHistoryReportPage utilityType="Electricity" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/meters"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.meterView} fallback={<AccessDeniedNotice />}>
+                <MeterDirectoryPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/readings"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingRegisterPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/readings/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingRecord} fallback={<AccessDeniedNotice />}>
+                <ReadingCapturePage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/readings/:id"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingDetailPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/rate-plans"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.ratePlanView} fallback={<AccessDeniedNotice />}>
+                <RatePlanDirectoryPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/rate-plans/new"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.ratePlanManage} fallback={<AccessDeniedNotice />}>
+                <RatePlanFormPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/reports/billed-vs-unbilled"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ReadingStatusReportPage utilityType="Gas" />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/utilities/gas/reports/consumption-history"
+            element={
+              <RequirePermission permission={PERMISSIONS.utility.readingView} fallback={<AccessDeniedNotice />}>
+                <ConsumptionHistoryReportPage utilityType="Gas" />
               </RequirePermission>
             }
           />

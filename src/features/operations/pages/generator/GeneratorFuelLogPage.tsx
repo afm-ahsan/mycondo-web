@@ -29,7 +29,7 @@ import { useGenerators } from '../../api/generatorsApi';
 import { useGeneratorFuelReceipts, useRecordFuelReceipt } from '../../api/generatorMaintenanceApi';
 import { FuelReceiptDialog } from '../../components/FuelReceiptDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt, formatNumber } from '../../lib/format';
+import { formatBdt, formatNumber } from '@/lib/helpers';
 import type { GeneratorFuelReceiptDto } from '@/api/generated/mycondoApi';
 import type { FuelReceiptSchemaType } from '../../schemas/fuelReceiptSchema';
 

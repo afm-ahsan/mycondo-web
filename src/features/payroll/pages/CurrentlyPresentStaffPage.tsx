@@ -16,7 +16,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
-import { ConfirmActionDialog } from '../components/ConfirmActionDialog';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { useAttendanceRegister, useClockOut } from '../api/staffAttendanceApi';
 import { formatShift, formatTimeOfDay } from '../lib/format';
 import type { AttendanceRegisterEntryDto } from '@/api/generated/mycondoApi';

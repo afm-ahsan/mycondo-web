@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBdt } from '../lib/format';
+import { formatBdt } from '@/lib/helpers';
 import type { BookingDto } from '@/api/generated/mycondoApi';
 
 export function DepositSummaryPanel({ booking }: { booking: BookingDto }) {
