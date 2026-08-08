@@ -4,22 +4,9 @@ import { useLogout } from '@/features/auth/api/authApi';
 import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
 import { I18N_LANGUAGES } from '@/i18n/config';
 import { Language } from '@/i18n/types';
-import {
-  BetweenHorizontalStart,
-  Coffee,
-  CreditCard,
-  FileText,
-  Globe,
-  IdCard,
-  Moon,
-  Settings,
-  Shield,
-  SquareCode,
-  UserCircle,
-  Users,
-} from 'lucide-react';
+import { Globe, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { Link, useNavigate } from 'react-router';
+import { useNavigate } from 'react-router';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { sessionEnded } from '@/store/slices/authSlice';
@@ -75,129 +62,27 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" side="bottom" align="end">
-        {/* Header */}
-        <div className="flex items-center justify-between p-3">
-          <div className="flex items-center gap-2">
-            <img
-              className="size-9 rounded-full border-2 border-green-500"
-              src={displayAvatar}
-              alt="User avatar"
-            />
-            <div className="flex flex-col">
-              <Link
-                to="/account/home/get-started"
-                className="text-sm text-mono hover:text-primary font-semibold"
-              >
-                {displayName}
-              </Link>
-              <a
-                href={`mailto:${displayEmail}`}
-                className="text-xs text-muted-foreground hover:text-primary"
-              >
-                {displayEmail}
-              </a>
-            </div>
+        {/* Header — plain identity display, not a link: MyCondo has no profile page of its own yet
+            (see UX-6 UserDropdownMenu cleanup — the Metronic template's account/public-profile demo
+            pages have no real backing, so this deliberately doesn't link to them). */}
+        <div className="flex items-center gap-2 p-3">
+          <img
+            className="size-9 rounded-full border-2 border-green-500"
+            src={displayAvatar}
+            alt="User avatar"
+          />
+          <div className="flex flex-col">
+            <span className="text-sm text-mono font-semibold">{displayName}</span>
+            <a
+              href={`mailto:${displayEmail}`}
+              className="text-xs text-muted-foreground hover:text-primary"
+            >
+              {displayEmail}
+            </a>
           </div>
-          <Badge variant="primary" appearance="light" size="sm">
-            Pro
-          </Badge>
         </div>
 
         <DropdownMenuSeparator />
-
-        {/* Menu Items */}
-        <DropdownMenuItem asChild>
-          <Link
-            to="/public-profile/profiles/default"
-            className="flex items-center gap-2"
-          >
-            <IdCard />
-            Public Profile
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link
-            to="/account/home/user-profile"
-            className="flex items-center gap-2"
-          >
-            <UserCircle />
-            My Profile
-          </Link>
-        </DropdownMenuItem>
-
-        {/* My Account Submenu */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2">
-            <Settings />
-            My Account
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/home/get-started"
-                className="flex items-center gap-2"
-              >
-                <Coffee />
-                Get Started
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/home/user-profile"
-                className="flex items-center gap-2"
-              >
-                <FileText />
-                My Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/billing/basic"
-                className="flex items-center gap-2"
-              >
-                <CreditCard />
-                Billing
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/security/overview"
-                className="flex items-center gap-2"
-              >
-                <Shield />
-                Security
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/members/teams"
-                className="flex items-center gap-2"
-              >
-                <Users />
-                Members & Roles
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link
-                to="/account/integrations"
-                className="flex items-center gap-2"
-              >
-                <BetweenHorizontalStart />
-                Integrations
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-
-        <DropdownMenuItem asChild>
-          <Link
-            to="https://devs.keenthemes.com"
-            className="flex items-center gap-2"
-          >
-            <SquareCode />
-            Dev Forum
-          </Link>
-        </DropdownMenuItem>
 
         {/* Language Submenu with Radio Group */}
         <DropdownMenuSub>
