@@ -6,3 +6,4 @@ export { RatePlanDirectoryPage } from './pages/RatePlanDirectoryPage';
 export { RatePlanFormPage } from './pages/RatePlanFormPage';
 export { ReadingStatusReportPage } from './pages/ReadingStatusReportPage';
 export { ConsumptionHistoryReportPage } from './pages/ConsumptionHistoryReportPage';
+export { ConsumptionSummaryReportPage } from './pages/ConsumptionSummaryReportPage';

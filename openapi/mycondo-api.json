@@ -3166,6 +3166,25 @@
         }
       }
     },
+    "/api/v1/reports/security/summary": {
+      "get": {
+        "tags": [
+          "Security Reports"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SecuritySummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/resident-accounts": {
       "post": {
         "tags": [
@@ -3910,6 +3929,90 @@
         }
       }
     },
+    "/api/v1/reports/financial/summary": {
+      "get": {
+        "tags": [
+          "Financial Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/financial/receivables-ageing": {
+      "get": {
+        "tags": [
+          "Financial Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivablesAgeingReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/meters": {
       "post": {
         "tags": [
@@ -4644,6 +4747,141 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReadingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/utilities/consumption-summary": {
+      "get": {
+        "tags": [
+          "Utility Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "utilityType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConsumptionSummaryLineDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/utilities/reading-status-summary": {
+      "get": {
+        "tags": [
+          "Utility Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "utilityType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReadingStatusSummaryLineDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/utilities/meter-status-summary": {
+      "get": {
+        "tags": [
+          "Utility Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "utilityType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MeterStatusSummaryLineDto"
+                  }
                 }
               }
             }
@@ -8452,6 +8690,55 @@
           }
         }
       },
+      "AgeingBucketDto": {
+        "required": [
+          "bucketLabel",
+          "minDaysOverdue",
+          "maxDaysOverdue",
+          "invoiceCount",
+          "totalBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "bucketLabel": {
+            "type": "string"
+          },
+          "minDaysOverdue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "maxDaysOverdue": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "null",
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "invoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "AssignMeterRequest": {
         "required": [
           "flatId"
@@ -9757,6 +10044,35 @@
           }
         }
       },
+      "ConsumptionSummaryLineDto": {
+        "required": [
+          "utilityType",
+          "totalConsumptionUnits",
+          "readingCount"
+        ],
+        "type": "object",
+        "properties": {
+          "utilityType": {
+            "type": "string"
+          },
+          "totalConsumptionUnits": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "readingCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "CorrectReadingRequest": {
         "required": [
           "previousReading",
@@ -10529,6 +10845,26 @@
           }
         }
       },
+      "CurrentlyInsideCategoryCountDto": {
+        "required": [
+          "category",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "CylinderConsumptionReportLineDto": {
         "required": [
           "cylinderType",
@@ -11122,6 +11458,83 @@
             "format": "int32"
           }
         }
+      },
+      "FinancialSummaryDto": {
+        "required": [
+          "fromDate",
+          "toDate",
+          "asOfDate",
+          "totalBilled",
+          "totalCollected",
+          "totalOutstanding",
+          "unpaidInvoiceCount",
+          "partiallyPaidInvoiceCount",
+          "overdueInvoiceCount"
+        ],
+        "type": "object",
+        "properties": {
+          "fromDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "toDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "asOfDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "totalBilled": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalCollected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalOutstanding": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "unpaidInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "partiallyPaidInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "overdueInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "TotalBilled and TotalCollected are period-flow values strictly within [FromDate, ToDate].\r\n            TotalOutstanding, UnpaidInvoiceCount, PartiallyPaidInvoiceCount, and OverdueInvoiceCount are\r\n            current-snapshot values as of DateOnly FinancialSummaryDto.AsOfDate, independent of the FromDate/ToDate window —\r\n            do not treat TotalOutstanding as constrained to the reporting period."
       },
       "FlatDto": {
         "required": [
@@ -12355,6 +12768,30 @@
               "string"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "MeterStatusSummaryLineDto": {
+        "required": [
+          "utilityType",
+          "status",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "utilityType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -15820,6 +16257,30 @@
           }
         }
       },
+      "ReadingStatusSummaryLineDto": {
+        "required": [
+          "utilityType",
+          "status",
+          "count"
+        ],
+        "type": "object",
+        "properties": {
+          "utilityType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "ReasonRequest": {
         "required": [
           "reason"
@@ -15830,6 +16291,35 @@
             "type": "string"
           }
         }
+      },
+      "ReceivablesAgeingReportDto": {
+        "required": [
+          "asOfDate",
+          "buckets",
+          "grandTotal"
+        ],
+        "type": "object",
+        "properties": {
+          "asOfDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "buckets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgeingBucketDto"
+            }
+          },
+          "grandTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Always 5 fixed buckets (Current, 1-30, 31-60, 61-90, 91+ days overdue), computed from\r\n            remaining balance as of DateOnly ReceivablesAgeingReportDto.AsOfDate — never the invoice's original amount."
       },
       "ReceiveParcelCommand": {
         "required": [
@@ -16907,6 +17397,30 @@
           }
         }
       },
+      "SecuritySummaryDto": {
+        "required": [
+          "currentlyInside",
+          "parcelsAwaitingCollectionCount"
+        ],
+        "type": "object",
+        "properties": {
+          "currentlyInside": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CurrentlyInsideCategoryCountDto"
+            }
+          },
+          "parcelsAwaitingCollectionCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "Tenant-wide only — `AccessSession` and `Parcel` have no BuildingId of their own\r\n            (one front gate/desk serves the whole property), so no buildingId filter is offered here. Excludes\r\n            Payroll's Staff Attendance entirely — that stays Payroll's domain, not Security's, per UX-5's\r\n            approved module-boundary decision."
+      },
       "SecurityVehicleDto": {
         "required": [
           "registrationNumber",
@@ -17839,6 +18353,9 @@
       "name": "Parcels"
     },
     {
+      "name": "Security Reports"
+    },
+    {
       "name": "ResidentAccounts"
     },
     {
@@ -17851,6 +18368,9 @@
       "name": "Invoices"
     },
     {
+      "name": "Financial Reports"
+    },
+    {
       "name": "Meters"
     },
     {
@@ -17858,6 +18378,9 @@
     },
     {
       "name": "Readings"
+    },
+    {
+      "name": "Utility Reports"
     },
     {
       "name": "Facilities"

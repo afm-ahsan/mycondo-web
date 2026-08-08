@@ -1,13 +1,18 @@
-import { useState } from 'react';
-import { skipToken } from '@reduxjs/toolkit/query/react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardHeading,
+  CardTitle,
+  CardToolbar,
+} from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
-import { MeterSelect } from '../components/MeterSelect';
-import { useReadings } from '../api/readingsApi';
+import { useReadingStatusSummaryReport } from '../api/reportsApi';
 import type { UtilityType } from '../lib/constants';
 import { readingStatusToneMap, type ReadingStatus } from '../lib/readingStatus';
 
@@ -15,114 +20,93 @@ interface ReadingStatusReportPageProps {
   utilityType: UtilityType;
 }
 
-const UNBILLED_STATUSES: ReadingStatus[] = ['Draft', 'Reviewed', 'Finalized', 'Corrected'];
-const FILTER_DEFAULTS = { buildingId: '', meterId: '' };
-
-function StatusCountRow({ meterId, status }: { meterId: string; status: ReadingStatus }) {
-  const { data, isFetching } = useReadings({ meterId, status, page: 1, pageSize: 1 });
-  return (
-    <div className="flex items-center justify-between py-1.5 border-b border-border last:border-0 text-sm">
-      <StatusBadge status={status} toneMap={readingStatusToneMap} />
-      <span className="font-medium tabular-nums">{isFetching ? '…' : Number(data?.total ?? 0)}</span>
-    </div>
-  );
-}
+const ALL_STATUSES: ReadingStatus[] = ['Draft', 'Reviewed', 'Finalized', 'Billed', 'Corrected'];
+const FILTER_DEFAULTS = { buildingId: '' };
 
 /**
- * Every count on this page comes directly from the server's own `total` for that exact filter — the
- * only client-side arithmetic is "Unbilled = Total − Billed", which is an exact identity over two
- * unpaginated, authoritative totals (not an approximation from a single page), never a financial
- * calculation.
+ * Tenant-wide (optionally building-scoped) breakdown of every reading's current status, from the
+ * backend's GetReadingStatusSummaryReport aggregate — no meter selection required. Previously this
+ * page could only show one meter at a time (GET /api/v1/readings had no buildingId/utilityType
+ * aggregate of its own); UX-5 closed that gap for this report specifically.
  */
 export function ReadingStatusReportPage({ utilityType }: ReadingStatusReportPageProps) {
   const [filters, setFilters] = useUrlFilters(FILTER_DEFAULTS);
-  const [buildingId, setBuildingId] = useState(filters.buildingId);
 
-  const { data: totalData, isFetching: isTotalFetching } = useReadings(
-    filters.meterId ? { meterId: filters.meterId, page: 1, pageSize: 1 } : skipToken,
-  );
-  const { data: billedData, isFetching: isBilledFetching } = useReadings(
-    filters.meterId ? { meterId: filters.meterId, status: 'Billed', page: 1, pageSize: 1 } : skipToken,
-  );
+  const { data, isFetching, isError, refetch } = useReadingStatusSummaryReport({
+    buildingId: filters.buildingId || undefined,
+    utilityType,
+  });
 
-  const total = totalData ? Number(totalData.total) : null;
-  const billed = billedData ? Number(billedData.total) : null;
-  const unbilled = total !== null && billed !== null ? total - billed : null;
-  const isSummaryLoading = isTotalFetching || isBilledFetching;
+  const countByStatus = new Map((data ?? []).map((line) => [line.status, line.count]));
+  const total = [...countByStatus.values()].reduce((sum, c) => sum + c, 0);
+  const billed = countByStatus.get('Billed') ?? 0;
+  const unbilled = total - billed;
 
   return (
     <>
       <PageHeader
-        title={`${utilityType} — Billed vs Unbilled Readings`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Reports' }, { label: 'Billed vs Unbilled' }]}
+        title={`${utilityType} — Reading Status`}
+        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Reports' }, { label: 'Reading Status' }]}
       />
 
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-end gap-3">
+      <Card className="mb-4">
+        <CardHeader>
+          <CardHeading>
+            <CardTitle>Filters</CardTitle>
+          </CardHeading>
+        </CardHeader>
+        <div className="flex flex-wrap gap-4 p-4">
           <div className="space-y-1.5 w-full sm:w-56">
             <Label className="text-xs">Building</Label>
             <BuildingSelect
-              value={buildingId}
-              onValueChange={(v) => {
-                setBuildingId(v);
-                setFilters({ buildingId: v, meterId: '' });
-              }}
-              placeholder="Select a building"
-            />
-          </div>
-          <div className="space-y-1.5 w-full sm:w-56">
-            <Label className="text-xs">Meter</Label>
-            <MeterSelect
-              buildingId={buildingId}
-              utilityType={utilityType}
-              value={filters.meterId}
-              onValueChange={(v) => setFilters({ meterId: v })}
-              disabled={!buildingId}
+              value={filters.buildingId || undefined}
+              onValueChange={(v) => setFilters({ buildingId: v })}
+              placeholder="All buildings"
             />
           </div>
         </div>
+      </Card>
 
-        {!filters.meterId ? (
+      {isError ? (
+        <ErrorState description="Couldn't load the reading status report." onRetry={refetch} />
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
-            <CardContent className="pt-6 text-sm text-muted-foreground">
-              Select a meter to see its billed/unbilled reading breakdown.
+            <CardHeader>
+              <CardTitle>Summary</CardTitle>
+              <CardToolbar>{isFetching && <span className="text-muted-foreground text-sm">Loading…</span>}</CardToolbar>
+            </CardHeader>
+            <CardContent className="space-y-1.5">
+              <div className="flex items-center justify-between py-1.5 border-b border-border text-sm">
+                <span className="text-muted-foreground">Total readings</span>
+                <span className="font-medium tabular-nums">{total}</span>
+              </div>
+              <div className="flex items-center justify-between py-1.5 border-b border-border text-sm">
+                <StatusBadge status="Billed" toneMap={readingStatusToneMap} />
+                <span className="font-medium tabular-nums">{billed}</span>
+              </div>
+              <div className="flex items-center justify-between py-1.5 text-sm">
+                <span className="text-muted-foreground">Unbilled (Total − Billed)</span>
+                <span className="font-medium tabular-nums">{unbilled}</span>
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1.5">
-                <div className="flex items-center justify-between py-1.5 border-b border-border text-sm">
-                  <span className="text-muted-foreground">Total readings</span>
-                  <span className="font-medium tabular-nums">{isSummaryLoading ? '…' : total}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 border-b border-border text-sm">
-                  <StatusBadge status="Billed" toneMap={readingStatusToneMap} />
-                  <span className="font-medium tabular-nums">{isSummaryLoading ? '…' : billed}</span>
-                </div>
-                <div className="flex items-center justify-between py-1.5 text-sm">
-                  <span className="text-muted-foreground">Unbilled (Total − Billed)</span>
-                  <span className="font-medium tabular-nums">{isSummaryLoading ? '…' : unbilled}</span>
-                </div>
-              </CardContent>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Unbilled breakdown by status</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {UNBILLED_STATUSES.map((status) => (
-                  <StatusCountRow key={status} meterId={filters.meterId} status={status} />
-                ))}
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
+          <Card>
+            <CardHeader>
+              <CardTitle>By status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {ALL_STATUSES.map((status) => (
+                <div key={status} className="flex items-center justify-between py-1.5 border-b border-border last:border-0 text-sm">
+                  <StatusBadge status={status} toneMap={readingStatusToneMap} />
+                  <span className="font-medium tabular-nums">{countByStatus.get(status) ?? 0}</span>
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </>
   );
 }

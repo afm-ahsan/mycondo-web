@@ -290,6 +290,22 @@ export const MENU_SIDEBAR: MenuConfig = [
         permission: PERMISSIONS.billing.invoiceView,
       },
       {
+        title: 'Reports',
+        icon: BarChart3,
+        children: [
+          {
+            title: 'Financial Summary',
+            path: '/billing/reports/financial-summary',
+            permission: PERMISSIONS.report.financialView,
+          },
+          {
+            title: 'Receivables Ageing',
+            path: '/billing/reports/receivables-ageing',
+            permission: PERMISSIONS.report.financialView,
+          },
+        ],
+      },
+      {
         title: 'Electricity',
         icon: Lightbulb,
         children: [
@@ -346,6 +362,17 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Consumption History',
             path: '/utilities/gas/reports/consumption-history',
             permission: PERMISSIONS.utility.readingView,
+          },
+        ],
+      },
+      {
+        title: 'Utility Reports',
+        icon: BarChart3,
+        children: [
+          {
+            title: 'Consumption Summary',
+            path: '/utilities/reports/consumption-summary',
+            permission: PERMISSIONS.utility.report,
           },
         ],
       },

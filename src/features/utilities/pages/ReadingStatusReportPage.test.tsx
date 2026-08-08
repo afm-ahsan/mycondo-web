@@ -1,6 +1,5 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
-import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
@@ -15,68 +14,73 @@ const adminUser: AuthUser = {
   name: 'Utility Admin',
   tenantId: 'tenant-1',
   roles: ['UtilityAdmin'],
-  permissions: ['utility.reading.view'],
+  permissions: ['utility.report'],
   buildingIds: [],
   buildingPermissions: [],
 };
 
-function mockBuildingsAndMeters() {
+function mockBuildings() {
   server.use(
     http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
-      HttpResponse.json({
-        items: [{ buildingId: 'bld-1', name: 'Tower A', code: 'A', address: null }],
-        page: 1,
-        pageSize: 100,
-        total: 1,
-      }),
-    ),
-    http.get(`${API_BASE}/api/v1/meters`, () =>
-      HttpResponse.json({
-        items: [{ meterId: 'meter-1', buildingId: 'bld-1', utilityType: 'Electricity', meterNumber: 'ELEC-001', status: 'Active', replacesMeterId: null }],
-        page: 1,
-        pageSize: 100,
-        total: 1,
-      }),
+      HttpResponse.json({ items: [], page: 1, pageSize: 100, total: 0 }),
     ),
   );
 }
 
-const READING_TOTALS_BY_STATUS: Record<string, number> = {
-  Draft: 2,
-  Reviewed: 1,
-  Finalized: 1,
-  Billed: 5,
-  Corrected: 0,
-};
-
-async function chooseOption(user: ReturnType<typeof userEvent.setup>, placeholder: string, optionName: string) {
-  const placeholderNode = await screen.findByText(placeholder);
-  const trigger = placeholderNode.closest('[role="combobox"]') as HTMLElement;
-  await user.click(trigger);
-  await user.click(await screen.findByRole('option', { name: optionName }));
-}
-
 describe('ReadingStatusReportPage', () => {
-  it('derives Unbilled as the exact difference between two authoritative server totals, and shows the per-status breakdown', async () => {
-    mockBuildingsAndMeters();
+  it('derives Unbilled as Total minus Billed from the tenant-wide status-summary aggregate, no meter selection required', async () => {
+    mockBuildings();
     server.use(
-      http.get(`${API_BASE}/api/v1/readings`, ({ request }) => {
-        const status = new URL(request.url).searchParams.get('status');
-        const total = status ? (READING_TOTALS_BY_STATUS[status] ?? 0) : 9;
-        return HttpResponse.json({ items: [], page: 1, pageSize: 1, total });
-      }),
+      http.get(`${API_BASE}/api/v1/reports/utilities/reading-status-summary`, () =>
+        HttpResponse.json([
+          { utilityType: 'Electricity', status: 'Draft', count: 2 },
+          { utilityType: 'Electricity', status: 'Reviewed', count: 1 },
+          { utilityType: 'Electricity', status: 'Finalized', count: 1 },
+          { utilityType: 'Electricity', status: 'Billed', count: 5 },
+        ]),
+      ),
     );
 
-    const user = userEvent.setup();
     renderWithProviders(<ReadingStatusReportPage utilityType="Electricity" />, {
       auth: { user: adminUser, isInitialized: true },
     });
 
-    await chooseOption(user, 'Select a building', 'Tower A (A)');
-    await chooseOption(user, 'Select a meter', 'ELEC-001 (Active)');
-
-    await waitFor(() => expect(screen.getByText('9')).toBeInTheDocument()); // Total
-    expect(screen.getByText('5')).toBeInTheDocument(); // Billed
+    // No meter/building selection needed — the aggregate is fetched immediately, tenant-wide by default.
+    await waitFor(() => expect(screen.getByText('9')).toBeInTheDocument()); // Total = 2+1+1+5
+    expect(screen.getAllByText('5')).toHaveLength(2); // Billed, shown in both the Summary and the by-status breakdown
     expect(screen.getByText('4')).toBeInTheDocument(); // Unbilled = 9 - 5
-  }, 15000);
+    expect(screen.getByText('0')).toBeInTheDocument(); // Corrected (not present in the response) shows as 0, not omitted
+  });
+
+  it('scopes the request to the chosen building', async () => {
+    mockBuildings();
+    const receivedBuildingIds: (string | null)[] = [];
+    server.use(
+      http.get(`${API_BASE}/api/v1/reports/utilities/reading-status-summary`, ({ request }) => {
+        receivedBuildingIds.push(new URL(request.url).searchParams.get('buildingId'));
+        return HttpResponse.json([]);
+      }),
+    );
+
+    renderWithProviders(<ReadingStatusReportPage utilityType="Gas" />, {
+      auth: { user: adminUser, isInitialized: true },
+    });
+
+    await waitFor(() => expect(receivedBuildingIds).toContain(null));
+  });
+
+  it('shows an inline error and a retry action when the aggregate fails to load', async () => {
+    mockBuildings();
+    server.use(
+      http.get(`${API_BASE}/api/v1/reports/utilities/reading-status-summary`, () =>
+        HttpResponse.json({ message: 'boom' }, { status: 500 }),
+      ),
+    );
+
+    renderWithProviders(<ReadingStatusReportPage utilityType="Electricity" />, {
+      auth: { user: adminUser, isInitialized: true },
+    });
+
+    expect(await screen.findByText("Couldn't load the reading status report.")).toBeInTheDocument();
+  });
 });

@@ -1,5 +1,7 @@
 import { useMemo, useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
+import type { ApexOptions } from 'apexcharts';
+import ApexChart from 'react-apexcharts';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -12,6 +14,27 @@ import { MeterSelect } from '../components/MeterSelect';
 import { useReadings } from '../api/readingsApi';
 import type { UtilityType } from '../lib/constants';
 import { readingStatusToneMap, type ReadingStatus } from '../lib/readingStatus';
+
+function buildTrendChartOptions(periodLabels: string[]): ApexOptions {
+  return {
+    chart: { type: 'bar', height: 220, toolbar: { show: false } },
+    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+    dataLabels: { enabled: false },
+    legend: { show: false },
+    colors: ['var(--color-primary)'],
+    xaxis: {
+      categories: periodLabels,
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      labels: { style: { colors: 'var(--color-secondary-foreground)', fontSize: '11px' } },
+    },
+    yaxis: {
+      labels: { style: { colors: 'var(--color-secondary-foreground)', fontSize: '12px' } },
+    },
+    grid: { borderColor: 'var(--color-border)', strokeDashArray: 5 },
+    tooltip: { theme: 'dark' },
+  };
+}
 
 interface ConsumptionHistoryReportPageProps {
   utilityType: UtilityType;
@@ -75,6 +98,22 @@ export function ConsumptionHistoryReportPage({ utilityType }: ConsumptionHistory
             />
           </div>
         </div>
+
+        {filters.meterId && !isFetching && sortedReadings.length > 0 && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Consumption trend</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ApexChart
+                options={buildTrendChartOptions(sortedReadings.map((r) => `${r.periodStart}`))}
+                series={[{ name: 'Consumption', data: sortedReadings.map((r) => Number(r.consumptionUnits)) }]}
+                type="bar"
+                height={220}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         <Card>
           <CardHeader>
