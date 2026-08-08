@@ -26,7 +26,7 @@ import {
   useVerifyTenantRegistrationByManagement,
 } from '../api/leasingApi';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { ReasonDialog } from '../components/ReasonDialog';
+import { ReasonDialog } from '@/components/shared/ReasonDialog';
 import { StatusHistoryTimeline } from '../components/StatusHistoryTimeline';
 import { WorkerVehicleAssignmentsSection } from '../components/WorkerVehicleAssignmentsSection';
 import { tenantRegistrationStatusToneMap, type TenantRegistrationStatus } from '../lib/status';

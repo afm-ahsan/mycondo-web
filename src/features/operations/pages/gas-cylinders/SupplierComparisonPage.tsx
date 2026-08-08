@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Card,
   CardHeader,
@@ -9,10 +8,14 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useSupplierComparisonReport } from '../../api/reportsApi';
+import { RatePerKg } from '../../components/RatePerKg';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt, formatNumber } from '@/lib/helpers';
 
 function firstDayOfMonth(): string {
   const now = new Date();
@@ -23,11 +26,15 @@ function today(): string {
   return new Date().toISOString().slice(0, 10);
 }
 
-export function SupplierComparisonPage() {
-  const [fromDate, setFromDate] = useState(firstDayOfMonth());
-  const [toDate, setToDate] = useState(today());
+const COMPARISON_FILTER_DEFAULTS = { fromDate: firstDayOfMonth(), toDate: today() };
 
-  const { data, isFetching, isError } = useSupplierComparisonReport({ fromDate, toDate });
+export function SupplierComparisonPage() {
+  const [filters, setFilters] = useUrlFilters(COMPARISON_FILTER_DEFAULTS);
+
+  const { data, isFetching, isError, refetch } = useSupplierComparisonReport({
+    fromDate: filters.fromDate,
+    toDate: filters.toDate,
+  });
 
   return (
     <>
@@ -42,57 +49,64 @@ export function SupplierComparisonPage() {
         <div className="flex flex-wrap gap-4 p-4">
           <div className="space-y-1">
             <Label>From</Label>
-            <Input type="date" value={fromDate} onChange={(e) => setFromDate(e.target.value)} />
+            <Input type="date" value={filters.fromDate} onChange={(e) => setFilters({ fromDate: e.target.value })} />
           </div>
           <div className="space-y-1">
             <Label>To</Label>
-            <Input type="date" value={toDate} onChange={(e) => setToDate(e.target.value)} />
+            <Input type="date" value={filters.toDate} onChange={(e) => setFilters({ toDate: e.target.value })} />
           </div>
         </div>
       </Card>
 
-      {isError && <p className="text-destructive text-sm mb-2">Failed to load the supplier comparison report. Please try again.</p>}
-
-      <Card>
-        <CardHeader>
-          <CardHeading>
-            <CardTitle>Supplier Comparison</CardTitle>
-          </CardHeading>
-          <CardToolbar>{isFetching && <span className="text-muted-foreground text-sm">Loading…</span>}</CardToolbar>
-        </CardHeader>
-        <CardTable>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Supplier</TableHead>
-                <TableHead>Purchases</TableHead>
-                <TableHead>Total quantity</TableHead>
-                <TableHead>Total amount</TableHead>
-                <TableHead>Avg. price/kg</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(data ?? []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-muted-foreground text-center">
-                    No purchases in this period.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                (data ?? []).map((line) => (
-                  <TableRow key={line.supplierId}>
-                    <TableCell>{line.supplierName}</TableCell>
-                    <TableCell>{line.purchaseCount}</TableCell>
-                    <TableCell>{line.totalQuantity}</TableCell>
-                    <TableCell>{formatBdt(line.totalAmount)}</TableCell>
-                    <TableCell>{formatNumber(line.averageUnitPricePerKg)}</TableCell>
+      {isError ? (
+        <Card>
+          <ErrorState description="Failed to load the supplier comparison report. Please try again." onRetry={refetch} />
+        </Card>
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardHeading>
+              <CardTitle>Supplier Comparison</CardTitle>
+            </CardHeading>
+            <CardToolbar>{isFetching && <span className="text-muted-foreground text-sm">Loading…</span>}</CardToolbar>
+          </CardHeader>
+          <CardTable>
+            <ScrollArea>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Supplier</TableHead>
+                    <TableHead>Purchases</TableHead>
+                    <TableHead>Total quantity</TableHead>
+                    <TableHead>Total amount</TableHead>
+                    <TableHead>Avg. price</TableHead>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardTable>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {(data ?? []).length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-muted-foreground text-center">
+                        No purchases in this period.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    (data ?? []).map((line) => (
+                      <TableRow key={line.supplierId}>
+                        <TableCell>{line.supplierName}</TableCell>
+                        <TableCell>{line.purchaseCount}</TableCell>
+                        <TableCell>{line.totalQuantity}</TableCell>
+                        <TableCell><MoneyDisplay amount={line.totalAmount} /></TableCell>
+                        <TableCell><RatePerKg amount={line.averageUnitPricePerKg} /></TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </CardTable>
+        </Card>
+      )}
     </>
   );
 }

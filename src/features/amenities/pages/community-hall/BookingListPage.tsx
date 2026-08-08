@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   type ColumnDef,
   getCoreRowModel,
@@ -21,7 +21,6 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { Input } from '@/components/ui/input';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
   Select,
@@ -32,38 +31,70 @@ import {
 } from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FacilitySelect } from '@/components/shared/FacilitySelect';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
+import { SearchInput } from '@/components/shared/SearchInput';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatDate } from '@/lib/helpers';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useBookings } from '../../api/bookingsApi';
 import { useFacilities } from '../../api/facilitiesApi';
 import { BookingStatusBadge } from '../../components/BookingStatusBadge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { PaymentStatusBadge } from '../../components/PaymentStatusBadge';
-import { formatBdt } from '@/lib/helpers';
 import { formatTimeOfDay } from '../../lib/format';
-import { bookingStatusToneMap, type BookingStatus } from '../../lib/bookingStatus';
+import { bookingStatusToneMap, paymentStatusToneMap, type BookingStatus, type PaymentStatus } from '../../lib/bookingStatus';
 import type { BookingDto } from '@/api/generated/mycondoApi';
 
 const ALL = '__all__';
 
+const BOOKING_LIST_FILTER_DEFAULTS = {
+  facilityId: '',
+  buildingId: '',
+  eventType: '',
+  status: '',
+  paymentStatus: '',
+  page: '1',
+  pageSize: '10',
+};
+
 /**
- * List columns/filters per Slice G plan §5. `GetBookingsQuery` only accepts `facilityId`/`flatId`/
- * `status` server-side — Building/Event type/Payment status are applied client-side on the current
- * page only, disclosed as a known limitation rather than extending the backend query in this frontend
- * slice.
+ * Every filter shown here (Hall, Building, Event type, Status, Payment status) is applied server-side
+ * by `GetBookingsQuery` before pagination — the DataGrid's row count, page count, and result range all
+ * describe the exact same filtered set. Event type uses the same debounced-search convention as every
+ * other list page (see ServiceChargeRuleDirectoryPage).
  */
 export function BookingListPage() {
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [facilityId, setFacilityId] = useState<string | undefined>();
-  const [statusFilter, setStatusFilter] = useState<string | undefined>();
-  const [buildingId, setBuildingId] = useState<string | undefined>();
-  const [eventTypeFilter, setEventTypeFilter] = useState('');
-  const [paymentStatusFilter, setPaymentStatusFilter] = useState<string | undefined>();
+  const [filters, setFilters] = useUrlFilters(BOOKING_LIST_FILTER_DEFAULTS);
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
+    pageSize: Number(filters.pageSize) || 10,
+  };
+
+  const [eventType, setEventType] = useState(filters.eventType);
+  const debouncedEventType = useDebouncedValue(eventType);
+  const isFirstRender = useRef(true);
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    setFilters({ eventType: debouncedEventType, page: '1' });
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- only the settled event type should retrigger this
+  }, [debouncedEventType]);
+
+  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
+    const next = updater(pagination);
+    setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
+  }
 
   const { data, isFetching, isError } = useBookings({
-    facilityId,
-    status: statusFilter,
+    facilityId: filters.facilityId || undefined,
+    buildingId: filters.buildingId || undefined,
+    eventType: debouncedEventType || undefined,
+    status: filters.status || undefined,
+    paymentStatus: filters.paymentStatus || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
   });
@@ -73,19 +104,6 @@ export function BookingListPage() {
     () => Object.fromEntries((facilitiesData?.items ?? []).map((f) => [f.facilityId, f.name])),
     [facilitiesData],
   );
-
-  const filteredItems = useMemo(() => {
-    let items = data?.items ?? [];
-    if (buildingId) items = items.filter((b) => b.buildingId === buildingId);
-    if (eventTypeFilter.trim()) {
-      const needle = eventTypeFilter.trim().toLowerCase();
-      items = items.filter((b) => b.eventType.toLowerCase().includes(needle));
-    }
-    if (paymentStatusFilter) {
-      items = items.filter((b) => derivePaymentStatusLabel(b) === paymentStatusFilter);
-    }
-    return items;
-  }, [data, buildingId, eventTypeFilter, paymentStatusFilter]);
 
   const columns: ColumnDef<BookingDto>[] = [
     {
@@ -114,8 +132,8 @@ export function BookingListPage() {
     },
     { id: 'eventType', header: 'Event type', cell: ({ row }) => row.original.eventType },
     { id: 'guests', header: 'Guests', cell: ({ row }) => row.original.expectedGuestCount },
-    { id: 'charge', header: 'Charge', cell: ({ row }) => formatBdt(row.original.bookingChargeAmount) },
-    { id: 'deposit', header: 'Deposit', cell: ({ row }) => formatBdt(row.original.depositAmount) },
+    { id: 'charge', header: 'Charge', cell: ({ row }) => <MoneyDisplay amount={row.original.bookingChargeAmount} /> },
+    { id: 'deposit', header: 'Deposit', cell: ({ row }) => <MoneyDisplay amount={row.original.depositAmount} /> },
     {
       id: 'paymentStatus',
       header: 'Payment',
@@ -140,14 +158,14 @@ export function BookingListPage() {
   const total = data ? Number(data.total) : 0;
   const table = useReactTable({
     columns,
-    data: filteredItems,
+    data: data?.items ?? [],
     pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
     manualPagination: true,
     // The API has no sort parameter on this query — DataGridColumnHeader would otherwise show a
     // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
     enableSorting: false,
     state: { pagination },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -193,26 +211,25 @@ export function BookingListPage() {
             <CardToolbar className="flex flex-wrap gap-2">
               <FacilitySelect
                 facilityType="CommunityHall"
-                value={facilityId}
-                onValueChange={(id) => {
-                  setFacilityId(id);
-                  setPagination((p) => ({ ...p, pageIndex: 0 }));
-                }}
+                value={filters.facilityId || undefined}
+                onValueChange={(id) => setFilters({ facilityId: id, page: '1' })}
                 placeholder="All halls"
               />
-              <BuildingSelect value={buildingId} onValueChange={setBuildingId} placeholder="All buildings" />
-              <Input
+              <BuildingSelect
+                value={filters.buildingId || undefined}
+                onValueChange={(id) => setFilters({ buildingId: id, page: '1' })}
+                placeholder="All buildings"
+              />
+              <SearchInput
+                value={eventType}
+                onChange={setEventType}
                 placeholder="Event type…"
-                value={eventTypeFilter}
-                onChange={(e) => setEventTypeFilter(e.target.value)}
+                isSearching={eventType !== debouncedEventType}
                 className="w-40"
               />
               <Select
-                value={statusFilter ?? ALL}
-                onValueChange={(v) => {
-                  setStatusFilter(v === ALL ? undefined : v);
-                  setPagination((p) => ({ ...p, pageIndex: 0 }));
-                }}
+                value={filters.status || ALL}
+                onValueChange={(v) => setFilters({ status: v === ALL ? '' : v, page: '1' })}
               >
                 <SelectTrigger className="w-44">
                   <SelectValue placeholder="All statuses" />
@@ -226,15 +243,20 @@ export function BookingListPage() {
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={paymentStatusFilter ?? ALL} onValueChange={(v) => setPaymentStatusFilter(v === ALL ? undefined : v)}>
+              <Select
+                value={filters.paymentStatus || ALL}
+                onValueChange={(v) => setFilters({ paymentStatus: v === ALL ? '' : v, page: '1' })}
+              >
                 <SelectTrigger className="w-44">
                   <SelectValue placeholder="All payment statuses" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value={ALL}>All payment statuses</SelectItem>
-                  <SelectItem value="Not Required">Not Required</SelectItem>
-                  <SelectItem value="Awaiting Payment">Awaiting Payment</SelectItem>
-                  <SelectItem value="Paid">Paid</SelectItem>
+                  {Object.keys(paymentStatusToneMap).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {paymentStatusToneMap[status as PaymentStatus].label}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </CardToolbar>
@@ -252,10 +274,4 @@ export function BookingListPage() {
       </DataGrid>
     </>
   );
-}
-
-function derivePaymentStatusLabel(booking: BookingDto): string {
-  if (!booking.paymentRequired) return 'Not Required';
-  if (booking.invoiceId || booking.depositCollectionPostingId) return 'Paid';
-  return 'Awaiting Payment';
 }

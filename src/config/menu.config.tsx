@@ -2,6 +2,7 @@ import {
   AlertCircle,
   Award,
   Badge,
+  BarChart3,
   Bell,
   Bitcoin,
   Book,
@@ -374,6 +375,11 @@ export const MENU_SIDEBAR: MenuConfig = [
             path: '/facilities/community-hall/bookings/new',
             permission: PERMISSIONS.facility.bookingCreate,
           },
+          {
+            title: 'Halls / Settings',
+            path: '/facilities/swimming-pool/settings',
+            permission: PERMISSIONS.facility.manage,
+          },
         ],
       },
       {
@@ -398,6 +404,27 @@ export const MENU_SIDEBAR: MenuConfig = [
           },
         ],
       },
+      {
+        title: 'Reports',
+        icon: BarChart3,
+        children: [
+          {
+            title: 'Utilization',
+            path: '/facilities/reports/utilization',
+            permission: PERMISSIONS.report.facility,
+          },
+          {
+            title: 'Booking Revenue',
+            path: '/facilities/reports/booking-revenue',
+            permission: PERMISSIONS.report.facility,
+          },
+          {
+            title: 'Pool Daily Usage',
+            path: '/facilities/reports/pool-daily-usage',
+            permission: PERMISSIONS.report.facility,
+          },
+        ],
+      },
     ],
   },
   { heading: 'Operations' },
@@ -412,17 +439,17 @@ export const MENU_SIDEBAR: MenuConfig = [
           {
             title: 'Operation Log',
             path: '/operations/generator/log',
-            permission: PERMISSIONS.generator.operationManage,
+            permission: PERMISSIONS.generator.view,
           },
           {
             title: 'Fuel Log',
             path: '/operations/generator/fuel',
-            permission: PERMISSIONS.generator.fuelManage,
+            permission: PERMISSIONS.generator.view,
           },
           {
             title: 'Maintenance',
             path: '/operations/generator/maintenance',
-            permission: PERMISSIONS.generator.maintenanceManage,
+            permission: PERMISSIONS.generator.view,
           },
           {
             title: 'Reports',
@@ -438,17 +465,17 @@ export const MENU_SIDEBAR: MenuConfig = [
           {
             title: 'Purchases',
             path: '/operations/gas-cylinders/purchases',
-            permission: PERMISSIONS.gasCylinder.purchaseManage,
+            permission: PERMISSIONS.gasCylinder.view,
           },
           {
             title: 'Stock',
             path: '/operations/gas-cylinders/stock',
-            permission: PERMISSIONS.gasCylinder.stockManage,
+            permission: PERMISSIONS.gasCylinder.view,
           },
           {
             title: 'Consumption',
             path: '/operations/gas-cylinders/consumption',
-            permission: PERMISSIONS.gasCylinder.stockManage,
+            permission: PERMISSIONS.gasCylinder.report,
           },
           {
             title: 'Supplier Comparison',

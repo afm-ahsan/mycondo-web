@@ -5,7 +5,9 @@ import {
   type PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus, Scale } from 'lucide-react';
+import { AlertCircle, Plus, Scale } from 'lucide-react';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,13 +21,16 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatDate, formatDateTime } from '@/lib/helpers';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { toUserMessage } from '@/api/errors';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import {
   useCreateMonthlyReconciliation,
   useCurrentStock,
@@ -39,23 +44,41 @@ import { StockAdjustmentDialog } from '../../components/StockAdjustmentDialog';
 import { ReconciliationDialog } from '../../components/ReconciliationDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { cylinderStockMovementTypeToneMap, type CylinderStockMovementType } from '../../lib/status';
-import type { CylinderStockMovementDto } from '@/api/generated/mycondoApi';
+import type { CylinderStockMovementDto, MonthlyCylinderReconciliationDto } from '@/api/generated/mycondoApi';
 import type { StockAdjustmentSchemaType, StockMovementSchemaType } from '../../schemas/stockSchema';
 import type { ReconciliationSchemaType } from '../../schemas/stockSchema';
 
+const STOCK_FILTER_DEFAULTS = { movementPage: '1', movementPageSize: '10', reconciliationPage: '1', reconciliationPageSize: '10' };
+
 export function CylinderStockPage() {
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const [filters, setFilters] = useUrlFilters(STOCK_FILTER_DEFAULTS);
+  const movementPagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.movementPage) || 1) - 1),
+    pageSize: Number(filters.movementPageSize) || 10,
+  };
+  const reconciliationPagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.reconciliationPage) || 1) - 1),
+    pageSize: Number(filters.reconciliationPageSize) || 10,
+  };
   const [movementDialogOpen, setMovementDialogOpen] = useState(false);
   const [adjustmentDialogOpen, setAdjustmentDialogOpen] = useState(false);
   const [reconciliationDialogOpen, setReconciliationDialogOpen] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { data: currentStock, isFetching: stockFetching } = useCurrentStock({});
-  const { data: movements, isFetching: movementsFetching, isError } = useStockMovements({
-    page: pagination.pageIndex + 1,
-    pageSize: pagination.pageSize,
+  const { data: movements, isFetching: movementsFetching, isError, refetch } = useStockMovements({
+    page: movementPagination.pageIndex + 1,
+    pageSize: movementPagination.pageSize,
   });
-  const { data: reconciliations, isFetching: reconciliationsFetching } = useMonthlyReconciliations({ page: 1, pageSize: 20 });
+  const {
+    data: reconciliations,
+    isFetching: reconciliationsFetching,
+    isError: reconciliationsError,
+    refetch: refetchReconciliations,
+  } = useMonthlyReconciliations({
+    page: reconciliationPagination.pageIndex + 1,
+    pageSize: reconciliationPagination.pageSize,
+  });
 
   const [recordMovement, { isLoading: isRecordingMovement }] = useRecordStockMovement();
   const [recordAdjustment, { isLoading: isRecordingAdjustment }] = useRecordStockAdjustment();
@@ -128,10 +151,53 @@ export function CylinderStockPage() {
   const table = useReactTable({
     columns,
     data: movements?.items ?? [],
-    pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
+    pageCount: Math.max(1, Math.ceil(total / movementPagination.pageSize)),
     manualPagination: true,
-    state: { pagination },
-    onPaginationChange: setPagination,
+    state: { pagination: movementPagination },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(movementPagination) : updater;
+      setFilters({ movementPage: String(next.pageIndex + 1), movementPageSize: String(next.pageSize) });
+    },
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  const reconciliationColumns: ColumnDef<MonthlyCylinderReconciliationDto>[] = [
+    { id: 'period', header: 'Period', cell: ({ row }) => formatDate(row.original.periodMonth) },
+    { id: 'cylinderType', header: 'Cylinder type', cell: ({ row }) => row.original.cylinderType },
+    { id: 'opening', header: 'Opening', cell: ({ row }) => row.original.openingStock },
+    { id: 'received', header: 'Received', cell: ({ row }) => row.original.totalReceived },
+    { id: 'issued', header: 'Issued', cell: ({ row }) => row.original.totalIssued },
+    { id: 'emptyReturned', header: 'Empty returned', cell: ({ row }) => row.original.totalEmptyReturned },
+    { id: 'closing', header: 'Closing', cell: ({ row }) => row.original.closingStock },
+    {
+      id: 'variance',
+      header: 'Variance',
+      cell: ({ row }) => {
+        const variance = Number(row.original.varianceQuantity);
+        const isMatched = variance === 0;
+        return (
+          <div className="flex items-center gap-2">
+            <span className={isMatched ? undefined : 'font-semibold text-destructive'}>{row.original.varianceQuantity}</span>
+            <Badge variant={isMatched ? 'success' : 'destructive'} appearance="light">
+              {isMatched ? 'Matched' : 'Variance Detected'}
+            </Badge>
+          </div>
+        );
+      },
+    },
+  ];
+
+  const reconciliationTotal = reconciliations ? Number(reconciliations.total) : 0;
+  const reconciliationTable = useReactTable({
+    columns: reconciliationColumns,
+    data: reconciliations?.items ?? [],
+    pageCount: Math.max(1, Math.ceil(reconciliationTotal / reconciliationPagination.pageSize)),
+    manualPagination: true,
+    state: { pagination: reconciliationPagination },
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(reconciliationPagination) : updater;
+      setFilters({ reconciliationPage: String(next.pageIndex + 1), reconciliationPageSize: String(next.pageSize) });
+    },
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -157,8 +223,13 @@ export function CylinderStockPage() {
         }
       />
 
-      {(isError || errorMessage) && (
-        <p className="text-destructive text-sm mb-2">{errorMessage ?? 'Failed to load stock movements. Please try again.'}</p>
+      {errorMessage && (
+        <Alert variant="destructive" appearance="light" className="mb-2" onClose={() => setErrorMessage(null)}>
+          <AlertIcon>
+            <AlertCircle />
+          </AlertIcon>
+          <AlertTitle>{errorMessage}</AlertTitle>
+        </Alert>
       )}
 
       <Card className="mb-4">
@@ -196,68 +267,61 @@ export function CylinderStockPage() {
         </CardTable>
       </Card>
 
-      <DataGrid table={table} recordCount={total} isLoading={movementsFetching} emptyMessage="No stock movements yet." tableLayout={{ cellBorder: true }}>
+      {isError ? (
         <Card className="mb-4">
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Stock Movements</CardTitle>
-            </CardHeading>
-          </CardHeader>
-          <CardTable>
-            <DataGridTable />
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description="Failed to load stock movements. Please try again." onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid table={table} recordCount={total} isLoading={movementsFetching} emptyMessage="No stock movements yet." tableLayout={{ cellBorder: true }}>
+          <Card className="mb-4">
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Stock Movements</CardTitle>
+              </CardHeading>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
-      <Card>
-        <CardHeader>
-          <CardHeading>
-            <CardTitle>Monthly Reconciliations</CardTitle>
-          </CardHeading>
-          <CardToolbar>{reconciliationsFetching && <span className="text-muted-foreground text-sm">Loading…</span>}</CardToolbar>
-        </CardHeader>
-        <CardTable>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Period</TableHead>
-                <TableHead>Cylinder type</TableHead>
-                <TableHead>Opening</TableHead>
-                <TableHead>Received</TableHead>
-                <TableHead>Issued</TableHead>
-                <TableHead>Empty returned</TableHead>
-                <TableHead>Closing</TableHead>
-                <TableHead>Variance</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {(reconciliations?.items ?? []).length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="text-muted-foreground text-center">
-                    No reconciliations yet.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                (reconciliations?.items ?? []).map((line) => (
-                  <TableRow key={line.monthlyCylinderReconciliationId}>
-                    <TableCell>{formatDate(line.periodMonth)}</TableCell>
-                    <TableCell>{line.cylinderType}</TableCell>
-                    <TableCell>{line.openingStock}</TableCell>
-                    <TableCell>{line.totalReceived}</TableCell>
-                    <TableCell>{line.totalIssued}</TableCell>
-                    <TableCell>{line.totalEmptyReturned}</TableCell>
-                    <TableCell>{line.closingStock}</TableCell>
-                    <TableCell>{line.varianceQuantity}</TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </CardTable>
-      </Card>
+      {reconciliationsError ? (
+        <Card>
+          <ErrorState description="Failed to load reconciliations. Please try again." onRetry={refetchReconciliations} />
+        </Card>
+      ) : (
+        <DataGrid
+          table={reconciliationTable}
+          recordCount={reconciliationTotal}
+          isLoading={reconciliationsFetching}
+          emptyMessage="No reconciliations yet."
+          tableLayout={{ cellBorder: true }}
+        >
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Monthly Reconciliations</CardTitle>
+              </CardHeading>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <StockMovementDialog open={movementDialogOpen} onOpenChange={setMovementDialogOpen} isSubmitting={isRecordingMovement} onSubmit={handleRecordMovement} />
       <StockAdjustmentDialog open={adjustmentDialogOpen} onOpenChange={setAdjustmentDialogOpen} isSubmitting={isRecordingAdjustment} onSubmit={handleRecordAdjustment} />

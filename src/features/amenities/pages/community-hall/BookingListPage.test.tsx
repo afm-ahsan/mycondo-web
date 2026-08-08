@@ -1,5 +1,6 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
+import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
@@ -126,5 +127,70 @@ describe('BookingListPage', () => {
     expect(screen.getByText('Birthday party')).toBeInTheDocument();
     expect(screen.getByText('40')).toBeInTheDocument();
     expect(screen.getByText('Pending Approval')).toBeInTheDocument();
+  });
+
+  it('sends Building/Status/Payment-status filters to the server and the rendered rows match the reported total', async () => {
+    mockFacilities();
+    server.use(
+      http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+        HttpResponse.json({ items: [{ buildingId: 'bld-1', name: 'Tower A', code: 'A', address: null }], page: 1, pageSize: 100, total: 1 }),
+      ),
+    );
+
+    const receivedUrls: string[] = [];
+    server.use(
+      http.get(`${API_BASE}/api/v1/facility-bookings`, ({ request }) => {
+        receivedUrls.push(request.url);
+        const url = new URL(request.url);
+        // Server "applies" the filter — only one booking matches, and the total reflects exactly that.
+        if (url.searchParams.get('buildingId') === 'bld-1' && url.searchParams.get('paymentStatus') === 'AwaitingPayment') {
+          return HttpResponse.json({ items: [sampleBooking], page: 1, pageSize: 10, total: 1 });
+        }
+        return HttpResponse.json({ items: [sampleBooking, sampleBooking], page: 1, pageSize: 10, total: 2 });
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWithProviders(<BookingListPage />, { auth: { user: viewerUser, isInitialized: true } });
+
+    await waitFor(() => expect(receivedUrls.length).toBeGreaterThan(0));
+
+    const buildingTrigger = (await screen.findByText('All buildings')).closest('[role="combobox"]') as HTMLElement;
+    await user.click(buildingTrigger);
+    await user.click(await screen.findByRole('option', { name: 'Tower A (A)' }));
+
+    const paymentTrigger = screen.getByText('All payment statuses').closest('[role="combobox"]') as HTMLElement;
+    await user.click(paymentTrigger);
+    await user.click(await screen.findByRole('option', { name: 'Awaiting Payment' }));
+
+    await waitFor(() => {
+      const last = new URL(receivedUrls[receivedUrls.length - 1]);
+      expect(last.searchParams.get('buildingId')).toBe('bld-1');
+      expect(last.searchParams.get('paymentStatus')).toBe('AwaitingPayment');
+    });
+
+    // Rendered row count matches the server's reported total for the filtered result — no
+    // client-side filtering shrinking the visible rows below what the count/pagination claim.
+    expect(screen.getAllByText('Birthday party')).toHaveLength(1);
+  });
+
+  it('debounces the event-type search before sending it as a server-side filter', async () => {
+    mockFacilities();
+    const receivedEventTypes: (string | null)[] = [];
+    server.use(
+      http.get(`${API_BASE}/api/v1/facility-bookings`, ({ request }) => {
+        receivedEventTypes.push(new URL(request.url).searchParams.get('eventType'));
+        return HttpResponse.json({ items: [], page: 1, pageSize: 10, total: 0 });
+      }),
+    );
+
+    const user = userEvent.setup();
+    renderWithProviders(<BookingListPage />, { auth: { user: viewerUser, isInitialized: true } });
+
+    await user.type(screen.getByPlaceholderText('Event type…'), 'Wedding');
+
+    // Not sent on every keystroke — only the settled value, after the debounce window.
+    await waitFor(() => expect(receivedEventTypes).toContain('Wedding'), { timeout: 2000 });
+    expect(receivedEventTypes.filter((v) => v === 'Wedding')).toHaveLength(1);
   });
 });

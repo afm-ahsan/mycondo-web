@@ -5,7 +5,8 @@ import {
   type PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus, Settings2 } from 'lucide-react';
+import { AlertCircle, Plus, Settings2 } from 'lucide-react';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -20,12 +21,15 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { GeneratorSelect } from '@/components/shared/GeneratorSelect';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatDateTime } from '@/lib/helpers';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { toUserMessage } from '@/api/errors';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useGenerators, useGeneratorSessions, useStartGeneratorSession, useStopGeneratorSession } from '../../api/generatorsApi';
 import { StartSessionDialog } from '../../components/StartSessionDialog';
 import { StopSessionDialog } from '../../components/StopSessionDialog';
@@ -37,19 +41,29 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import type { GeneratorSessionDto } from '@/api/generated/mycondoApi';
 import type { StartSessionSchemaType, StopSessionSchemaType } from '../../schemas/generatorSessionSchema';
 
+const LOG_FILTER_DEFAULTS = { generatorId: '', page: '1', pageSize: '10' };
+
 /** Operation log — start/stop generator runtime sessions. "Only one open session per generator" is
  * enforced server-side (backend row-lock); a 409/422 here surfaces as a page-level alert, not silently
  * swallowed, per the "no client-owned business-state transitions" convention. */
 export function GeneratorLogPage() {
-  const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [generatorId, setGeneratorId] = useState<string | undefined>();
+  const [filters, setFilters] = useUrlFilters(LOG_FILTER_DEFAULTS);
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
+    pageSize: Number(filters.pageSize) || 10,
+  };
   const [startOpen, setStartOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
   const [stoppingSessionId, setStoppingSessionId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const { data, isFetching, isError } = useGeneratorSessions({
-    generatorId,
+  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
+    const next = updater(pagination);
+    setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
+  }
+
+  const { data, isFetching, isError, refetch } = useGeneratorSessions({
+    generatorId: filters.generatorId || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
   });
@@ -133,7 +147,7 @@ export function GeneratorLogPage() {
     // clickable sort arrow that updates but never actually reorders rows (no getSortedRowModel).
     enableSorting: false,
     state: { pagination },
-    onPaginationChange: setPagination,
+    onPaginationChange: handlePaginationChange,
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -158,28 +172,46 @@ export function GeneratorLogPage() {
         }
       />
 
-      {(isError || errorMessage) && (
-        <p className="text-destructive text-sm mb-2">{errorMessage ?? 'Failed to load sessions. Please try again.'}</p>
+      {errorMessage && (
+        <Alert variant="destructive" appearance="light" className="mb-2" onClose={() => setErrorMessage(null)}>
+          <AlertIcon>
+            <AlertCircle />
+          </AlertIcon>
+          <AlertTitle>{errorMessage}</AlertTitle>
+        </Alert>
       )}
 
-      <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No sessions yet." tableLayout={{ cellBorder: true }}>
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Sessions</CardTitle>
-            </CardHeading>
-            <CardToolbar>
-              <GeneratorSelect value={generatorId} onValueChange={setGeneratorId} placeholder="All generators" />
-            </CardToolbar>
-          </CardHeader>
-          <CardTable>
-            <DataGridTable />
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description="Failed to load sessions. Please try again." onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No sessions yet." tableLayout={{ cellBorder: true }}>
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Sessions</CardTitle>
+              </CardHeading>
+              <CardToolbar>
+                <GeneratorSelect
+                  value={filters.generatorId || undefined}
+                  onValueChange={(id) => setFilters({ generatorId: id, page: '1' })}
+                  placeholder="All generators"
+                />
+              </CardToolbar>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <ManageGeneratorsDialog open={manageOpen} onOpenChange={setManageOpen} />
       <StartSessionDialog open={startOpen} onOpenChange={setStartOpen} isSubmitting={isStarting} onSubmit={handleStart} />

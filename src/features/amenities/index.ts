@@ -6,3 +6,6 @@ export { PoolAccessPage } from './pages/swimming-pool/PoolAccessPage';
 export { CurrentOccupancyPage } from './pages/swimming-pool/CurrentOccupancyPage';
 export { UsageHistoryPage } from './pages/swimming-pool/UsageHistoryPage';
 export { FacilitySettingsPage } from './pages/swimming-pool/FacilitySettingsPage';
+export { FacilityUtilizationReportPage } from './pages/reports/FacilityUtilizationReportPage';
+export { BookingRevenueReportPage } from './pages/reports/BookingRevenueReportPage';
+export { PoolDailyUsageReportPage } from './pages/reports/PoolDailyUsageReportPage';

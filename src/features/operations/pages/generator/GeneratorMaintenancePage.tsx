@@ -5,7 +5,8 @@ import {
   type PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { AlertCircle, Plus } from 'lucide-react';
+import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -19,14 +20,18 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { GeneratorSelect } from '@/components/shared/GeneratorSelect';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatDate, formatDateTime } from '@/lib/helpers';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { toUserMessage } from '@/api/errors';
+import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useGenerators } from '../../api/generatorsApi';
 import {
   useCompleteMaintenanceService,
@@ -37,12 +42,12 @@ import {
   useResolveBreakdown,
   useCreateMaintenanceSchedule,
 } from '../../api/generatorMaintenanceApi';
+import { useGeneratorMaintenanceDueReport } from '../../api/reportsApi';
 import { MaintenanceScheduleDialog } from '../../components/MaintenanceScheduleDialog';
 import { CompleteMaintenanceDialog } from '../../components/CompleteMaintenanceDialog';
 import { BreakdownDialog } from '../../components/BreakdownDialog';
-import { ReasonDialog } from '../../components/ReasonDialog';
+import { ReasonDialog } from '@/components/shared/ReasonDialog';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { formatBdt } from '@/lib/helpers';
 import type {
   GeneratorBreakdownRecordDto,
   GeneratorMaintenanceScheduleDto,
@@ -50,13 +55,33 @@ import type {
 } from '@/api/generated/mycondoApi';
 import type { BreakdownSchemaType, CompleteMaintenanceSchemaType, MaintenanceScheduleSchemaType } from '../../schemas/maintenanceSchema';
 
+const MAINTENANCE_FILTER_DEFAULTS = {
+  generatorId: '',
+  tab: 'schedule',
+  schedulePage: '1',
+  schedulePageSize: '10',
+  servicePage: '1',
+  servicePageSize: '10',
+  breakdownPage: '1',
+  breakdownPageSize: '10',
+};
+
 export function GeneratorMaintenancePage() {
-  const [generatorId, setGeneratorId] = useState<string | undefined>();
+  const [filters, setFilters] = useUrlFilters(MAINTENANCE_FILTER_DEFAULTS);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const [schedulePagination, setSchedulePagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [servicePagination, setServicePagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
-  const [breakdownPagination, setBreakdownPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
+  const schedulePagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.schedulePage) || 1) - 1),
+    pageSize: Number(filters.schedulePageSize) || 10,
+  };
+  const servicePagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.servicePage) || 1) - 1),
+    pageSize: Number(filters.servicePageSize) || 10,
+  };
+  const breakdownPagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.breakdownPage) || 1) - 1),
+    pageSize: Number(filters.breakdownPageSize) || 10,
+  };
 
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [completingScheduleId, setCompletingScheduleId] = useState<string | null>(null);
@@ -69,21 +94,30 @@ export function GeneratorMaintenancePage() {
     [generatorsData],
   );
 
-  const { data: schedules, isFetching: schedulesFetching } = useGeneratorMaintenanceSchedules({
-    generatorId,
+  const { data: schedules, isFetching: schedulesFetching, isError: schedulesError, refetch: refetchSchedules } = useGeneratorMaintenanceSchedules({
+    generatorId: filters.generatorId || undefined,
     page: schedulePagination.pageIndex + 1,
     pageSize: schedulePagination.pageSize,
   });
-  const { data: serviceRecords, isFetching: serviceFetching } = useGeneratorServiceRecords({
-    generatorId,
+  const { data: serviceRecords, isFetching: serviceFetching, isError: serviceError, refetch: refetchService } = useGeneratorServiceRecords({
+    generatorId: filters.generatorId || undefined,
     page: servicePagination.pageIndex + 1,
     pageSize: servicePagination.pageSize,
   });
-  const { data: breakdowns, isFetching: breakdownsFetching } = useGeneratorBreakdowns({
-    generatorId,
+  const { data: breakdowns, isFetching: breakdownsFetching, isError: breakdownsError, refetch: refetchBreakdowns } = useGeneratorBreakdowns({
+    generatorId: filters.generatorId || undefined,
     page: breakdownPagination.pageIndex + 1,
     pageSize: breakdownPagination.pageSize,
   });
+  // Unpaginated, bounded set (one line per active schedule) — the backend's authoritative isDue
+  // flag, never recalculated client-side. Cross-referenced by generatorMaintenanceScheduleId so the
+  // Schedule tab shows the same due status the Reports page already surfaces, instead of requiring
+  // an operator to leave the maintenance workflow to find out what needs action.
+  const { data: dueReport } = useGeneratorMaintenanceDueReport();
+  const dueByScheduleId = useMemo(
+    () => new Map((dueReport ?? []).map((line) => [line.generatorMaintenanceScheduleId, line.isDue])),
+    [dueReport],
+  );
 
   const [createSchedule, { isLoading: isCreatingSchedule }] = useCreateMaintenanceSchedule();
   const [completeService, { isLoading: isCompleting }] = useCompleteMaintenanceService();
@@ -162,6 +196,23 @@ export function GeneratorMaintenancePage() {
     { id: 'dueDate', header: 'Due date', cell: ({ row }) => (row.original.nextDueDate ? formatDate(row.original.nextDueDate) : '—') },
     { id: 'dueHours', header: 'Due hour meter', cell: ({ row }) => row.original.nextDueHourMeterReading ?? '—' },
     {
+      id: 'due',
+      header: 'Due status',
+      cell: ({ row }) => {
+        const isDue = dueByScheduleId.get(row.original.generatorMaintenanceScheduleId);
+        if (isDue === undefined) return '—';
+        return isDue ? (
+          <Badge variant="destructive" appearance="light">
+            Maintenance Due
+          </Badge>
+        ) : (
+          <Badge variant="success" appearance="light">
+            Up to Date
+          </Badge>
+        );
+      },
+    },
+    {
       id: 'status',
       header: 'Status',
       cell: ({ row }) => <Badge variant={row.original.isActive ? 'primary' : 'secondary'} appearance="light">{row.original.isActive ? 'Active' : 'Inactive'}</Badge>,
@@ -183,7 +234,7 @@ export function GeneratorMaintenancePage() {
     { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
     { id: 'date', header: 'Date', cell: ({ row }) => formatDate(row.original.performedAtUtc) },
     { id: 'description', header: 'Description', cell: ({ row }) => row.original.description },
-    { id: 'cost', header: 'Cost', cell: ({ row }) => formatBdt(row.original.cost) },
+    { id: 'cost', header: 'Cost', cell: ({ row }) => (row.original.cost != null ? <MoneyDisplay amount={row.original.cost} /> : '—') },
   ];
 
   const breakdownColumns: ColumnDef<GeneratorBreakdownRecordDto>[] = [
@@ -214,7 +265,10 @@ export function GeneratorMaintenancePage() {
     pageCount: Math.max(1, Math.ceil(scheduleTotal / schedulePagination.pageSize)),
     manualPagination: true,
     state: { pagination: schedulePagination },
-    onPaginationChange: setSchedulePagination,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(schedulePagination) : updater;
+      setFilters({ schedulePage: String(next.pageIndex + 1), schedulePageSize: String(next.pageSize) });
+    },
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -225,7 +279,10 @@ export function GeneratorMaintenancePage() {
     pageCount: Math.max(1, Math.ceil(serviceTotal / servicePagination.pageSize)),
     manualPagination: true,
     state: { pagination: servicePagination },
-    onPaginationChange: setServicePagination,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(servicePagination) : updater;
+      setFilters({ servicePage: String(next.pageIndex + 1), servicePageSize: String(next.pageSize) });
+    },
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -236,7 +293,10 @@ export function GeneratorMaintenancePage() {
     pageCount: Math.max(1, Math.ceil(breakdownTotal / breakdownPagination.pageSize)),
     manualPagination: true,
     state: { pagination: breakdownPagination },
-    onPaginationChange: setBreakdownPagination,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(breakdownPagination) : updater;
+      setFilters({ breakdownPage: String(next.pageIndex + 1), breakdownPageSize: String(next.pageSize) });
+    },
     getCoreRowModel: getCoreRowModel(),
   });
 
@@ -247,13 +307,24 @@ export function GeneratorMaintenancePage() {
         crumbs={[{ label: 'Operations' }, { label: 'Generator' }, { label: 'Maintenance' }]}
       />
 
-      {errorMessage && <p className="text-destructive text-sm mb-2">{errorMessage}</p>}
+      {errorMessage && (
+        <Alert variant="destructive" appearance="light" className="mb-2" onClose={() => setErrorMessage(null)}>
+          <AlertIcon>
+            <AlertCircle />
+          </AlertIcon>
+          <AlertTitle>{errorMessage}</AlertTitle>
+        </Alert>
+      )}
 
       <div className="mb-4 max-w-xs">
-        <GeneratorSelect value={generatorId} onValueChange={setGeneratorId} placeholder="All generators" />
+        <GeneratorSelect
+          value={filters.generatorId || undefined}
+          onValueChange={(id) => setFilters({ generatorId: id })}
+          placeholder="All generators"
+        />
       </div>
 
-      <Tabs defaultValue="schedule">
+      <Tabs value={filters.tab} onValueChange={(tab) => setFilters({ tab })}>
         <TabsList>
           <TabsTrigger value="schedule">Schedule</TabsTrigger>
           <TabsTrigger value="history">Service History</TabsTrigger>
@@ -261,71 +332,98 @@ export function GeneratorMaintenancePage() {
         </TabsList>
 
         <TabsContent value="schedule" className="space-y-4">
-          <DataGrid table={scheduleTable} recordCount={scheduleTotal} isLoading={schedulesFetching} emptyMessage="No maintenance schedules yet." tableLayout={{ cellBorder: true }}>
+          {schedulesError ? (
             <Card>
-              <CardHeader>
-                <CardHeading>
-                  <CardTitle>Maintenance Schedules</CardTitle>
-                </CardHeading>
-                <CardToolbar>
-                  <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-                    <Button onClick={() => setScheduleDialogOpen(true)}>
-                      <Plus /> New Schedule
-                    </Button>
-                  </RequirePermission>
-                </CardToolbar>
-              </CardHeader>
-              <CardTable>
-                <DataGridTable />
-              </CardTable>
-              <CardFooter>
-                <DataGridPagination />
-              </CardFooter>
+              <ErrorState description="Failed to load maintenance schedules. Please try again." onRetry={refetchSchedules} />
             </Card>
-          </DataGrid>
+          ) : (
+            <DataGrid table={scheduleTable} recordCount={scheduleTotal} isLoading={schedulesFetching} emptyMessage="No maintenance schedules yet." tableLayout={{ cellBorder: true }}>
+              <Card>
+                <CardHeader>
+                  <CardHeading>
+                    <CardTitle>Maintenance Schedules</CardTitle>
+                  </CardHeading>
+                  <CardToolbar>
+                    <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
+                      <Button onClick={() => setScheduleDialogOpen(true)}>
+                        <Plus /> New Schedule
+                      </Button>
+                    </RequirePermission>
+                  </CardToolbar>
+                </CardHeader>
+                <CardTable>
+                  <ScrollArea>
+                    <DataGridTable />
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardTable>
+                <CardFooter>
+                  <DataGridPagination />
+                </CardFooter>
+              </Card>
+            </DataGrid>
+          )}
         </TabsContent>
 
         <TabsContent value="history" className="space-y-4">
-          <DataGrid table={serviceTable} recordCount={serviceTotal} isLoading={serviceFetching} emptyMessage="No service history yet." tableLayout={{ cellBorder: true }}>
+          {serviceError ? (
             <Card>
-              <CardHeader>
-                <CardHeading>
-                  <CardTitle>Service History</CardTitle>
-                </CardHeading>
-              </CardHeader>
-              <CardTable>
-                <DataGridTable />
-              </CardTable>
-              <CardFooter>
-                <DataGridPagination />
-              </CardFooter>
+              <ErrorState description="Failed to load service history. Please try again." onRetry={refetchService} />
             </Card>
-          </DataGrid>
+          ) : (
+            <DataGrid table={serviceTable} recordCount={serviceTotal} isLoading={serviceFetching} emptyMessage="No service history yet." tableLayout={{ cellBorder: true }}>
+              <Card>
+                <CardHeader>
+                  <CardHeading>
+                    <CardTitle>Service History</CardTitle>
+                  </CardHeading>
+                </CardHeader>
+                <CardTable>
+                  <ScrollArea>
+                    <DataGridTable />
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardTable>
+                <CardFooter>
+                  <DataGridPagination />
+                </CardFooter>
+              </Card>
+            </DataGrid>
+          )}
         </TabsContent>
 
         <TabsContent value="breakdowns" className="space-y-4">
-          <DataGrid table={breakdownTable} recordCount={breakdownTotal} isLoading={breakdownsFetching} emptyMessage="No breakdowns reported." tableLayout={{ cellBorder: true }}>
+          {breakdownsError ? (
             <Card>
-              <CardHeader>
-                <CardHeading>
-                  <CardTitle>Breakdown Log</CardTitle>
-                </CardHeading>
-                <CardToolbar>
-                  <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-                    <Button onClick={() => setBreakdownDialogOpen(true)}>
-                      <Plus /> Report Breakdown
-                    </Button>
-                  </RequirePermission>
-                </CardToolbar>
-              </CardHeader>
-              <CardTable>
-                <DataGridTable />
-              </CardTable>
-              <CardFooter>
-                <DataGridPagination />
-              </CardFooter>
+              <ErrorState description="Failed to load breakdowns. Please try again." onRetry={refetchBreakdowns} />
             </Card>
-          </DataGrid>
+          ) : (
+            <DataGrid table={breakdownTable} recordCount={breakdownTotal} isLoading={breakdownsFetching} emptyMessage="No breakdowns reported." tableLayout={{ cellBorder: true }}>
+              <Card>
+                <CardHeader>
+                  <CardHeading>
+                    <CardTitle>Breakdown Log</CardTitle>
+                  </CardHeading>
+                  <CardToolbar>
+                    <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
+                      <Button onClick={() => setBreakdownDialogOpen(true)}>
+                        <Plus /> Report Breakdown
+                      </Button>
+                    </RequirePermission>
+                  </CardToolbar>
+                </CardHeader>
+                <CardTable>
+                  <ScrollArea>
+                    <DataGridTable />
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardTable>
+                <CardFooter>
+                  <DataGridPagination />
+                </CardFooter>
+              </Card>
+            </DataGrid>
+          )}
         </TabsContent>
       </Tabs>
 

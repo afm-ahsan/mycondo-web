@@ -3,12 +3,8 @@ import {
   useGetApiV1FacilityBookingsQuery,
   useGetApiV1FacilityBookingsUpcomingQuery,
   usePostApiV1FacilityBookingsByIdApproveMutation,
-  usePostApiV1FacilityBookingsByIdCancelMutation,
   usePostApiV1FacilityBookingsByIdCheckInMutation,
   usePostApiV1FacilityBookingsByIdCompleteMutation,
-  usePostApiV1FacilityBookingsByIdConfirmPaymentMutation,
-  usePostApiV1FacilityBookingsByIdInspectMutation,
-  usePostApiV1FacilityBookingsByIdMarkNoShowMutation,
   usePostApiV1FacilityBookingsByIdRejectMutation,
   usePostApiV1FacilityBookingsByIdSubmitMutation,
   usePostApiV1FacilityBookingsMutation,
@@ -22,9 +18,11 @@ export const useRequestBooking = usePostApiV1FacilityBookingsMutation;
 export const useSubmitBooking = usePostApiV1FacilityBookingsByIdSubmitMutation;
 export const useApproveBooking = usePostApiV1FacilityBookingsByIdApproveMutation;
 export const useRejectBooking = usePostApiV1FacilityBookingsByIdRejectMutation;
-export const useConfirmBookingPayment = usePostApiV1FacilityBookingsByIdConfirmPaymentMutation;
 export const useCheckInBooking = usePostApiV1FacilityBookingsByIdCheckInMutation;
 export const useCompleteBooking = usePostApiV1FacilityBookingsByIdCompleteMutation;
-export const useInspectBooking = usePostApiV1FacilityBookingsByIdInspectMutation;
-export const useCancelBooking = usePostApiV1FacilityBookingsByIdCancelMutation;
-export const useMarkBookingNoShow = usePostApiV1FacilityBookingsByIdMarkNoShowMutation;
+
+// ConfirmPayment/Inspect/Cancel/MarkNoShow require X-Idempotency-Key (backend
+// `.RequireIdempotencyKey()`) — deliberately NOT re-exported here. Use
+// useConfirmBookingPaymentIdempotentMutation / useInspectBookingIdempotentMutation /
+// useCancelBookingIdempotentMutation / useMarkBookingNoShowIdempotentMutation from
+// `@/api/idempotentEndpoints` instead.

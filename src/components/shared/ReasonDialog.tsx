@@ -21,8 +21,13 @@ interface ReasonDialogProps {
   onConfirm: (reason: string) => void;
 }
 
-/** Generic "confirm with required text" dialog, mirrors amenities/components/OverrideReasonDialog.tsx
- * exactly — reused here for reject/adjustment/breakdown-resolution reasons. */
+/**
+ * Generic "confirm with a required reason" dialog — reject/cancel/no-show/breakdown-resolution/
+ * corrections-request/move-out reasons. Consolidated in UX-4 from three byte-identical feature-local
+ * copies (amenities' `OverrideReasonDialog`, operations' and leasing's own `ReasonDialog`) once a
+ * third feature needed the exact same shape — same promotion precedent as `ConfirmActionDialog`
+ * (payroll → shared in UX-3).
+ */
 export function ReasonDialog({
   open,
   onOpenChange,

@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatBdt } from '@/lib/helpers';
+import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import type { FacilityDto } from '@/api/generated/mycondoApi';
 
 /**
@@ -25,8 +25,8 @@ export function AvailabilityPanel({ facility }: { facility: FacilityDto }) {
               : '24 hours'
           }
         />
-        <Field label="Booking charge" value={formatBdt(facility.bookingChargeAmount)} />
-        <Field label="Deposit" value={formatBdt(facility.depositAmount)} />
+        <Field label="Booking charge" value={<MoneyDisplay amount={facility.bookingChargeAmount} />} />
+        <Field label="Deposit" value={<MoneyDisplay amount={facility.depositAmount} />} />
         <Field
           label="Cancellation policy"
           value={`Full refund up to ${facility.cancellationDeadlineHours}h before; ${facility.cancellationDeductionPercentage}% forfeited within that window`}
@@ -41,7 +41,7 @@ export function AvailabilityPanel({ facility }: { facility: FacilityDto }) {
   );
 }
 
-function Field({ label, value }: { label: string; value: string }) {
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div>
       <div className="text-muted-foreground text-xs">{label}</div>
