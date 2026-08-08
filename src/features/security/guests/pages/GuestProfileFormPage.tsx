@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useCreateGuestProfile } from '../api/guestsApi';
 import {
@@ -67,9 +68,18 @@ export function GuestProfileFormPage() {
   }
 
   return (
-    <Card className="max-w-lg">
+    <>
+      <PageHeader
+        title="New Guest"
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Visitor Management' },
+          { label: 'New Guest' },
+        ]}
+      />
+      <Card className="max-w-lg">
       <CardHeader>
-        <CardTitle>New Guest</CardTitle>
+        <CardTitle as="h2">New Guest</CardTitle>
       </CardHeader>
       <CardContent>
         {error && (
@@ -146,6 +156,7 @@ export function GuestProfileFormPage() {
           </form>
         </Form>
       </CardContent>
-    </Card>
+      </Card>
+    </>
   );
 }

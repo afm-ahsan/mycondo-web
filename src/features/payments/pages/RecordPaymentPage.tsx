@@ -3,7 +3,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { useRecordPaymentIdempotentMutation } from '@/api/idempotentEndpoints';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
@@ -73,7 +72,8 @@ export function RecordPaymentPage() {
         idempotencyKey,
       }).unwrap();
 
-      toast.success(`Payment of ${values.amount} recorded.`);
+      // No toast here — the persistent success view below (with amount, method, reference, and
+      // allocations) already confirms the result; a toast on top of it was duplicate feedback.
       setRecordedPayment(payment);
       resetIdempotencyKey();
     } catch (err) {

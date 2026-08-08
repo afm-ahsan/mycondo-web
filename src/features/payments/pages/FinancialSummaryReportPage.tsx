@@ -1,5 +1,6 @@
-import { AlertTriangle, FileClock, FileWarning, Receipt, TrendingUp, Wallet } from 'lucide-react';
-import { Card, CardHeader, CardHeading, CardTitle } from '@/components/ui/card';
+import { AlertTriangle, FileClock, FileWarning, Printer, Receipt, TrendingUp, Wallet } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardHeader, CardHeading, CardTitle, CardToolbar } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
@@ -38,16 +39,33 @@ export function FinancialSummaryReportPage() {
 
   return (
     <>
+      {/* Print-only: everything outside #print-root (sidebar, header, filter inputs) is hidden via
+          this page-local override — same pattern as TenantRegistrationPrintPage. No PDF library or
+          export architecture involved, just the browser's own print pipeline. */}
+      <style>{`
+        @media print {
+          body * { visibility: hidden; }
+          #print-root, #print-root * { visibility: visible; }
+          #print-root { position: absolute; inset: 0; width: 100%; margin: 0; padding: 0; }
+          #print-hide-on-print { display: none !important; }
+        }
+      `}</style>
+
       <PageHeader
         title="Financial Summary"
         crumbs={[{ label: 'Billing & Collections' }, { label: 'Reports' }, { label: 'Financial Summary' }]}
       />
 
-      <Card className="mb-4">
+      <Card className="mb-4" id="print-hide-on-print">
         <CardHeader>
           <CardHeading>
             <CardTitle>Filters</CardTitle>
           </CardHeading>
+          <CardToolbar>
+            <Button variant="outline" size="sm" onClick={() => window.print()}>
+              <Printer /> Print
+            </Button>
+          </CardToolbar>
         </CardHeader>
         <div className="flex flex-wrap gap-4 p-4">
           <div className="space-y-1 w-full sm:w-56">
@@ -72,7 +90,7 @@ export function FinancialSummaryReportPage() {
       {isError ? (
         <ErrorState description="Couldn't load the financial summary." onRetry={refetch} />
       ) : (
-        <div className="space-y-4">
+        <div id="print-root" className="space-y-4">
           <div>
             <h3 className="text-muted-foreground text-sm font-medium mb-2">
               This period ({formatDate(filters.fromDate)} – {formatDate(filters.toDate)})
@@ -118,7 +136,7 @@ export function FinancialSummaryReportPage() {
                 value={data?.overdueInvoiceCount ?? 0}
                 icon={AlertTriangle}
                 isLoading={isFetching}
-                tone={data && data.overdueInvoiceCount > 0 ? 'destructive' : 'primary'}
+                tone={data && Number(data.overdueInvoiceCount) > 0 ? 'destructive' : 'primary'}
               />
             </div>
           </div>

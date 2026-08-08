@@ -2,6 +2,7 @@ import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
 import { screen } from '@testing-library/react';
+import { axe } from 'vitest-axe';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -45,5 +46,13 @@ describe('GuestProfileFormPage', () => {
     expect(
       await screen.findByText('Phone number is already registered to another guest.'),
     ).toBeInTheDocument();
+  });
+
+  it('has no detectable axe violations', async () => {
+    const { container } = renderWithProviders(<GuestProfileFormPage />, {
+      auth: { user: guardUser, isInitialized: true },
+    });
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

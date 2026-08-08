@@ -35,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -184,6 +185,14 @@ export function GuestDirectoryPage() {
 
   return (
     <>
+      <PageHeader
+        title="Guest Register"
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Visitor Management' },
+          { label: 'Guest Register' },
+        ]}
+      />
       <DataGrid
         table={table}
         recordCount={total}
@@ -194,7 +203,7 @@ export function GuestDirectoryPage() {
         <Card>
           <CardHeader>
             <CardHeading>
-              <CardTitle>Guest Register</CardTitle>
+              <CardTitle as="h2">Guest Register</CardTitle>
               <SearchInput
                 value={search}
                 onChange={setSearch}

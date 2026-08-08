@@ -1,5 +1,6 @@
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
+import { formatDateTime } from '@/lib/helpers';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
@@ -30,7 +31,7 @@ const columns: ColumnDef<AccessSessionDto>[] = [
     id: 'entryAtUtc',
     accessorFn: (row) => row.entryAtUtc,
     header: ({ column }) => <DataGridColumnHeader title="Entry time" column={column} />,
-    cell: ({ row }) => new Date(row.original.entryAtUtc).toLocaleString(),
+    cell: ({ row }) => formatDateTime(row.original.entryAtUtc),
   },
   {
     id: 'remarks',

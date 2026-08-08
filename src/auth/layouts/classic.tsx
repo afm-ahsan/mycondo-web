@@ -15,13 +15,13 @@ export function ClassicLayout() {
           }
         `}
       </style>
-      <div className="flex flex-col items-center justify-center grow bg-center bg-no-repeat page-bg">
+      <main className="flex flex-col items-center justify-center grow bg-center bg-no-repeat page-bg">
         <div className="m-5">
           <Link to="/">
             <img
               src={toAbsoluteUrl('/media/app/mini-logo.svg')}
               className="h-[35px] max-w-none"
-              alt=""
+              alt="MyCondo"
             />
           </Link>
         </div>
@@ -30,7 +30,7 @@ export function ClassicLayout() {
             <Outlet />
           </CardContent>
         </Card>
-      </div>
+      </main>
     </>
   );
 }

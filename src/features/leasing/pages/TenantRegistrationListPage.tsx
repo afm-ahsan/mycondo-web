@@ -9,6 +9,8 @@ import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { toUserMessage } from '@/api/errors';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import type { OccupancyRegistrationDto } from '@/api/generated/mycondoApi';
@@ -35,7 +37,7 @@ export function TenantRegistrationListPage() {
   const [pagination, setPagination] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 });
   const [status, setStatus] = useState<string>('all');
 
-  const { data, isFetching, isError } = useTenantRegistrations({
+  const { data, isFetching, isError, error, refetch } = useTenantRegistrations({
     status: status === 'all' ? undefined : status,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
@@ -96,48 +98,52 @@ export function TenantRegistrationListPage() {
         }
       />
 
-      {isError && <p className="text-destructive mb-2 text-sm">Failed to load registrations. Please try again.</p>}
-
-      <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No tenant registrations yet.">
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Registrations</CardTitle>
-            </CardHeading>
-            <CardToolbar>
-              <Select value={status} onValueChange={setStatus}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {STATUS_FILTERS.map((f) => (
-                    <SelectItem key={f.value} value={f.value}>
-                      {f.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </CardToolbar>
-          </CardHeader>
-
-          {/* Below `md`, a table forces horizontal scroll — this feature's list is narrow enough
-              (4 columns) that a stacked card per row reads better than a scrolling table. */}
-          <div className="hidden md:block">
-            <CardTable>
-              <DataGridTable />
-            </CardTable>
-          </div>
-          <div className="divide-border divide-y md:hidden">
-            {(data?.items ?? []).map((item) => (
-              <RegistrationCard key={item.occupancyRegistrationId} registration={item} />
-            ))}
-          </div>
-
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No tenant registrations yet.">
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Registrations</CardTitle>
+              </CardHeading>
+              <CardToolbar>
+                <Select value={status} onValueChange={setStatus}>
+                  <SelectTrigger className="w-48">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {STATUS_FILTERS.map((f) => (
+                      <SelectItem key={f.value} value={f.value}>
+                        {f.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </CardToolbar>
+            </CardHeader>
+
+            {/* Below `md`, a table forces horizontal scroll — this feature's list is narrow enough
+                (4 columns) that a stacked card per row reads better than a scrolling table. */}
+            <div className="hidden md:block">
+              <CardTable>
+                <DataGridTable />
+              </CardTable>
+            </div>
+            <div className="divide-border divide-y md:hidden">
+              {(data?.items ?? []).map((item) => (
+                <RegistrationCard key={item.occupancyRegistrationId} registration={item} />
+              ))}
+            </div>
+
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
     </>
   );
 }
