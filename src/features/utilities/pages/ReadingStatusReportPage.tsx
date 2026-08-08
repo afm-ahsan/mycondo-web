@@ -37,7 +37,7 @@ export function ReadingStatusReportPage({ utilityType }: ReadingStatusReportPage
     utilityType,
   });
 
-  const countByStatus = new Map((data ?? []).map((line) => [line.status, line.count]));
+  const countByStatus = new Map((data ?? []).map((line) => [line.status, Number(line.count)] as const));
   const total = [...countByStatus.values()].reduce((sum, c) => sum + c, 0);
   const billed = countByStatus.get('Billed') ?? 0;
   const unbilled = total - billed;

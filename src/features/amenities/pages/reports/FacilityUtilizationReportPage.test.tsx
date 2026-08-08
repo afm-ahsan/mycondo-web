@@ -21,11 +21,11 @@ const viewerUser: AuthUser = {
 
 describe('FacilityUtilizationReportPage', () => {
   it('renders server-computed utilization counts without recalculating them', async () => {
-    let receivedRange: { fromDate: string | null; toDate: string | null } | null = null;
+    const receivedRangeRef: { current: { fromDate: string | null; toDate: string | null } | null } = { current: null };
     server.use(
       http.get(`${API_BASE}/api/v1/reports/facilities/utilization`, ({ request }) => {
         const url = new URL(request.url);
-        receivedRange = { fromDate: url.searchParams.get('fromDate'), toDate: url.searchParams.get('toDate') };
+        receivedRangeRef.current = { fromDate: url.searchParams.get('fromDate'), toDate: url.searchParams.get('toDate') };
         return HttpResponse.json([
           { facilityId: 'fac-1', facilityName: 'Main Hall', totalBookings: 12, completedBookings: 9, cancelledBookings: 2, noShowBookings: 1 },
         ]);
@@ -35,9 +35,9 @@ describe('FacilityUtilizationReportPage', () => {
 
     renderWithProviders(<FacilityUtilizationReportPage />, { auth: { user: viewerUser, isInitialized: true } });
 
-    await waitFor(() => expect(receivedRange).not.toBeNull());
-    expect(receivedRange?.fromDate).toBeTruthy();
-    expect(receivedRange?.toDate).toBeTruthy();
+    await waitFor(() => expect(receivedRangeRef.current).not.toBeNull());
+    expect(receivedRangeRef.current?.fromDate).toBeTruthy();
+    expect(receivedRangeRef.current?.toDate).toBeTruthy();
 
     expect(await screen.findByText('Main Hall')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();

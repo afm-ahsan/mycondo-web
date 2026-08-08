@@ -87,9 +87,15 @@ function readCorrelationId(response: Response | undefined): string | undefined {
   return response?.headers.get(CORRELATION_HEADER) ?? undefined;
 }
 
+// The generated client (src/api/generated/mycondoApi.ts) doesn't use RTK Query's cache-tag
+// invalidation system at all (its own `tag: true` codegen option only groups hooks by OpenAPI tag
+// name, unrelated to this). These tag types exist solely for src/api/idempotentEndpoints.ts's
+// hand-authored mutations, which do use providesTags/invalidatesTags — never removed even though
+// tsc -b (see mycondo-web/CLAUDE.md) never actually checked this file's tags for real were it not
+// declared here.
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery: baseQueryWithRefresh,
   endpoints: () => ({}),
-  tagTypes: [],
+  tagTypes: ['Payments', 'Invoices', 'ResidentAccounts', 'Readings', 'Facility Bookings'],
 });

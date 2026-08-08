@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -27,7 +28,7 @@ interface StopSessionDialogProps {
 }
 
 export function StopSessionDialog({ open, onOpenChange, isSubmitting, onSubmit }: StopSessionDialogProps) {
-  const form = useForm<StopSessionSchemaType>({
+  const form = useForm<z.input<typeof stopSessionSchema>, unknown, StopSessionSchemaType>({
     resolver: zodResolver(stopSessionSchema),
     defaultValues: { closingFuelLevel: 0, outageReason: '', hourMeterReading: undefined },
   });

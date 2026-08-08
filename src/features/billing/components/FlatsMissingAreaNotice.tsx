@@ -33,7 +33,7 @@ export function FlatsMissingAreaNotice({ buildingId }: FlatsMissingAreaNoticePro
           {data.total} flat{Number(data.total) === 1 ? '' : 's'} in this building have no recorded area — any
           PerSquareFoot rule will skip them.
         </AlertTitle>
-        <Button variant="link" size="sm" className="h-auto p-0 mt-1" onClick={() => setExpanded((v) => !v)}>
+        <Button variant="dim" size="sm" className="h-auto p-0 mt-1 underline" onClick={() => setExpanded((v) => !v)}>
           {expanded ? 'Hide flat list' : 'Show flat list'}
         </Button>
         {expanded && (

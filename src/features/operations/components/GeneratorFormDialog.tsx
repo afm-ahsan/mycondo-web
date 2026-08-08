@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -34,7 +35,7 @@ interface GeneratorFormDialogProps {
  * "Manage Generators", mirroring Slice G's FacilitySettingsPage precedent for otherwise-unhoused
  * master-data screens. */
 export function GeneratorFormDialog({ open, onOpenChange, isSubmitting, onSubmit, initialValues }: GeneratorFormDialogProps) {
-  const form = useForm<GeneratorSchemaType>({
+  const form = useForm<z.input<typeof generatorSchema>, unknown, GeneratorSchemaType>({
     resolver: zodResolver(generatorSchema),
     defaultValues: initialValues ?? { buildingId: '', name: '', model: '', capacityKva: undefined, location: '' },
   });

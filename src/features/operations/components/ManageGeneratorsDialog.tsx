@@ -194,7 +194,7 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
                 buildingId: editingGenerator.buildingId,
                 name: editingGenerator.name,
                 model: editingGenerator.model ?? undefined,
-                capacityKva: editingGenerator.capacityKva ?? undefined,
+                capacityKva: editingGenerator.capacityKva != null ? Number(editingGenerator.capacityKva) : undefined,
                 location: editingGenerator.location ?? undefined,
               }
             : undefined

@@ -40,7 +40,7 @@ export function FinancialSummarySection() {
     <Card>
       <CardHeader>
         <CardHeading>
-          <CardTitle>Financial</CardTitle>
+          <CardTitle as="h2">Financial</CardTitle>
         </CardHeading>
       </CardHeader>
       <CardContent>
@@ -74,7 +74,7 @@ export function FinancialSummarySection() {
               value={data?.overdueInvoiceCount ?? 0}
               icon={AlertTriangle}
               isLoading={isFetching}
-              tone={data && data.overdueInvoiceCount > 0 ? 'destructive' : 'primary'}
+              tone={data && Number(data.overdueInvoiceCount) > 0 ? 'destructive' : 'primary'}
               caption={data ? `As of ${formatDate(data.asOfDate)}` : undefined}
             />
           </div>

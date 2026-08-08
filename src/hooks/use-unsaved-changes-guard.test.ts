@@ -33,7 +33,7 @@ describe('useUnsavedChangesGuard', () => {
 
   it('prevents the default beforeunload behavior while dirty', () => {
     renderHook(() => useUnsavedChangesGuard(true));
-    const handler = addSpy.mock.calls.find((call) => call[0] === 'beforeunload')?.[1] as (
+    const handler = addSpy.mock.calls.find((call: unknown[]) => call[0] === 'beforeunload')?.[1] as (
       e: Partial<BeforeUnloadEvent>,
     ) => void;
 

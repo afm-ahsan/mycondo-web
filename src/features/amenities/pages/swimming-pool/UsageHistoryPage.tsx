@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import {
   type ColumnDef,
+  functionalUpdate,
   getCoreRowModel,
   type PaginationState,
+  type Updater,
   useReactTable,
 } from '@tanstack/react-table';
 import { AlertTriangle, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
@@ -78,8 +80,8 @@ export function UsageHistoryPage() {
     pageSize: Number(filters.pageSize) || 10,
   };
 
-  function handlePaginationChange(updater: (old: PaginationState) => PaginationState) {
-    const next = updater(pagination);
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = functionalUpdate(updater, pagination);
     setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
   }
 

@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import type { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -28,7 +29,7 @@ interface CompleteMaintenanceDialogProps {
 }
 
 export function CompleteMaintenanceDialog({ open, onOpenChange, isSubmitting, onSubmit }: CompleteMaintenanceDialogProps) {
-  const form = useForm<CompleteMaintenanceSchemaType>({
+  const form = useForm<z.input<typeof completeMaintenanceSchema>, unknown, CompleteMaintenanceSchemaType>({
     resolver: zodResolver(completeMaintenanceSchema),
     defaultValues: {
       performedAtUtc: new Date().toISOString().slice(0, 10),

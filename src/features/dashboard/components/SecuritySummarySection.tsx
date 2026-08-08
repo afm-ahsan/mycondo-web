@@ -22,13 +22,13 @@ export function SecuritySummarySection() {
     return null;
   }
 
-  const currentlyInsideTotal = data?.currentlyInside.reduce((sum, c) => sum + c.count, 0) ?? 0;
+  const currentlyInsideTotal = data?.currentlyInside.reduce((sum, c) => sum + Number(c.count), 0) ?? 0;
 
   return (
     <Card>
       <CardHeader>
         <CardHeading>
-          <CardTitle>Security &amp; Front Desk</CardTitle>
+          <CardTitle as="h2">Security &amp; Front Desk</CardTitle>
         </CardHeading>
       </CardHeader>
       <CardContent>
@@ -52,7 +52,7 @@ export function SecuritySummarySection() {
               value={data?.parcelsAwaitingCollectionCount ?? 0}
               icon={Package}
               isLoading={isFetching}
-              tone={data && data.parcelsAwaitingCollectionCount > 0 ? 'warning' : 'primary'}
+              tone={data && Number(data.parcelsAwaitingCollectionCount) > 0 ? 'warning' : 'primary'}
             />
           </div>
         )}

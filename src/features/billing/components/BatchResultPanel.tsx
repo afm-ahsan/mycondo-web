@@ -29,7 +29,7 @@ function OutcomeSection({
         <Badge variant={variant} appearance="light">
           {title}: {count}
         </Badge>
-        <Button variant="link" size="sm" className="h-auto p-0" onClick={() => setExpanded((v) => !v)}>
+        <Button variant="dim" size="sm" className="h-auto p-0 underline" onClick={() => setExpanded((v) => !v)}>
           {expanded ? 'Hide details' : 'Show details'}
         </Button>
       </div>
