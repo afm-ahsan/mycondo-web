@@ -5,6 +5,7 @@ import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { RequireAuth } from '@/lib/auth/RequireAuth';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { RequirePlatformAuth } from '@/lib/auth/RequirePlatformAuth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
@@ -18,6 +19,18 @@ const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'Log
 const RegisterPage = lazyPage(() => import('@/features/auth/pages/RegisterPage'), 'RegisterPage');
 const AuthWelcomeMessagePage = lazyPage(() => import('@/pages/auth'), 'AuthWelcomeMessagePage');
 const AuthAccountDeactivatedPage = lazyPage(() => import('@/pages/auth'), 'AuthAccountDeactivatedPage');
+
+// Platform (see mycondo-docs ADR-019) — deliberately not linked from the tenant /login page; an
+// internal-only route for MyCondo's own operations staff, structurally separate from every tenant
+// route above and below it.
+const PlatformLoginPage = lazyPage(
+  () => import('@/features/platform/pages/PlatformLoginPage'),
+  'PlatformLoginPage',
+);
+const PlatformDashboardPage = lazyPage(
+  () => import('@/features/platform/pages/PlatformDashboardPage'),
+  'PlatformDashboardPage',
+);
 
 // Security
 const security = () => import('@/features/security');
@@ -1038,7 +1051,25 @@ export function AppRoutingSetup() {
             </Suspense>
           }
         />
+        <Route
+          path="/platform/login"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <PlatformLoginPage />
+            </Suspense>
+          }
+        />
       </Route>
+      <Route
+        path="/platform/dashboard"
+        element={
+          <RequirePlatformAuth>
+            <Suspense fallback={<PageSkeleton />}>
+              <PlatformDashboardPage />
+            </Suspense>
+          </RequirePlatformAuth>
+        }
+      />
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
   );
