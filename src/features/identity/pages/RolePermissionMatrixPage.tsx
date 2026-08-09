@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
@@ -92,11 +93,23 @@ export function RolePermissionMatrixPage() {
               }`}
             >
               <span>{role.name}</span>
-              {role.isSystem && (
-                <Badge variant="info" appearance="light">
-                  System
-                </Badge>
-              )}
+              <span className="flex items-center gap-1">
+                {role.requiresBuildingScope === true && (
+                  <Badge variant="secondary" appearance="light">
+                    Building-scoped
+                  </Badge>
+                )}
+                {role.requiresBuildingScope === false && (
+                  <Badge variant="secondary" appearance="light">
+                    Organization-wide
+                  </Badge>
+                )}
+                {role.isSystem && (
+                  <Badge variant="info" appearance="light">
+                    System
+                  </Badge>
+                )}
+              </span>
             </button>
           ))}
         </CardContent>
@@ -106,7 +119,11 @@ export function RolePermissionMatrixPage() {
         {selectedRole ? (
           <>
             <RolePermissionsPanel roleId={selectedRole.roleId} roleName={selectedRole.name} />
-            <RoleAssignmentsPanel roleId={selectedRole.roleId} roleName={selectedRole.name} />
+            <RoleAssignmentsPanel
+              roleId={selectedRole.roleId}
+              roleName={selectedRole.name}
+              requiresBuildingScope={selectedRole.requiresBuildingScope ?? null}
+            />
           </>
         ) : (
           <Card>
@@ -283,27 +300,41 @@ function RolePermissionsPanel({ roleId, roleName }: { roleId: string; roleName: 
   );
 }
 
-function RoleAssignmentsPanel({ roleId, roleName }: { roleId: string; roleName: string }) {
+function RoleAssignmentsPanel({
+  roleId,
+  roleName,
+  requiresBuildingScope,
+}: {
+  roleId: string;
+  roleName: string;
+  /** true = every assignment must carry a Building (condominium-scoped system roles); false = no
+   * assignment may carry one (OrganizationAdmin); null/undefined = no constraint, matching every
+   * pre-Phase-2 role's behavior (custom roles, legacy tenant SuperAdmin). */
+  requiresBuildingScope: boolean | null;
+}) {
   const { data: assignments, isLoading: isLoadingAssignments } = useRoleAssignments({ id: roleId });
   const { data: users } = useUsers();
   const [assignRole, { isLoading: isAssigning }] = useAssignRoleToUser();
   const [revokeRole] = useRevokeRoleFromUser();
   const [selectedUserId, setSelectedUserId] = useState<string>('');
-  const [buildingId, setBuildingId] = useState('');
+  const [buildingId, setBuildingId] = useState<string | undefined>(undefined);
 
   const assignedUserIds = new Set(assignments?.map((a) => a.userId) ?? []);
   const assignableUsers = users?.filter((u) => u.isActive) ?? [];
+  const buildingRequired = requiresBuildingScope === true;
+  const buildingForbidden = requiresBuildingScope === false;
+  const canAssign = selectedUserId && (!buildingRequired || buildingId);
 
   async function handleAssign() {
-    if (!selectedUserId) return;
+    if (!canAssign) return;
     try {
       await assignRole({
         id: roleId,
-        assignRoleToUserRequest: { userId: selectedUserId, buildingId: buildingId || null },
+        assignRoleToUserRequest: { userId: selectedUserId, buildingId: buildingForbidden ? null : (buildingId ?? null) },
       }).unwrap();
       toast.success('Role assigned.');
       setSelectedUserId('');
-      setBuildingId('');
+      setBuildingId(undefined);
     } catch (err) {
       toast.error(toUserMessage(err));
     }
@@ -378,15 +409,19 @@ function RoleAssignmentsPanel({ roleId, roleName }: { roleId: string; roleName: 
                 </SelectContent>
               </Select>
             </div>
-            <div className="w-40">
-              <label className="text-xs text-muted-foreground">Building ID (optional)</label>
-              <Input
-                value={buildingId}
-                onChange={(e) => setBuildingId(e.target.value)}
-                placeholder="Tenant-wide"
-              />
-            </div>
-            <Button onClick={handleAssign} disabled={!selectedUserId || isAssigning}>
+            {!buildingForbidden && (
+              <div className="w-56">
+                <label className="text-xs text-muted-foreground">
+                  Building{buildingRequired ? '' : ' (optional — leave blank for tenant-wide)'}
+                </label>
+                <BuildingSelect
+                  value={buildingId}
+                  onValueChange={setBuildingId}
+                  placeholder={buildingRequired ? 'Select a building' : 'Tenant-wide'}
+                />
+              </div>
+            )}
+            <Button onClick={handleAssign} disabled={!canAssign || isAssigning}>
               {isAssigning ? 'Assigning...' : 'Assign'}
             </Button>
           </div>

@@ -33,7 +33,9 @@ function setUpMocks() {
 
   server.use(
     http.get(`${API_BASE}/api/v1/roles`, () =>
-      HttpResponse.json([{ roleId: 'role-1', name: 'BuildingAdmin', description: '', isSystem: false }]),
+      HttpResponse.json([
+        { roleId: 'role-1', name: 'BuildingAdmin', description: '', isSystem: false, code: null, requiresBuildingScope: null },
+      ]),
     ),
     http.get(`${API_BASE}/api/v1/permissions`, () => HttpResponse.json(permissionCatalogue)),
     http.get(`${API_BASE}/api/v1/roles/role-1/permissions`, () =>
@@ -69,5 +71,34 @@ describe('RolePermissionMatrixPage', () => {
     await waitFor(() => {
       expect(checkbox).toHaveAttribute('data-state', 'checked');
     });
+  });
+
+  it('shows a Building-scoped badge and picker for a condominium-scoped role, and an Organization-wide badge with no picker otherwise', async () => {
+    server.use(
+      http.get(`${API_BASE}/api/v1/roles`, () =>
+        HttpResponse.json([
+          { roleId: 'role-condo', name: 'CondoAdmin', description: '', isSystem: true, code: 'condominium.admin', requiresBuildingScope: true },
+          { roleId: 'role-org', name: 'OrganizationAdmin', description: '', isSystem: true, code: 'organization.admin', requiresBuildingScope: false },
+        ]),
+      ),
+      http.get(`${API_BASE}/api/v1/permissions`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/roles/:id/permissions`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/roles/:id/assignments`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/users`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+        HttpResponse.json({ items: [], page: 1, pageSize: 100, totalCount: 0 }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<RolePermissionMatrixPage />, { auth: { user: roleManagerUser, isInitialized: true } });
+
+    await user.click(await screen.findByRole('button', { name: /condoadmin/i }));
+    expect(await screen.findByText('Building-scoped')).toBeInTheDocument();
+    expect(await screen.findByText(/select a building/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^assign$/i })).toBeDisabled();
+
+    await user.click(await screen.findByRole('button', { name: /organizationadmin/i }));
+    expect(await screen.findByText('Organization-wide')).toBeInTheDocument();
+    expect(screen.queryByText(/select a building/i)).not.toBeInTheDocument();
   });
 });

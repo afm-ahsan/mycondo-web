@@ -17519,7 +17519,9 @@
           "roleId",
           "name",
           "description",
-          "isSystem"
+          "isSystem",
+          "code",
+          "requiresBuildingScope"
         ],
         "type": "object",
         "properties": {
@@ -17535,6 +17537,18 @@
           },
           "isSystem": {
             "type": "boolean"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "requiresBuildingScope": {
+            "type": [
+              "null",
+              "boolean"
+            ]
           }
         }
       },
