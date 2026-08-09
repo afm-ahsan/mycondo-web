@@ -274,6 +274,191 @@
         }
       }
     },
+    "/api/v1/platform/auth/login": {
+      "post": {
+        "tags": [
+          "Platform Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlatformLoginCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/auth/refresh": {
+      "post": {
+        "tags": [
+          "Platform Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformAuthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/auth/logout": {
+      "post": {
+        "tags": [
+          "Platform Auth"
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations": {
+      "get": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TenantSummaryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProvisionTenantCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProvisionTenantResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/{id}": {
+      "get": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantSummaryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/{id}/suspend": {
+      "post": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/{id}/activate": {
+      "post": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/tenants/by-slug/{slug}": {
       "get": {
         "tags": [
@@ -15675,6 +15860,77 @@
           }
         }
       },
+      "PlatformAuthenticatedUserDto": {
+        "required": [
+          "platformUserId",
+          "email",
+          "displayName",
+          "roles",
+          "permissions"
+        ],
+        "type": "object",
+        "properties": {
+          "platformUserId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "roles": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "description": "Deliberately has no TenantId field — unlike\r\nAuthenticatedUserDto, there is no tenant\r\ndimension to carry. A Platform identity is not a tenant member. See mycondo-docs ADR-019."
+      },
+      "PlatformAuthResponse": {
+        "required": [
+          "accessToken",
+          "accessTokenExpiresAtUtc",
+          "user"
+        ],
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string"
+          },
+          "accessTokenExpiresAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "user": {
+            "$ref": "#/components/schemas/PlatformAuthenticatedUserDto"
+          }
+        }
+      },
+      "PlatformLoginCommand": {
+        "required": [
+          "email",
+          "password"
+        ],
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        },
+        "description": "Deliberately carries no TenantId/Organization/OrganizationCode/TenantSlug field — not optional,\r\nstructurally absent. A Platform SuperAdmin authenticates without ever declaring a tenant. See\r\nmycondo-docs ADR-019 and the approved Phase 1 blueprint, §5 (\"Platform Authentication\")."
+      },
       "PoolDailyUsageReportDto": {
         "required": [
           "date",
@@ -18312,6 +18568,12 @@
     },
     {
       "name": "Auth"
+    },
+    {
+      "name": "Platform Auth"
+    },
+    {
+      "name": "Platform Organizations"
     },
     {
       "name": "Tenants"
