@@ -225,6 +225,22 @@ Dev server runs on `http://localhost:4219` (fixed in `vite.config.ts`, not env-d
 `docs/local-development-ports.md` for the full reserved-port registry shared with sibling local
 projects on this machine.
 
+## Mandatory Git Branch Policy
+
+Before modifying code for any new feature, bug fix, refactor, architecture change, or other meaningful development task:
+
+1. Inspect `git status`, current branch, and recent history.
+2. Preserve unrelated/uncommitted work.
+3. Fetch the latest remote state.
+4. Create or switch to a dedicated task branch from the latest appropriate `main`.
+5. Verify the branch and base before editing code.
+
+Never develop directly on `main` unless explicitly instructed. Never use an unrelated currently checked-out feature branch as the base for new work — the branch that happens to be checked out is not automatically the correct one.
+
+Branch from something other than `main` only when the task has a genuine unmerged dependency; report `DEPENDENT BRANCH REQUIRED` and explain the dependency before proceeding, rather than silently stacking a new branch on top of unmerged work.
+
+Branch creation is mandatory pre-flight work, not optional — but it does not by itself authorize commit, push, merge, rebase, force-push, branch deletion, or PR creation. Those require task-specific authorization.
+
 ## Always Do
 
 - Use **strict TypeScript**; no `any`, no `@ts-ignore` without comment justifying it.
