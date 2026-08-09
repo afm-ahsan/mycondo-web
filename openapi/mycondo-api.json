@@ -32,6 +32,39 @@
         }
       }
     },
+    "/api/v1/properties/flats/{flatId}/ownerships": {
+      "get": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "flatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FlatOwnershipDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/household-members/{id}/deactivate": {
       "post": {
         "tags": [
@@ -1212,6 +1245,67 @@
         }
       }
     },
+    "/api/v1/properties/flat-ownerships": {
+      "post": {
+        "tags": [
+          "Property"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFlatOwnershipCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateFlatOwnershipResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/flat-ownerships/{id}": {
+      "delete": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/residents": {
       "post": {
         "tags": [
@@ -1316,6 +1410,83 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResidentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/residents/{id}/link-user": {
+      "post": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkResidentToUserRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/me/flats": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MyFlatDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me/invoices": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InvoiceDto"
+                  }
                 }
               }
             }
@@ -10532,6 +10703,55 @@
           }
         }
       },
+      "CreateFlatOwnershipCommand": {
+        "required": [
+          "userId",
+          "flatId",
+          "startDate"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "CreateFlatOwnershipResult": {
+        "required": [
+          "flatOwnershipId",
+          "userId",
+          "flatId",
+          "startDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatOwnershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "CreateFlatRequest": {
         "required": [
           "flatNumber",
@@ -11782,6 +12002,45 @@
           }
         }
       },
+      "FlatOwnershipDto": {
+        "required": [
+          "flatOwnershipId",
+          "userId",
+          "flatId",
+          "status",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatOwnershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        }
+      },
       "GasCylinderSupplierDto": {
         "required": [
           "gasCylinderSupplierId",
@@ -12842,6 +13101,18 @@
           }
         }
       },
+      "LinkResidentToUserRequest": {
+        "required": [
+          "userId"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
       "LoginCommand": {
         "required": [
           "tenantId",
@@ -13086,6 +13357,51 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "MyFlatDto": {
+        "required": [
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "relationshipType",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },
@@ -18575,6 +18891,9 @@
       "name": "Roles"
     },
     {
+      "name": "Property"
+    },
+    {
       "name": "Tenant Registrations"
     },
     {
@@ -18596,10 +18915,10 @@
       "name": "Users"
     },
     {
-      "name": "Property"
+      "name": "Residents"
     },
     {
-      "name": "Residents"
+      "name": "Me"
     },
     {
       "name": "Attachments"

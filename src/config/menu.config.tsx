@@ -11,6 +11,7 @@ import {
   Gauge,
   GraduationCap,
   HardHat,
+  Home,
   Landmark,
   LayoutGrid,
   Lightbulb,
@@ -28,6 +29,18 @@ import { type MenuConfig } from './types';
 
 export const MENU_SIDEBAR: MenuConfig = [
   { title: 'Dashboard', icon: LayoutGrid, path: '/' },
+  // No `permission` on these two — mycondo-api's GET /api/v1/me/flats and /me/invoices are gated by
+  // authentication only, with each backend query enforcing its own per-relationship permission check
+  // internally (Phase 3, mycondo-docs ADR-021). A user with no ownership/occupancy relationship
+  // simply sees an empty list, same as every other resident-facing self-service view.
+  {
+    title: 'My Flat',
+    icon: Home,
+    children: [
+      { title: 'My Flat', path: '/me/flats' },
+      { title: 'My Invoices', path: '/me/invoices' },
+    ],
+  },
   { heading: 'Administration' },
   {
     title: 'Administration',

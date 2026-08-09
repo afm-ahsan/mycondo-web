@@ -14,6 +14,12 @@ import { lazyPage } from './lazyPage';
 // Dashboard
 const DashboardPage = lazyPage(() => import('@/features/dashboard'), 'DashboardPage');
 
+// Me (self-service, Phase 3 — mycondo-docs ADR-021) — no RequirePermission wrapper: each backend
+// query enforces its own per-relationship permission check internally, so any authenticated user may
+// load the page (it may simply render empty for a user with no ownership/occupancy relationship).
+const MyFlatsPage = lazyPage(() => import('@/features/me'), 'MyFlatsPage');
+const MyInvoicesPage = lazyPage(() => import('@/features/me'), 'MyInvoicesPage');
+
 // Auth
 const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'LoginPage');
 const RegisterPage = lazyPage(() => import('@/features/auth/pages/RegisterPage'), 'RegisterPage');
@@ -196,6 +202,8 @@ export function AppRoutingSetup() {
       <Route element={<RequireAuth><Outlet /></RequireAuth>}>
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DashboardPage />} />
+          <Route path="/me/flats" element={<MyFlatsPage />} />
+          <Route path="/me/invoices" element={<MyInvoicesPage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route
             path="/public-profile/profiles/default/"
