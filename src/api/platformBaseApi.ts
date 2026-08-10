@@ -79,5 +79,6 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unkno
 export const platformBaseApi = createApi({
   reducerPath: 'platformApi',
   baseQuery: platformBaseQueryWithRefresh,
+  tagTypes: ['Organizations', 'Organization'],
   endpoints: () => ({}),
 });

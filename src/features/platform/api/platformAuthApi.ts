@@ -3,7 +3,6 @@ import type {
   PlatformAuthenticatedUserDto,
   PlatformAuthResponse as PlatformAuthResponseDto,
   PlatformLoginCommand as PlatformLoginRequest,
-  TenantSummaryDto as OrganizationSummaryDto,
 } from '@/api/generated/mycondoApi';
 import type { PlatformAuthUser } from '@/store/slices/platformAuthSlice';
 
@@ -20,12 +19,7 @@ import type { PlatformAuthUser } from '@/store/slices/platformAuthSlice';
 // The wire-shape *types* are NOT hand-duplicated, though — they're imported from the generated client
 // (confirmed structurally identical on comparison), so this file can't silently drift from the actual
 // backend contract the way a fully hand-authored set of interfaces could.
-export type {
-  PlatformAuthenticatedUserDto,
-  PlatformAuthResponseDto,
-  PlatformLoginRequest,
-  OrganizationSummaryDto,
-};
+export type { PlatformAuthenticatedUserDto, PlatformAuthResponseDto, PlatformLoginRequest };
 
 export function toPlatformAuthUser(dto: PlatformAuthenticatedUserDto): PlatformAuthUser {
   return {
@@ -48,9 +42,6 @@ const injectedPlatformAuthApi = platformBaseApi.injectEndpoints({
     platformLogout: builder.mutation<void, void>({
       query: () => ({ url: '/api/v1/platform/auth/logout', method: 'POST' }),
     }),
-    listOrganizations: builder.query<OrganizationSummaryDto[], void>({
-      query: () => ({ url: '/api/v1/platform/organizations', method: 'GET' }),
-    }),
   }),
 });
 
@@ -58,5 +49,4 @@ export const {
   usePlatformLoginMutation: usePlatformLogin,
   usePlatformRefreshMutation: usePlatformRefresh,
   usePlatformLogoutMutation: usePlatformLogout,
-  useListOrganizationsQuery,
 } = injectedPlatformAuthApi;

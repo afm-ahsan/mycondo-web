@@ -37,6 +37,14 @@ const PlatformDashboardPage = lazyPage(
   () => import('@/features/platform/pages/PlatformDashboardPage'),
   'PlatformDashboardPage',
 );
+const NewOrganizationWizardPage = lazyPage(
+  () => import('@/features/platform/pages/NewOrganizationWizardPage'),
+  'NewOrganizationWizardPage',
+);
+const PlatformOrganizationDetailPage = lazyPage(
+  () => import('@/features/platform/pages/PlatformOrganizationDetailPage'),
+  'PlatformOrganizationDetailPage',
+);
 
 // Security
 const security = () => import('@/features/security');
@@ -1074,6 +1082,26 @@ export function AppRoutingSetup() {
           <RequirePlatformAuth>
             <Suspense fallback={<PageSkeleton />}>
               <PlatformDashboardPage />
+            </Suspense>
+          </RequirePlatformAuth>
+        }
+      />
+      <Route
+        path="/platform/organizations/new"
+        element={
+          <RequirePlatformAuth>
+            <Suspense fallback={<PageSkeleton />}>
+              <NewOrganizationWizardPage />
+            </Suspense>
+          </RequirePlatformAuth>
+        }
+      />
+      <Route
+        path="/platform/organizations/:id"
+        element={
+          <RequirePlatformAuth>
+            <Suspense fallback={<PageSkeleton />}>
+              <PlatformOrganizationDetailPage />
             </Suspense>
           </RequirePlatformAuth>
         }

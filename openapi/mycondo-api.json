@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5219/"
+      "url": "https://localhost:7219/"
     }
   ],
   "paths": {
@@ -372,16 +372,55 @@
         "tags": [
           "Platform Organizations"
         ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/TenantSummaryDto"
-                  }
+                  "$ref": "#/components/schemas/PagedResultOfOrganizationListItemDto"
                 }
               }
             }
@@ -396,7 +435,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ProvisionTenantCommand"
+                "$ref": "#/components/schemas/ProvisionOrganizationWithAdminCommand"
               }
             }
           },
@@ -408,7 +447,26 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProvisionTenantResult"
+                  "$ref": "#/components/schemas/ProvisionOrganizationResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/stats": {
+      "get": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationSummaryStatsDto"
                 }
               }
             }
@@ -438,10 +496,41 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/TenantSummaryDto"
+                  "$ref": "#/components/schemas/OrganizationDetailDto"
                 }
               }
             }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrganizationRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -485,6 +574,62 @@
             }
           }
         ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/{id}/reactivate": {
+      "post": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/platform/organizations/{id}/modules": {
+      "put": {
+        "tags": [
+          "Platform Organizations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplaceOrganizationModulesRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "204": {
             "description": "No Content"
@@ -13865,6 +14010,199 @@
           }
         }
       },
+      "OrganizationAdministratorDto": {
+        "required": [
+          "userId",
+          "fullName",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        }
+      },
+      "OrganizationDetailDto": {
+        "required": [
+          "tenantId",
+          "name",
+          "code",
+          "slug",
+          "status",
+          "createdAtUtc",
+          "updatedAtUtc",
+          "administrator",
+          "enabledModuleKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "administrator": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/OrganizationAdministratorDto"
+              }
+            ]
+          },
+          "enabledModuleKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OrganizationListItemDto": {
+        "required": [
+          "tenantId",
+          "name",
+          "code",
+          "slug",
+          "status",
+          "primaryAdministratorFullName",
+          "primaryAdministratorEmail",
+          "createdAtUtc",
+          "enabledModuleCount"
+        ],
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "primaryAdministratorFullName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryAdministratorEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "createdAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "enabledModuleCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "OrganizationSummaryStatsDto": {
+        "required": [
+          "total",
+          "active",
+          "suspended",
+          "pendingActivation",
+          "recentlyCreated"
+        ],
+        "type": "object",
+        "properties": {
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "active": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "suspended": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pendingActivation": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "recentlyCreated": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "PagedResultOfAccessSessionDto": {
         "required": [
           "items",
@@ -15240,6 +15578,61 @@
           }
         }
       },
+      "PagedResultOfOrganizationListItemDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationListItemDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
       "PagedResultOfParcelDto": {
         "required": [
           "items",
@@ -16462,6 +16855,77 @@
           }
         }
       },
+      "ProvisionOrganizationResult": {
+        "required": [
+          "tenantId",
+          "name",
+          "code",
+          "slug",
+          "status",
+          "administratorUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "tenantId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "administratorUserId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        }
+      },
+      "ProvisionOrganizationWithAdminCommand": {
+        "required": [
+          "name",
+          "code",
+          "slug",
+          "administratorFullName",
+          "administratorEmail",
+          "administratorPassword",
+          "enabledModuleKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "administratorFullName": {
+            "type": "string"
+          },
+          "administratorEmail": {
+            "type": "string"
+          },
+          "administratorPassword": {
+            "type": "string"
+          },
+          "enabledModuleKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ProvisionTenantCommand": {
         "required": [
           "name",
@@ -17587,6 +18051,20 @@
           }
         }
       },
+      "ReplaceOrganizationModulesRequest": {
+        "required": [
+          "moduleKeys"
+        ],
+        "type": "object",
+        "properties": {
+          "moduleKeys": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "ReportPoolIncidentCommand": {
         "required": [
           "facilityId",
@@ -18691,6 +19169,24 @@
               "string"
             ],
             "format": "date"
+          }
+        }
+      },
+      "UpdateOrganizationRequest": {
+        "required": [
+          "name",
+          "code"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
