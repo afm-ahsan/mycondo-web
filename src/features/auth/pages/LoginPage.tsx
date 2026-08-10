@@ -99,7 +99,7 @@ export function LoginPage() {
             <FormItem>
               <FormLabel>Organization</FormLabel>
               <FormControl>
-                <Input placeholder="your-organization" {...field} />
+                <Input placeholder="Your organization name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

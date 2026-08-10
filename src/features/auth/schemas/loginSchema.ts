@@ -5,8 +5,9 @@ import { z } from 'zod';
 export const loginSchema = z.object({
   tenantSlug: z
     .string()
+    .trim()
     .min(1, { message: 'Organization is required.' })
-    .max(63, { message: 'Organization slug is too long.' }),
+    .max(200, { message: 'Organization name is too long.' }),
   email: z
     .string()
     .email({ message: 'Please enter a valid email address.' })
