@@ -88,7 +88,7 @@ export function RecordPaymentPage() {
   if (recordedPayment) {
     return (
       <>
-        <PageHeader title="Payment Recorded" crumbs={[{ label: 'Billing & Collections' }, { label: 'Payments' }, { label: 'Record' }]} />
+        <PageHeader title="Payment Recorded" crumbs={[{ label: 'Finance' }, { label: 'Payments' }, { label: 'Record' }]} />
         <Card className="max-w-xl">
           <CardContent className="pt-6 space-y-4">
             <Alert variant="success" appearance="light">
@@ -133,7 +133,7 @@ export function RecordPaymentPage() {
 
   return (
     <>
-      <PageHeader title="Record Payment" crumbs={[{ label: 'Billing & Collections' }, { label: 'Payments' }, { label: 'Record' }]} />
+      <PageHeader title="Record Payment" crumbs={[{ label: 'Finance' }, { label: 'Payments' }, { label: 'Record' }]} />
       <Card className="max-w-xl">
         <CardContent className="pt-6">
           {error && (

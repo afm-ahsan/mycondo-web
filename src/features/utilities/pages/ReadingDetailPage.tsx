@@ -97,7 +97,7 @@ export function ReadingDetailPage({ utilityType }: ReadingDetailPageProps) {
     <>
       <PageHeader
         title={`Reading — ${reading.periodStart} to ${reading.periodEnd}`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Readings', path: `/utilities/${utilityType.toLowerCase()}/readings` }, { label: 'Detail' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Readings', path: `/utilities/${utilityType.toLowerCase()}/readings` }, { label: 'Detail' }]}
         secondaryActions={
           <div className="flex gap-2">
             {reading.status === 'Draft' && (

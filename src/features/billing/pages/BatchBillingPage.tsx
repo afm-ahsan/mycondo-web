@@ -41,7 +41,7 @@ export function BatchBillingPage() {
     <>
       <PageHeader
         title="Generate Billing Run"
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Service Charges' }, { label: 'Generate Billing Run' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Service Charges' }, { label: 'Generate Billing Run' }]}
       />
 
       <div className="space-y-4">

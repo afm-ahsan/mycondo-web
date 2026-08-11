@@ -119,7 +119,7 @@ export function PaymentListPage() {
 
   return (
     <>
-      <PageHeader title="Payments" crumbs={[{ label: 'Billing & Collections' }, { label: 'Payments' }]} />
+      <PageHeader title="Payments" crumbs={[{ label: 'Finance' }, { label: 'Payments' }]} />
       {isError ? (
         <Card>
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />

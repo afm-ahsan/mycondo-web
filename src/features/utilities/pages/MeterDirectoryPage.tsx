@@ -110,7 +110,7 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
     <>
       <PageHeader
         title={`${utilityType} Meters`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Meters' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Meters' }]}
       />
 
       <div className="space-y-4">

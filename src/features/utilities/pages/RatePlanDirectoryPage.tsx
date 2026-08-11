@@ -119,7 +119,7 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
     <>
       <PageHeader
         title={`${utilityType} Rate Plans`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Rate Plans' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Rate Plans' }]}
       />
 
       <div className="space-y-4">

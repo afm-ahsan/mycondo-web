@@ -51,7 +51,7 @@ export function InvoiceDetailPage() {
     <>
       <PageHeader
         title={invoice.invoiceNumber}
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Invoices', path: '/billing/invoices' }, { label: 'Detail' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Invoices', path: '/billing/invoices' }, { label: 'Detail' }]}
         secondaryActions={
           canVoid && (
             <RequirePermission permission={PERMISSIONS.billing.invoiceVoid}>

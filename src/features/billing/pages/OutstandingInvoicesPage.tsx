@@ -125,7 +125,7 @@ export function OutstandingInvoicesPage() {
 
   return (
     <>
-      <PageHeader title="Outstanding Invoices" crumbs={[{ label: 'Billing & Collections' }, { label: 'Outstanding Invoices' }]} />
+      <PageHeader title="Outstanding Invoices" crumbs={[{ label: 'Finance' }, { label: 'Outstanding Invoices' }]} />
       {isError ? (
         <Card>
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />

@@ -313,14 +313,17 @@ function RoleAssignmentsPanel({
   requiresBuildingScope: boolean | null;
 }) {
   const { data: assignments, isLoading: isLoadingAssignments } = useRoleAssignments({ id: roleId });
-  const { data: users } = useUsers();
+  // pageSize 200 — this dropdown needs every active tenant user, not one page of them; tenant scale
+  // here (a single condominium's staff/owners) makes that a reasonable ceiling. See UsersPage for the
+  // paginated register-style view of the same data.
+  const { data: usersPage } = useUsers({ isActive: true, pageSize: 200 });
   const [assignRole, { isLoading: isAssigning }] = useAssignRoleToUser();
   const [revokeRole] = useRevokeRoleFromUser();
   const [selectedUserId, setSelectedUserId] = useState<string>('');
   const [buildingId, setBuildingId] = useState<string | undefined>(undefined);
 
   const assignedUserIds = new Set(assignments?.map((a) => a.userId) ?? []);
-  const assignableUsers = users?.filter((u) => u.isActive) ?? [];
+  const assignableUsers = usersPage?.items ?? [];
   const buildingRequired = requiresBuildingScope === true;
   const buildingForbidden = requiresBuildingScope === false;
   const canAssign = selectedUserId && (!buildingRequired || buildingId);

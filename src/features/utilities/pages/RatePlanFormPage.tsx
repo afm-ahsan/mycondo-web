@@ -91,7 +91,7 @@ export function RatePlanFormPage({ utilityType }: RatePlanFormPageProps) {
     <>
       <PageHeader
         title={`New ${utilityType} Rate Plan`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Rate Plans', path: `/utilities/${utilityType.toLowerCase()}/rate-plans` }, { label: 'New' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Rate Plans', path: `/utilities/${utilityType.toLowerCase()}/rate-plans` }, { label: 'New' }]}
       />
       <Card className="max-w-2xl">
         <CardContent className="pt-6">

@@ -1,6 +1,7 @@
 import { Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { Outlet, useLocation } from 'react-router-dom';
+import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { MENU_SIDEBAR } from '@/config/menu.config';
 import { useMenu } from '@/hooks/use-menu';
@@ -67,9 +68,11 @@ export function Demo1Layout() {
         <Header />
 
         <main className="grow pt-5">
-          <Suspense fallback={<PageSkeleton />}>
-            <Outlet />
-          </Suspense>
+          <Container width="fluid" className="pb-5">
+            <Suspense fallback={<PageSkeleton />}>
+              <Outlet />
+            </Suspense>
+          </Container>
         </main>
 
         <Footer />

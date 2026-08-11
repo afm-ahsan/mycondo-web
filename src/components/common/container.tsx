@@ -3,7 +3,7 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { useSettings } from '@/providers/settings-provider';
 
-const containerVariants = cva('w-full mx-auto px-4 lg:px-6', {
+const containerVariants = cva('w-full mx-auto px-4 md:px-5 lg:px-6 xl:px-8', {
   variants: {
     width: {
       fixed: 'max-w-[1320px]',

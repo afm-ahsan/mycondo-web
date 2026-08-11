@@ -42,7 +42,7 @@ export function ConsumptionSummaryReportPage() {
     <>
       <PageHeader
         title="Consumption Summary"
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Utilities' }, { label: 'Reports' }, { label: 'Consumption Summary' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Utilities' }, { label: 'Reports' }, { label: 'Consumption Summary' }]}
       />
 
       <Card className="mb-4">

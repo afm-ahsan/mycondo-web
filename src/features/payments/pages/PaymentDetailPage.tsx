@@ -49,7 +49,7 @@ export function PaymentDetailPage() {
     <>
       <PageHeader
         title={payment.referenceNumber ?? `Payment for flat ${payment.flatId}`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Payments', path: '/billing/payments' }, { label: 'Detail' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Payments', path: '/billing/payments' }, { label: 'Detail' }]}
         secondaryActions={
           canReverse && (
             <RequirePermission permission={PERMISSIONS.payment.reverse}>

@@ -73,7 +73,7 @@ export function ReceivablesAgeingReportPage() {
 
       <PageHeader
         title="Receivables Ageing"
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Reports' }, { label: 'Receivables Ageing' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Reports' }, { label: 'Receivables Ageing' }]}
       />
 
       <Card className="mb-4" id="print-hide-on-print">
