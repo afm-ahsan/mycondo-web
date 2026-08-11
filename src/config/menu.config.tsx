@@ -20,7 +20,7 @@ import {
   Receipt,
   Wallet,
   ShieldUser,
-  UserCheck,
+  Users,
   Waves,
   Zap,
 } from 'lucide-react';
@@ -41,6 +41,30 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'My Invoices', path: '/me/invoices' },
     ],
   },
+  { heading: 'Resident Management' },
+  {
+    title: 'Resident Management',
+    icon: Users,
+    children: [
+      { title: 'Residents', path: '/residents', permission: 'resident.view' },
+      { title: 'Flat Owners', path: '/residents/flat-owners', permission: 'ownership.manage' },
+      {
+        title: 'Tenant Registrations',
+        path: '/leasing/tenant-registrations',
+        permission: PERMISSIONS.occupancyRegistration.view,
+      },
+      {
+        title: 'New Tenant Registration',
+        path: '/leasing/tenant-registrations/new',
+        permission: PERMISSIONS.occupancyRegistration.create,
+      },
+      {
+        title: 'Security Directory',
+        path: '/leasing/security-directory',
+        permission: PERMISSIONS.occupancyRegistration.securityView,
+      },
+    ],
+  },
   { heading: 'Administration' },
   {
     title: 'Administration',
@@ -48,7 +72,6 @@ export const MENU_SIDEBAR: MenuConfig = [
     children: [
       { title: 'Users', path: '/admin/users', permission: 'user.view' },
       { title: 'Roles & Permissions', path: '/admin/roles', permission: 'role.view' },
-      { title: 'Create Tenant', path: '/admin/tenants/new', permission: 'tenant.manage' },
     ],
   },
   { heading: 'Security & Access' },
@@ -186,31 +209,9 @@ export const MENU_SIDEBAR: MenuConfig = [
       },
     ],
   },
-  { heading: 'Tenant Registration' },
+  { heading: 'Finance' },
   {
-    title: 'Tenant Registration',
-    icon: UserCheck,
-    children: [
-      {
-        title: 'Registrations',
-        path: '/leasing/tenant-registrations',
-        permission: PERMISSIONS.occupancyRegistration.view,
-      },
-      {
-        title: 'New Registration',
-        path: '/leasing/tenant-registrations/new',
-        permission: PERMISSIONS.occupancyRegistration.create,
-      },
-      {
-        title: 'Security Directory',
-        path: '/leasing/security-directory',
-        permission: PERMISSIONS.occupancyRegistration.securityView,
-      },
-    ],
-  },
-  { heading: 'Billing & Collections' },
-  {
-    title: 'Billing & Collections',
+    title: 'Finance',
     icon: Receipt,
     children: [
       {
@@ -245,6 +246,14 @@ export const MENU_SIDEBAR: MenuConfig = [
         children: [
           { title: 'Payments', path: '/billing/payments', permission: PERMISSIONS.payment.view },
           { title: 'Record Payment', path: '/billing/payments/new', permission: PERMISSIONS.payment.record },
+        ],
+      },
+      {
+        title: 'Expenses',
+        icon: Receipt,
+        children: [
+          { title: 'Expense Types', path: '/finance/expense-types', permission: 'expensetype.view' },
+          { title: 'Expenses', path: '/finance/expenses', permission: 'expense.view' },
         ],
       },
       {

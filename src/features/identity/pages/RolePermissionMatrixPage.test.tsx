@@ -42,7 +42,9 @@ function setUpMocks() {
       HttpResponse.json(granted ? [permissionCatalogue[1]] : []),
     ),
     http.get(`${API_BASE}/api/v1/roles/role-1/assignments`, () => HttpResponse.json([])),
-    http.get(`${API_BASE}/api/v1/users`, () => HttpResponse.json([])),
+    http.get(`${API_BASE}/api/v1/users`, () =>
+      HttpResponse.json({ items: [], page: 1, pageSize: 200, total: 0 }),
+    ),
     http.post(`${API_BASE}/api/v1/roles/role-1/permissions`, () => {
       granted = true;
       return new HttpResponse(null, { status: 204 });
@@ -84,7 +86,9 @@ describe('RolePermissionMatrixPage', () => {
       http.get(`${API_BASE}/api/v1/permissions`, () => HttpResponse.json([])),
       http.get(`${API_BASE}/api/v1/roles/:id/permissions`, () => HttpResponse.json([])),
       http.get(`${API_BASE}/api/v1/roles/:id/assignments`, () => HttpResponse.json([])),
-      http.get(`${API_BASE}/api/v1/users`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/users`, () =>
+      HttpResponse.json({ items: [], page: 1, pageSize: 200, total: 0 }),
+    ),
       http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
         HttpResponse.json({ items: [], page: 1, pageSize: 100, totalCount: 0 }),
       ),

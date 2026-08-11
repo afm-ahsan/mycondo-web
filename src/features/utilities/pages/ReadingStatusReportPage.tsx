@@ -46,7 +46,7 @@ export function ReadingStatusReportPage({ utilityType }: ReadingStatusReportPage
     <>
       <PageHeader
         title={`${utilityType} — Reading Status`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Reports' }, { label: 'Reading Status' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Reports' }, { label: 'Reading Status' }]}
       />
 
       <Card className="mb-4">

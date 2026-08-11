@@ -84,7 +84,7 @@ export function ServiceChargeRuleFormPage() {
       <PageHeader
         title="New Service Charge Rule"
         crumbs={[
-          { label: 'Billing & Collections' },
+          { label: 'Finance' },
           { label: 'Service Charges' },
           { label: 'Rules', path: '/billing/service-charge-rules' },
           { label: 'New' },

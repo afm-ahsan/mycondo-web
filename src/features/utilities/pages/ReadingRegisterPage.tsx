@@ -125,7 +125,7 @@ export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
     <>
       <PageHeader
         title={`${utilityType} Reading Register`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Readings' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Readings' }]}
       />
 
       <div className="space-y-4">

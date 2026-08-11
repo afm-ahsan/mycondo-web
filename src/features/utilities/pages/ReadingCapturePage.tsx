@@ -96,7 +96,7 @@ export function ReadingCapturePage({ utilityType }: ReadingCapturePageProps) {
     <>
       <PageHeader
         title={`Capture ${utilityType} Reading`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Capture Reading' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Capture Reading' }]}
       />
       <Card className="max-w-xl">
         <CardContent className="pt-6">

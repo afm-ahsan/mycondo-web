@@ -133,7 +133,7 @@ export function InvoiceListPage() {
 
   return (
     <>
-      <PageHeader title="Invoices" crumbs={[{ label: 'Billing & Collections' }, { label: 'Invoices' }]} />
+      <PageHeader title="Invoices" crumbs={[{ label: 'Finance' }, { label: 'Invoices' }]} />
       {isError ? (
         <Card>
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />

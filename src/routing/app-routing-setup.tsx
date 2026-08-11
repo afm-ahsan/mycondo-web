@@ -141,7 +141,14 @@ const identity = () => import('@/features/identity');
 const UsersPage = lazyPage(identity, 'UsersPage');
 const RolePermissionMatrixPage = lazyPage(identity, 'RolePermissionMatrixPage');
 
-const CreateTenantPage = lazyPage(() => import('@/features/tenancy'), 'CreateTenantPage');
+const residents = () => import('@/features/residents');
+const ResidentListPage = lazyPage(residents, 'ResidentListPage');
+const FlatOwnerListPage = lazyPage(residents, 'FlatOwnerListPage');
+
+const expenses = () => import('@/features/expenses');
+const ExpenseTypeListPage = lazyPage(expenses, 'ExpenseTypeListPage');
+const ExpenseListPage = lazyPage(expenses, 'ExpenseListPage');
+
 
 // Metronic template demo/scaffold pages — reachable by direct URL only (no live menu link, see
 // UX-6 cleanup discovery), kept per governance but not worth their weight in the main bundle.
@@ -416,18 +423,42 @@ export function AppRoutingSetup() {
             }
           />
           <Route
-            path="/admin/roles"
+            path="/residents"
             element={
-              <RequirePermission permission="role.view" fallback={<AccessDeniedNotice />}>
-                <RolePermissionMatrixPage />
+              <RequirePermission permission="resident.view" fallback={<AccessDeniedNotice />}>
+                <ResidentListPage />
               </RequirePermission>
             }
           />
           <Route
-            path="/admin/tenants/new"
+            path="/residents/flat-owners"
             element={
-              <RequirePermission permission="tenant.manage" fallback={<AccessDeniedNotice />}>
-                <CreateTenantPage />
+              <RequirePermission permission="ownership.manage" fallback={<AccessDeniedNotice />}>
+                <FlatOwnerListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/expense-types"
+            element={
+              <RequirePermission permission="expensetype.view" fallback={<AccessDeniedNotice />}>
+                <ExpenseTypeListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/expenses"
+            element={
+              <RequirePermission permission="expense.view" fallback={<AccessDeniedNotice />}>
+                <ExpenseListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/admin/roles"
+            element={
+              <RequirePermission permission="role.view" fallback={<AccessDeniedNotice />}>
+                <RolePermissionMatrixPage />
               </RequirePermission>
             }
           />

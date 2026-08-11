@@ -71,7 +71,7 @@ export function ConsumptionHistoryReportPage({ utilityType }: ConsumptionHistory
     <>
       <PageHeader
         title={`${utilityType} — Per-Meter Consumption History`}
-        crumbs={[{ label: 'Billing & Collections' }, { label: utilityType }, { label: 'Reports' }, { label: 'Consumption History' }]}
+        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Reports' }, { label: 'Consumption History' }]}
       />
 
       <div className="space-y-4">

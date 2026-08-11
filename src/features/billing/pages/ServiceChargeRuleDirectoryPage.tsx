@@ -155,7 +155,7 @@ export function ServiceChargeRuleDirectoryPage() {
     <>
       <PageHeader
         title="Service Charge Rules"
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Service Charges' }, { label: 'Rules' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Service Charges' }, { label: 'Rules' }]}
       />
 
       <div className="space-y-4">

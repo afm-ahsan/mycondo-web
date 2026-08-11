@@ -53,7 +53,7 @@ export function FinancialSummaryReportPage() {
 
       <PageHeader
         title="Financial Summary"
-        crumbs={[{ label: 'Billing & Collections' }, { label: 'Reports' }, { label: 'Financial Summary' }]}
+        crumbs={[{ label: 'Finance' }, { label: 'Reports' }, { label: 'Financial Summary' }]}
       />
 
       <Card className="mb-4" id="print-hide-on-print">

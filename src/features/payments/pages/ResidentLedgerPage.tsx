@@ -111,7 +111,7 @@ export function ResidentLedgerPage() {
 
   return (
     <>
-      <PageHeader title="Resident Ledger" crumbs={[{ label: 'Billing & Collections' }, { label: 'Resident Ledger' }]} />
+      <PageHeader title="Resident Ledger" crumbs={[{ label: 'Finance' }, { label: 'Resident Ledger' }]} />
 
       <div className="space-y-4">
         <Card className="max-w-xl">
