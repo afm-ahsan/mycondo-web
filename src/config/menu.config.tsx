@@ -70,6 +70,7 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Administration',
     icon: Building,
     children: [
+      { title: 'Buildings', path: '/admin/buildings', permission: 'property.view' },
       { title: 'Users', path: '/admin/users', permission: 'user.view' },
       { title: 'Roles & Permissions', path: '/admin/roles', permission: 'role.view' },
     ],

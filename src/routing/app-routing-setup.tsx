@@ -149,6 +149,10 @@ const expenses = () => import('@/features/expenses');
 const ExpenseTypeListPage = lazyPage(expenses, 'ExpenseTypeListPage');
 const ExpenseListPage = lazyPage(expenses, 'ExpenseListPage');
 
+const property = () => import('@/features/property');
+const BuildingListPage = lazyPage(property, 'BuildingListPage');
+const FlatListPage = lazyPage(property, 'FlatListPage');
+
 
 // Metronic template demo/scaffold pages — reachable by direct URL only (no live menu link, see
 // UX-6 cleanup discovery), kept per governance but not worth their weight in the main bundle.
@@ -459,6 +463,22 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission="role.view" fallback={<AccessDeniedNotice />}>
                 <RolePermissionMatrixPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/admin/buildings"
+            element={
+              <RequirePermission permission="property.view" fallback={<AccessDeniedNotice />}>
+                <BuildingListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/admin/buildings/:buildingId/flats"
+            element={
+              <RequirePermission permission="property.view" fallback={<AccessDeniedNotice />}>
+                <FlatListPage />
               </RequirePermission>
             }
           />

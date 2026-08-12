@@ -1,0 +1,316 @@
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
+import { PlusIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
+import { toast } from 'sonner';
+import { z } from 'zod';
+import { toUserMessage } from '@/api/errors';
+import type { BuildingDto } from '@/api/generated/mycondoApi';
+import { Button } from '@/components/ui/button';
+import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
+import { DataGrid } from '@/components/ui/data-grid';
+import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { DataGridTable } from '@/components/ui/data-grid-table';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { SearchInput } from '@/components/shared/SearchInput';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { useUrlFilters } from '@/hooks/use-url-filters';
+import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { useBuildings, useCreateBuilding, useDeactivateBuilding, useUpdateBuilding } from '../api/propertyApi';
+
+const BUILDINGS_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
+
+export function BuildingListPage() {
+  const [filters, setFilters] = useUrlFilters(BUILDINGS_FILTER_DEFAULTS);
+  const pagination: PaginationState = {
+    pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
+    pageSize: Number(filters.pageSize) || 10,
+  };
+
+  const [search, setSearch] = useState(filters.search);
+  const debouncedSearch = useDebouncedValue(search);
+  const isSearchPending = search !== debouncedSearch;
+
+  const { data, isFetching, isError, error, refetch } = useBuildings({
+    search: debouncedSearch || undefined,
+    page: pagination.pageIndex + 1,
+    pageSize: pagination.pageSize,
+  });
+
+  const [deactivateBuilding, { isLoading: isDeactivating }] = useDeactivateBuilding();
+  const [createOpen, setCreateOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<BuildingDto | null>(null);
+  const [deactivateTarget, setDeactivateTarget] = useState<BuildingDto | null>(null);
+
+  function handlePaginationChange(updater: Updater<PaginationState>) {
+    const next = typeof updater === 'function' ? updater(pagination) : updater;
+    setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    setFilters({ search: value, page: '1' });
+  }
+
+  async function handleDeactivate() {
+    if (!deactivateTarget) return;
+    try {
+      await deactivateBuilding({ id: deactivateTarget.buildingId }).unwrap();
+      toast.success(`"${deactivateTarget.name}" deactivated.`);
+      setDeactivateTarget(null);
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    }
+  }
+
+  const columns: ColumnDef<BuildingDto>[] = [
+    { id: 'name', header: 'Name', cell: ({ row }) => row.original.name },
+    { id: 'code', header: 'Code', cell: ({ row }) => row.original.code },
+    { id: 'address', header: 'Address', cell: ({ row }) => row.original.address ?? '—' },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2 justify-end">
+          <RequirePermission permission="property.view" buildingId={row.original.buildingId}>
+            <Button size="sm" variant="outline" asChild>
+              <Link to={`/admin/buildings/${row.original.buildingId}/flats`}>Flats</Link>
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="property.update" buildingId={row.original.buildingId}>
+            <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
+              Edit
+            </Button>
+          </RequirePermission>
+          <RequirePermission permission="property.delete" buildingId={row.original.buildingId}>
+            <Button variant="outline" size="sm" onClick={() => setDeactivateTarget(row.original)}>
+              Deactivate
+            </Button>
+          </RequirePermission>
+        </div>
+      ),
+    },
+  ];
+
+  const total = data ? Number(data.total) : 0;
+  const table = useReactTable({
+    columns,
+    data: data?.items ?? [],
+    pageCount: Math.max(1, Math.ceil(total / pagination.pageSize)),
+    manualPagination: true,
+    state: { pagination },
+    onPaginationChange: handlePaginationChange,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <>
+      <PageHeader
+        title="Buildings"
+        description="Manage the buildings in this property portfolio."
+        crumbs={[{ label: 'Administration' }, { label: 'Buildings' }]}
+        primaryAction={
+          <RequirePermission permission="property.create">
+            <Button onClick={() => setCreateOpen(true)}>
+              <PlusIcon /> Add Building
+            </Button>
+          </RequirePermission>
+        }
+      />
+
+      {isError ? (
+        <Card>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
+        </Card>
+      ) : (
+        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No buildings match these filters.">
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Buildings</CardTitle>
+                <SearchInput
+                  value={search}
+                  onChange={handleSearchChange}
+                  placeholder="Search by name or code…"
+                  isSearching={isSearchPending}
+                  className="w-64"
+                />
+              </CardHeading>
+            </CardHeader>
+            <CardTable>
+              <DataGridTable />
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
+
+      <BuildingFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+      {editTarget && (
+        <BuildingFormDialog
+          building={editTarget}
+          open
+          onOpenChange={(open) => !open && setEditTarget(null)}
+        />
+      )}
+
+      <ConfirmActionDialog
+        open={deactivateTarget !== null}
+        onOpenChange={(open) => !open && setDeactivateTarget(null)}
+        title="Deactivate this building?"
+        description={
+          deactivateTarget && (
+            <>
+              Deactivating <strong>{deactivateTarget.name}</strong> removes it from the active property register. This
+              cannot be undone from here.
+            </>
+          )
+        }
+        confirmLabel="Deactivate"
+        loadingLabel="Deactivating…"
+        isLoading={isDeactivating}
+        onConfirm={handleDeactivate}
+      />
+    </>
+  );
+}
+
+const buildingSchema = z.object({
+  name: z.string().min(1, { message: 'Name is required.' }).max(200),
+  code: z.string().min(1, { message: 'Code is required.' }).max(20),
+  address: z.string().max(400).optional().or(z.literal('')),
+});
+type BuildingSchemaType = z.infer<typeof buildingSchema>;
+
+function BuildingFormDialog({
+  building,
+  open,
+  onOpenChange,
+}: {
+  building?: BuildingDto;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}) {
+  const [createBuilding, { isLoading: isCreating }] = useCreateBuilding();
+  const [updateBuilding, { isLoading: isUpdating }] = useUpdateBuilding();
+  const isEditing = Boolean(building);
+  const isLoading = isCreating || isUpdating;
+
+  const form = useForm<BuildingSchemaType>({
+    resolver: zodResolver(buildingSchema),
+    defaultValues: {
+      name: building?.name ?? '',
+      code: building?.code ?? '',
+      address: building?.address ?? '',
+    },
+  });
+
+  async function onSubmit(values: BuildingSchemaType) {
+    try {
+      if (building) {
+        await updateBuilding({
+          id: building.buildingId,
+          updateBuildingRequest: { name: values.name, code: values.code, address: values.address || null },
+        }).unwrap();
+        toast.success('Building updated.');
+      } else {
+        await createBuilding({
+          createBuildingCommand: { name: values.name, code: values.code, address: values.address || null },
+        }).unwrap();
+        toast.success(`Building "${values.name}" created.`);
+      }
+      form.reset();
+      onOpenChange(false);
+    } catch (err) {
+      const apiError = toApiError(err);
+      const handled = applyApiErrorToForm(form, apiError, {
+        conflictField: 'code',
+        conflictMessage: 'A building with this name or code already exists.',
+      });
+      if (!handled) {
+        toast.error(toUserMessage(apiError ?? err));
+      }
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{isEditing ? 'Edit Building' : 'Add Building'}</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Aisha Tower" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="code"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Code</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. AISHA" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Saving…' : isEditing ? 'Save changes' : 'Create building'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+}
