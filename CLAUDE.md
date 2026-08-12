@@ -1,272 +1,813 @@
-# MyCondo — Web
+# MyCondo Web — Claude Code Instructions
 
-## Project Overview
+This file contains **repository-specific, durable frontend engineering rules** for `mycondo-web`.
 
-MyCondo is a multi-tenant SaaS building automation and property management platform delivered to ARP Flat Owner's Association under proposal MC-PROP-2026-001 (fixed-price BDT 2,50,000, 24 weeks). This repo is the **frontend SPA**: React + TypeScript + Vite + Metronic, calling the backend API at https://github.com/afm-ahsan/mycondo-api.
+Global workflow, Git, token-efficiency, architecture-governance, verification, and communication rules are defined in the root `../CLAUDE.md` and apply here.
 
-**Governance baseline:** see `../mycondo-docs/02-architecture/CURRENT_STATE_ASSESSMENT.md`,
-`TARGET_ARCHITECTURE.md`, and `Architecture_Decision_Register.md` (established 2026-07-28, Wave 0).
-Notably, ADR-005 (RTK Query, approved 2026-07-28 — resolved a conflict with the governing strategy
-document's TanStack Query recommendation) and ADR-006 (`modules/` → `features/` rename, executed
-2026-07-28) are both settled; see the register for the reasoning if you need it.
+Load additional architecture, feature, ADR, or current-state documentation only when required by the task.
 
-## Tech Stack
+---
 
-- **React 19** + **TypeScript 5.9+ strict** + **Vite 7**
-- **Metronic React Vite Template** (kept as the design system / layout base)
-- **Tailwind CSS v4** (utility-first, complements Metronic)
-- **Redux Toolkit + RTK Query** for server state and store
-- **React Hook Form + Zod** for forms + validation
-- **React Router v7** for routing
-- **`@microsoft/signalr`** for real-time
-- **OpenAPI codegen**: `openapi-typescript` + `@rtk-query/codegen-openapi` (consumes `mycondo-api`'s `/openapi/v1.json`)
-- **Vitest + React Testing Library** for unit tests
-- **Playwright** for E2E
+## 1. Repository Responsibility
 
-> Note: the upstream Metronic template ships with TanStack Query, Auth0, Supabase, and Formik. We swap **TanStack Query → RTK Query**, **Auth0/Supabase → our JWT auth**, and **Formik → React Hook Form** during Phase 3 foundation work. The convention library at `docs/conventions/02-frontend/` is the source of truth.
+`mycondo-web` is the MyCondo React frontend.
 
-## Project Structure
+Its responsibilities include:
 
+- presentation;
+- interaction and navigation;
+- client-side form validation;
+- API consumption;
+- permission-aware UI;
+- user feedback;
+- responsive behavior;
+- accessibility;
+- client-side state required for UX.
+
+The backend remains authoritative for:
+
+- business rules;
+- tenant isolation;
+- permissions;
+- financial calculations;
+- lifecycle transitions;
+- validation that affects business correctness;
+- persisted data;
+- API contracts.
+
+Never recreate authoritative backend behavior in the frontend.
+
+Frontend validation improves UX; it does not replace backend validation.
+
+---
+
+## 2. Technology Baseline
+
+Use the existing repository stack and versions unless an approved architecture decision changes them.
+
+Core technologies:
+
+- React 19
+- TypeScript strict mode
+- Vite
+- Metronic React
+- Tailwind CSS
+- Redux Toolkit
+- RTK Query
+- React Hook Form
+- Zod
+- React Router
+- Microsoft SignalR client
+- OpenAPI-generated API contracts
+- Vitest
+- React Testing Library
+- MSW
+- Playwright when/where configured
+
+Do not introduce competing libraries for capabilities already standardized by the project.
+
+In particular, do not introduce new usage of:
+
+- TanStack Query;
+- Formik;
+- Auth0;
+- Supabase.
+
+Their presence in upstream/template dependencies does not make them part of MyCondo's application architecture.
+
+---
+
+## 3. Feature-First Structure
+
+Business functionality belongs under:
+
+```text
+src/features/<feature>/
 ```
-mycondo-web/
-├── package.json
-├── tsconfig.json
-├── vite.config.ts
-├── index.html
-├── public/
-├── src/
-│   ├── main.tsx
-│   ├── App.tsx
-│   ├── auth/                       # Metronic auth scaffolding (kept; adapted to our JWT)
-│   ├── components/                 # Metronic UI components (kept)
-│   ├── features/                   # Business features (mirror backend module names 1:1; renamed from modules/ 2026-07-28, ADR-006)
-│   │   └── <feature>/
-│   │       ├── pages/
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       ├── api/                # RTK Query slice for this feature
-│   │       └── types.ts
-│   ├── store/                      # Redux store + typed hooks
-│   ├── api/                        # Shared RTK Query base + generated client
-│   ├── lib/                        # Cross-cutting helpers (env, signalr, i18n, auth)
-│   └── (Metronic-supplied folders kept as-is: layouts/, providers/, routing/, partials/, hooks/, errors/)
-├── e2e/                            # Playwright
-└── docs/
-    └── conventions/                # Convention library (duplicated from template)
+
+Prefer feature-local organization such as:
+
+```text
+src/features/<feature>/
+├── pages/
+├── components/
+├── hooks/
+├── api/
+├── schemas/
+├── utils/
+└── types/
 ```
 
-## Conventions
+Use only the folders a feature actually needs.
 
-**This project follows the convention library at `docs/conventions/`. Read it before generating, modifying, or reviewing code.**
+Do not create broad global dumping grounds for feature-specific:
 
-Most relevant files:
-- Foundation: `docs/conventions/00-foundation/`
-- Frontend: `docs/conventions/02-frontend/`
-- API design: `docs/conventions/04-api-design/`
-- Security: `docs/conventions/05-security/`
+- components;
+- hooks;
+- types;
+- schemas;
+- utilities;
+- API calls.
 
-When the conventions specify a rule, **follow it**. Project-specific overrides are listed below.
+Shared code belongs outside a feature only when it is genuinely cross-cutting and reused across multiple features.
 
-## Feature Layout (mirrors backend 1:1)
+Do not move code into shared folders merely because sharing might happen later.
 
-| Backend module                     | Frontend folder           |
-|-----------------------------------|---------------------------|
-| `MyCondo.Modules.Tenancy`         | `src/features/tenancy/`    |
-| `MyCondo.Modules.Identity`        | `src/features/identity/`   |
-| `MyCondo.Modules.Property`        | `src/features/property/`   |
-| `MyCondo.Modules.Security`        | `src/features/security/`   |
-| `MyCondo.Modules.Residents`       | `src/features/residents/`  |
-| `MyCondo.Modules.Leasing`         | `src/features/leasing/`    |
-| `MyCondo.Modules.Billing`         | `src/features/billing/`    |
-| `MyCondo.Modules.Payments`        | `src/features/payments/`   |
-| `MyCondo.Modules.Expenses`        | `src/features/expenses/`   |
-| `MyCondo.Modules.Vendors`         | `src/features/vendors/`    |
-| `MyCondo.Modules.Payroll`         | `src/features/payroll/`    |
-| `MyCondo.Modules.Complaints`      | `src/features/complaints/` |
-| `MyCondo.Modules.Notifications`   | `src/features/notifications/` |
-| `MyCondo.Modules.Documents`       | `src/features/documents/`  |
-| `MyCondo.Modules.Reporting`       | `src/features/reporting/`  |
-| `MyCondo.Modules.Amenities` (P2)  | `src/features/amenities/`  |
-| `MyCondo.Modules.Maintenance` (P2)| `src/features/maintenance/`|
-| `MyCondo.Modules.Operations` (P2) | `src/features/operations/` |
-| `MyCondo.Modules.Utilities`       | `src/features/utilities/`  |
+---
 
-`src/features/security/` (as of 2026-08-06): only `guests/` (Guest Register — directory, create,
-fast check-in/check-out, currently-inside view) is implemented. The backend's other `Features/
-Security/*` areas (Vehicles, DomesticWorkers, ServiceProviders, SebaVisits, Parcels) have a complete,
-wired API contract already but **no frontend UI yet** — do not assume they exist.
+## 4. Feature Boundaries
 
-`src/features/utilities/` (as of 2026-08-08, UX-3): a single shared bounded context for Electricity
-and Gas — one `Meter`/`MeterAssignment`/`RatePlan`/`Reading` domain model, differentiated purely by a
-`utilityType` prop threaded through every page/component (`MeterDirectoryPage`, `ReadingRegisterPage`,
-`ReadingCapturePage`, `ReadingDetailPage`, `RatePlanDirectoryPage`, `RatePlanFormPage`), never
-duplicated per utility. Implements Meter install/assign/mark-faulty/reactivate/replace, the reading
-lifecycle (Draft → Reviewed → Finalized → Billed, plus terminal Corrected), and Rate Plan
-create/deactivate/end-effective-period (`RatePlanFormPage` is create-only — `RatePlanDto` is
-immutable after creation, same pattern as `ServiceChargeRule`). Billing (`billReadingIdempotent`) and
-Correction (`correctReadingIdempotent`) use the shared idempotency-key infrastructure since both can
-mutate an invoice and the resident ledger. The Reading Register is deliberately meter-scoped (pick a
-building, then a meter, to see its register) because `GET /api/v1/readings` has no `buildingId`/
-`utilityType` filter of its own — a disclosed, not-yet-closed API gap (see UX-3 evidence report).
+Keep features independently understandable and minimally coupled.
 
-`src/features/amenities/` (as of 2026-08-07, Slice G — merged to `main` in both repos): Community
-Hall Booking (calendar, list, create, details with the full approve/reject/pay/check-in/complete/
-inspect/cancel/no-show action set) and Swimming Pool Management (search-and-check-in/out, current
-occupancy, usage history + incidents, combined facility settings) are implemented. **Known backend
-contract gaps discovered while building this slice** (not frontend omissions — nothing to build
-against): bookings have no update/edit endpoint (a Draft booking can only be Submitted or Cancelled,
-never field-edited — requirement "edit while status permits" is unimplementable until a backend
-PUT/PATCH exists), `RequestBookingCommand` has no `notes`/add-on-services field at all, there's no
-live per-slot availability-check endpoint (conflicts only surface as a 409 on the actual create
-call), and no audit-log/event endpoint for a booking's history (the UI timeline is built from the
-lifecycle timestamp fields already on `BookingDto`).
+Avoid direct imports into another feature's internal folders.
 
-`src/features/operations/` (as of 2026-08-07, Slice H — the final register-digitization slice):
-Generator Management (operation log with start/stop sessions, fuel log, maintenance schedule +
-service history + breakdown log, runtime/fuel/cost-per-hour + maintenance-due reports, plus a
-"Manage Generators" dialog off the Operation Log page for master create/edit/deactivate — no menu
-slot exists for it, same placement pattern as Slice G's Facility settings) and Gas Cylinder
-Management (purchases with the full approve/reject/mark-paid workflow and server-computed
-TotalKg/LineAmount/UnitPricePerKg/GrandTotal, stock movements + controlled adjustments + monthly
-reconciliation, consumption report, supplier comparison report) are implemented. Supplier master
-data has create-only UI (a "New Supplier" action on the Purchases page); the backend's
-update/deactivate/reactivate supplier endpoints exist but have no frontend UI yet — a known,
-disclosed limitation, not an oversight. **No contract mismatches found** between the backend and the
-regenerated OpenAPI client for this slice — every generated hook, computed field
-(`totalKg`/`lineAmount`/`unitPricePerKg`/`grandTotal`), and permission string matched the backend
-exactly on the first regeneration.
+If cross-feature reuse is genuinely required, use the existing public surface or extract a truly shared abstraction to an appropriate shared location.
 
-`src/features/leasing/` (as of 2026-08-07, Tenant Registration — merged to `main` in both repos via
-PR #3): a 5-step guided wizard (Property & Occupant → Contact & Identity → Household → Documents →
-Review & Submit) replacing the paper Flat Owner/Tenant Registration Form, plus a status-filterable
-list page and a detail/review page with the owner-review → management-verification → activate/
-move-out action set and a real status-history timeline (backend-persisted, not a timestamp
-reconstruction like `ApprovalTimeline`). **Priority 2** (also delivered): Domestic Worker assignment,
-Driver assignment (no separate Driver aggregate — a `DomesticWorkerProfile` with
-`WorkerType.Driver`, assigned through the same worker-assignment endpoint), Vehicle assignment, a
-restricted Security Directory (`SecurityDirectoryPage`, DTOs structurally omit NID/passport/address/
-email — the fields simply don't exist on the type), move-out cascade that ends every active worker/
-vehicle assignment and deactivates every household member in one transaction, live-computed (not
-persisted) access eligibility, and a printable English registration form (`@media print`, A4, no PDF
-library — see architecture decisions below). Domain/permission names use `OccupancyRegistration`/
-`occupancy-registration.*` rather than `TenantRegistration` to avoid colliding with this app's own
-multi-tenancy vocabulary (`TenantId`, `tenant.manage`) — "Tenant Registration" remains the label used
-everywhere in UI copy and menu titles; see mycondo-api's `OccupancyRegistration` doc comment for the
-full rationale. Sensitive fields (National ID/passport) are masked server-side via `IdentityMasking`,
-matching the `GuestProfileDto`/`DomesticWorkerProfileDto` precedent — no unmasked value is ever
-returned by any endpoint this feature calls; replacing a stored NID requires the user to type a full
-new value (the raw value can never be redisplayed to pre-fill the form).
+Do not create circular feature dependencies.
 
-**Known limitations (explicitly disclosed, not oversights):**
-1. Document upload records file metadata only (name/type/size against a synthetic storage key) —
-   mycondo-api's `Attachments` feature has no real object-storage upload path yet (see `Attachment`'s
-   doc comment); the wizard's Documents step says so plainly rather than pretending files are stored
-   anywhere. App-wide gap, not specific to this feature.
-2. No dedicated frontend idempotency-key plumbing for Tenant Registration's mutating requests.
-3. A previously stored masked NID cannot be recovered for editing; replacement requires a full new
-   value (by design — see masking discipline above).
-4. Docker-dependent `MyCondo.MultiTenancyTests`/parts of `MyCondo.Api.IntegrationTests` remain
-   unavailable without a local Docker daemon (Testcontainers) — pre-existing environment gap, not a
-   regression from this feature.
-5. Status changes surface via the existing `OccupancyRegistrationStatusHistory` audit trail rather
-   than a new/parallel notification framework (approved architecture decision, not a gap).
-6. Print support uses browser/A4 `@media print` rather than server-generated PDF (approved
-   architecture decision).
-7. **The printable form covers 29 of the 45 fields on the full paper-form checklist** — Father's/
-   Mother's Name, Marital Status, Profession, Employer/Office Address, household member Occupation,
-   driver Licence information, Property name (single-property system, so not applicable), Passport as
-   a field distinct from National ID, Emergency Contact Relationship/Address, Unit lease Start/End
-   dates, Previous residence/landlord information, and a vehicle's linked driver were never part of
-   the Priority 1/2 data model (`OccupancyRegistration`/`HouseholdMember` only capture the fields
-   listed in the domain entity). This was true from initial delivery and confirmed unchanged during
-   the 2026-08-07 finalization review — not a regression, but not previously written down either.
+Do not duplicate the same domain concept across multiple frontend features simply to avoid a clean shared boundary.
 
-**Finalization review (2026-08-07, post-merge):** two genuine defects were found and fixed via small
-follow-up branches (both repos' `feat/tenant-registration` had already been merged to `main` by the
-time the review ran, so fixes landed on new branches off `main` rather than amending the merged PRs):
-`fix/tenant-registration-move-in-date` (mycondo-web) — Step 2 of the wizard was hardcoding
-`moveInExpectedDate: null` on every save, silently wiping the date entered in Step 1 on every
-registration; and `fix/tenant-registration-nid-preserve-on-blank` (mycondo-api) — resuming a draft and
-saving Step 2 without retyping the (deliberately blank) NID field silently cleared a previously
-recorded NID, since `UpdateDraft` treated "not provided" the same as "clear it." Both are fixed,
-tested, and pushed; neither has been merged (awaiting review, per standing policy).
+Follow existing backend bounded-context/module ownership when deciding frontend feature ownership.
 
-## Common Commands
+---
+
+## 5. Backend Contract Is Authoritative
+
+Do not invent frontend contracts.
+
+Use the backend OpenAPI specification and generated client/types as the source of truth.
+
+When implementing a feature:
+
+1. inspect the relevant generated API contract;
+2. verify the backend supports the required operation;
+3. use existing generated types/hooks where available;
+4. build UI around the actual contract.
+
+If the backend does not expose required functionality:
+
+- do not fake persistence;
+- do not create an unofficial client-only business workflow;
+- do not invent request/response fields;
+- report the contract gap.
+
+A missing backend capability is not solved by pretending it exists in the frontend.
+
+---
+
+## 6. OpenAPI & Generated Client
+
+Generated API contracts should remain aligned with `mycondo-api`.
+
+When the backend contract changes:
+
+1. regenerate/update the frontend API client using the existing repository workflow;
+2. inspect the generated diff;
+3. update affected frontend code;
+4. verify type safety and behavior.
+
+Do not manually maintain duplicate DTOs when generated contract types already exist.
+
+Do not edit generated files unless the established generation workflow explicitly requires it.
+
+Avoid unnecessary API-client regeneration for frontend-only changes.
+
+---
+
+## 7. Server State
+
+Use **RTK Query** for server state.
+
+Examples:
+
+- remote lists;
+- entity details;
+- mutations;
+- loading state;
+- request errors;
+- cache invalidation;
+- API-derived data.
+
+Do not copy RTK Query server state into ordinary Redux slices.
+
+Use Redux slices only for genuine client/global application state that is not naturally owned by the server/API cache.
+
+Prefer component/local state for ephemeral UI state.
+
+Typical ownership:
+
+```text
+Server data            → RTK Query
+Cross-app client state → Redux slice when justified
+Form state             → React Hook Form
+Local UI state         → React state
+URL/search state       → Router/search params
+```
+
+Avoid introducing state layers when existing ownership already solves the problem.
+
+---
+
+## 8. RTK Query Discipline
+
+Follow existing base API and feature endpoint conventions.
+
+For mutations:
+
+- invalidate/update only relevant cache tags;
+- avoid unnecessary broad cache invalidation;
+- surface server errors consistently;
+- prevent accidental duplicate submissions where appropriate.
+
+Use generated hooks/contracts when available rather than creating parallel handwritten API clients.
+
+Do not call `fetch`/Axios directly inside feature components when the established API layer already owns that responsibility.
+
+---
+
+## 9. URL State
+
+Persist user-navigational state in the URL when appropriate, especially:
+
+- search;
+- filters;
+- pagination;
+- sort;
+- selected view/tab when shareable/bookmarkable.
+
+Do not put navigational state into Redux merely because multiple components need it.
+
+Preserve useful list state when navigating to detail/edit pages and back where the existing UX pattern supports it.
+
+---
+
+## 10. Forms
+
+Use:
+
+- React Hook Form;
+- Zod;
+- existing form components/conventions.
+
+Every meaningful form should have a clear schema.
+
+Use Zod for client-side input validation and form typing where appropriate.
+
+Map backend field-validation errors into the relevant form controls using the established error-handling pattern, including `setError` where applicable.
+
+Do not duplicate complex backend invariants in Zod.
+
+Client validation should cover:
+
+- required fields;
+- formats;
+- obvious ranges;
+- immediate UX constraints.
+
+Backend remains authoritative for business validity.
+
+---
+
+## 11. Submission Safety
+
+Mutating forms/actions must provide safe interaction behavior.
+
+As appropriate:
+
+- disable or guard duplicate submission;
+- show meaningful loading/progress state;
+- avoid firing the same mutation multiple times accidentally;
+- preserve form input after recoverable server errors;
+- show success/error feedback.
+
+For destructive, irreversible, high-impact, financial, or lifecycle-transition actions, use the project's established confirmation pattern.
+
+Do not add confirmation dialogs to routine low-risk interactions unnecessarily.
+
+---
+
+## 12. Authentication
+
+Use the application's established JWT authentication architecture.
+
+Never store JWT access or refresh tokens in `localStorage`.
+
+Preserve the established security model:
+
+- access token handled according to the existing in-memory auth mechanism;
+- refresh token handled through the established secure cookie/server flow.
+
+Do not introduce:
+
+- Auth0;
+- Supabase auth;
+- alternative authentication state libraries
+
+without explicit architectural approval.
+
+Do not implement frontend workarounds that weaken backend authentication requirements.
+
+---
+
+## 13. Authorization & Permission-Aware UI
+
+The backend is authoritative for authorization.
+
+Frontend permission handling exists to improve UX, not provide security.
+
+Use established permission data/utilities for:
+
+- route availability;
+- navigation visibility;
+- action/button visibility;
+- contextual operations.
+
+Do not hard-code role names where permission checks are authoritative.
+
+Do not assume hiding a button secures an operation.
+
+Never broaden or fabricate frontend permissions to make a feature visible.
+
+If the API returns `403`, treat it as an authorization outcome rather than bypassing the check client-side.
+
+---
+
+## 14. Routing
+
+Follow the existing React Router structure and route conventions.
+
+Business routes should live with or clearly reference their owning feature.
+
+Use the established authenticated/permission-aware routing mechanisms.
+
+Do not introduce an alternative router architecture for isolated features.
+
+Preserve deep-link behavior where possible.
+
+Route-level code should coordinate navigation/rendering, not contain business logic.
+
+---
+
+## 15. Components
+
+Prefer small, focused components with explicit responsibilities.
+
+Keep business-feature components within their feature.
+
+Move a component to a shared location only when it is genuinely reusable across business features.
+
+Prefer composition over highly configurable mega-components.
+
+Do not prematurely generalize a component based on one or two speculative future uses.
+
+Use named exports for ordinary components unless the existing router/lazy-loading convention requires otherwise.
+
+---
+
+## 16. Metronic & Design System
+
+Metronic remains the application's layout/design foundation.
+
+Reuse existing:
+
+- layout shell;
+- navigation;
+- cards;
+- forms;
+- tables;
+- dialogs;
+- typography;
+- spacing;
+- responsive conventions;
+- feedback patterns.
+
+Do not fork or duplicate the Metronic shell for individual features.
+
+Do not create a parallel design system.
+
+When Metronic's default component behavior conflicts with MyCondo usability requirements, prefer a minimal compatible extension rather than wholesale replacement.
+
+Use Tailwind utilities where they complement established components and conventions.
+
+---
+
+## 17. Shared UI Patterns
+
+Before creating new UI primitives, inspect the existing shared implementations.
+
+Reuse established patterns for common needs such as:
+
+- page headers;
+- breadcrumbs;
+- search/filter controls;
+- pagination;
+- tables;
+- empty states;
+- loading states;
+- error states;
+- confirmation dialogs;
+- status badges;
+- forms;
+- toasts/notifications.
+
+Do not create feature-specific copies of shared patterns without a real requirement.
+
+---
+
+## 18. Tables & Directories
+
+Directory/list pages should follow existing MyCondo list conventions.
+
+As appropriate, support:
+
+- responsive layout;
+- search;
+- filters;
+- pagination;
+- loading state;
+- empty state;
+- error state;
+- permission-aware actions.
+
+Avoid unnecessarily dense table layouts on small screens.
+
+Do not assume desktop-only usage.
+
+Preserve backend pagination/filter semantics rather than reimplementing large server datasets client-side.
+
+---
+
+## 19. Responsive UX
+
+All new or materially modified UI must be usable across supported viewport sizes.
+
+Do not validate layout only at desktop width.
+
+Check for:
+
+- horizontal overflow;
+- clipped controls;
+- unusable tables;
+- cramped forms;
+- inaccessible action menus;
+- modal/dialog overflow;
+- header collisions;
+- navigation overlap;
+- inappropriate fixed widths.
+
+Prefer responsive layout changes over hiding important functionality on smaller screens.
+
+---
+
+## 20. Accessibility
+
+Use semantic HTML and existing accessible components.
+
+Preserve:
+
+- label/input association;
+- keyboard operability;
+- focus visibility;
+- meaningful button/link text;
+- dialog focus behavior;
+- error association;
+- appropriate ARIA only when semantic HTML is insufficient.
+
+Do not use clickable `div`/`span` elements when a semantic button or link is appropriate.
+
+Do not encode meaning using color alone.
+
+Accessibility fixes should integrate with the existing UI system rather than creating parallel patterns.
+
+---
+
+## 21. Loading, Empty & Error States
+
+Remote-data pages must handle relevant states explicitly.
+
+As appropriate:
+
+```text
+loading
+success
+empty
+error
+```
+
+Avoid rendering misleading "no data" content while a request is still loading.
+
+Do not swallow API errors.
+
+Provide actionable feedback when the user can recover.
+
+Avoid exposing raw technical/server exception text directly to normal users unless the existing UX intentionally does so.
+
+---
+
+## 22. TypeScript
+
+Use strict TypeScript.
+
+Do not use `any`.
+
+When data is genuinely unknown, use:
+
+```ts
+unknown
+```
+
+and narrow it safely.
+
+Do not use `@ts-ignore` to silence real problems.
+
+If an exceptional suppression is unavoidable, use the narrowest mechanism and document why.
+
+Prefer inferred/generated types over duplicate handwritten interfaces.
+
+Avoid unsafe casting simply to satisfy the compiler.
+
+---
+
+## 23. Error Handling
+
+Use the project's established API-error normalization.
+
+Distinguish where appropriate between:
+
+- validation errors;
+- unauthorized;
+- forbidden;
+- not found;
+- conflict;
+- server/network failure.
+
+Do not duplicate error-parsing logic across individual components.
+
+Map errors to the UI surface that can best help the user recover:
+
+- field error;
+- inline message;
+- toast;
+- page-level error.
+
+Do not display success when a mutation partially or fully failed.
+
+---
+
+## 24. Sensitive Data
+
+Do not assume sensitive values returned by the backend can be redisplayed or reused.
+
+Respect backend masking/redaction.
+
+Never attempt to reconstruct masked:
+
+- National IDs;
+- passport numbers;
+- authentication secrets;
+- protected personal information.
+
+Do not persist sensitive API responses to browser storage unless explicitly supported by the security architecture.
+
+Do not log sensitive user information unnecessarily to the browser console.
+
+---
+
+## 25. Financial & High-Impact Actions
+
+For financial or high-impact state mutations:
+
+- use the backend-provided workflow;
+- preserve existing idempotency-key mechanisms where provided;
+- prevent accidental duplicate submission;
+- do not compute authoritative financial values in the browser;
+- display server-calculated values as authoritative;
+- confirm destructive/high-impact operations according to established UX patterns.
+
+Do not reconstruct ledger, allocation, invoice, fee, or billing rules client-side.
+
+---
+
+## 26. Real-Time Features
+
+Use the established SignalR infrastructure when a feature genuinely requires real-time updates.
+
+Do not introduce polling when an existing SignalR channel already serves the requirement.
+
+Likewise, do not introduce SignalR solely to avoid a normal refresh/query invalidation.
+
+Keep real-time subscriptions scoped and clean them up correctly.
+
+Do not create duplicate connections per component when the shared infrastructure already manages connection lifecycle.
+
+---
+
+## 27. Testing
+
+Use progressive verification from the root instructions.
+
+### Component/Page Tests
+
+Use:
+
+- Vitest;
+- React Testing Library;
+- `userEvent`;
+- MSW;
+- existing `renderWithProviders` or equivalent test infrastructure.
+
+Prefer tests that reflect user-observable behavior.
+
+Do not over-test implementation details.
+
+### Test Priority
+
+For a changed feature, prefer:
+
+1. affected test(s);
+2. affected feature tests;
+3. lint/build;
+4. broader test suite when justified.
+
+Run broader regression checks at appropriate final/release gates.
+
+Do not repeatedly run the entire suite after every minor UI edit.
+
+---
+
+## 28. API Mocking in Tests
+
+Use MSW and existing test infrastructure for API behavior.
+
+Do not mock RTK Query internals directly when the user interaction can be tested against mocked HTTP behavior.
+
+Test meaningful states such as:
+
+- successful load;
+- empty response;
+- validation failure;
+- authorization failure;
+- mutation success/failure
+
+when relevant to the feature's risk.
+
+Do not create exhaustive test matrices for trivial presentational changes.
+
+---
+
+## 29. Build & Common Commands
+
+Use the scripts currently defined in `package.json` as authoritative.
+
+Typical commands include:
 
 ```powershell
 npm install
-npm run dev                       # Vite dev server on http://localhost:4219
-npm run lint                      # eslint --fix
-npm run build                     # tsc typecheck + vite build (no separate `typecheck` script exists)
-npm run preview                   # serve the built bundle
-npm test                          # vitest run
-npm run test:watch                # vitest (watch mode)
+npm run dev
+npm run lint
+npm run build
+npm test
+npm run test:watch
 ```
 
-**As of 2026-08-06 (Wave 0.5, Security/Guest Register slice), Vitest + React Testing Library + MSW
-are installed and wired** (`vitest.config.ts`, `src/test/setup.ts`, `src/test/server.ts`,
-`src/test/renderWithProviders.tsx`) — `npm test` runs the suite. Tests are colocated
-`<PageName>.test.tsx` next to the component they cover; see `src/features/identity/pages/
-RolePermissionMatrixPage.test.tsx` or `src/features/security/guests/pages/
-GuestCheckInOutPage.test.tsx` for the pattern (MSW `http.get/post` handlers +
-`renderWithProviders` + `userEvent`). There is still no separate `typecheck` script (`npm run build`
-remains the way to catch type errors) and no Playwright/`test:e2e` script yet — that gap is tracked
-as `mycondo-docs/07-delivery/MASTER_BACKLOG.md` PF-5.
+Do not assume a script exists without checking `package.json`.
 
-## Required Frontend Env (`.env`)
+Do not run `npm install` unnecessarily when dependencies are already present and unchanged.
 
-```
-VITE_MYCONDO_API_BASE_URL=https://localhost:7219
-VITE_MYCONDO_APP_NAME=MyCondo
-VITE_MYCONDO_ENV=development
-```
+For routine changes, prefer targeted tests followed by `npm run build` or other appropriate verification.
 
-Dev server runs on `http://localhost:4219` (fixed in `vite.config.ts`, not env-driven). See
-`docs/local-development-ports.md` for the full reserved-port registry shared with sibling local
-projects on this machine.
+Inspect current configuration for ports, environment variables, and API URLs rather than carrying historical values in this instruction file.
 
-## Mandatory Git Branch Policy
+---
 
-Before modifying code for any new feature, bug fix, refactor, architecture change, or other meaningful development task:
+## 30. Dependencies
 
-1. Inspect `git status`, current branch, and recent history.
-2. Preserve unrelated/uncommitted work.
-3. Fetch the latest remote state.
-4. Create or switch to a dedicated task branch from the latest appropriate `main`.
-5. Verify the branch and base before editing code.
+Before adding a package:
 
-Never develop directly on `main` unless explicitly instructed. Never use an unrelated currently checked-out feature branch as the base for new work — the branch that happens to be checked out is not automatically the correct one.
+1. verify the capability is not already provided by the current stack;
+2. inspect existing project patterns;
+3. assess bundle/security/maintenance impact;
+4. prefer the existing design system or utility stack.
 
-Branch from something other than `main` only when the task has a genuine unmerged dependency; report `DEPENDENT BRANCH REQUIRED` and explain the dependency before proceeding, rather than silently stacking a new branch on top of unmerged work.
+Do not add dependencies for trivial helpers easily implemented with platform/existing-library capabilities.
 
-Branch creation is mandatory pre-flight work, not optional — but it does not by itself authorize commit, push, merge, rebase, force-push, branch deletion, or PR creation. Those require task-specific authorization.
+Do not replace established dependencies merely because another library is familiar.
 
-## Always Do
+---
 
-- Use **strict TypeScript**; no `any`, no `@ts-ignore` without comment justifying it.
-- Put **server state in RTK Query**, never copy it into Redux slices.
-- Validate every form with **Zod** + React Hook Form; map server errors to `form.setError`.
-- Keep features independent — feature A imports from feature B only via its public surface (`feature/index.ts`).
-- Use Metronic's existing layout shell; don't fork it.
+## 31. Performance
 
-## Never Do
+Avoid obvious unnecessary client-side cost.
 
-- **Never store JWTs in `localStorage`.** Refresh token in HTTP-only cookie; access token in memory.
-- **Never default-export non-router components.** Named exports only.
-- **Never `any`.** Use `unknown` + narrowing if types are genuinely unknown.
-- **Never commit secrets** or hardcode `MYCONDO_*` values.
-- **Never use TanStack Query, Formik, Auth0, or Supabase** in new code — they ship with the Metronic template but are being replaced.
+Prefer:
 
-## Project-Specific Overrides
+- server-side pagination/filtering where supported;
+- RTK Query caching;
+- appropriate memoization only when justified;
+- lazy loading/code splitting according to existing routing conventions;
+- avoiding duplicate requests.
 
-These deviate from the conventions library; an ADR will be added before Phase 2 work begins.
+Do not add `useMemo`/`useCallback` everywhere by default.
 
-- **Two-repo layout** (this repo + `mycondo-api`) instead of monorepo. Per proposal §03.
-- **React 19** instead of React 18.3 (convention default). Metronic template ships with React 19; downgrading is risky and React 19 is the natural evolution.
-- **TanStack Query / Auth0 / Supabase / Formik are present in `package.json` from the upstream template** but **must not be used in our code**. We migrate to RTK Query / our JWT auth / React Hook Form during Phase 3.
+Do not optimize speculatively without evidence.
 
-## Useful Links
+When touching large lists or expensive rendering, evaluate the actual bottleneck before introducing complexity.
 
-- Backend repo: https://github.com/afm-ahsan/mycondo-api
-- Backend OpenAPI spec (when running locally): https://localhost:7219/openapi/v1.json
-- Backend API docs UI: https://localhost:7219/scalar
+---
+
+## 32. Frontend Business-Logic Boundary
+
+The frontend may perform display derivation such as:
+
+- labels;
+- formatting;
+- presentation grouping;
+- temporary form calculations;
+- UI enable/disable logic based on returned state/permissions.
+
+The frontend must not become authoritative for:
+
+- eligibility;
+- permission decisions;
+- financial calculations;
+- invoice totals;
+- lifecycle validity;
+- tenant access;
+- persistence invariants;
+- domain state transitions.
+
+When uncertain, prefer asking the backend for authoritative behavior rather than duplicating rules.
+
+---
+
+## 33. Documentation & Current State
+
+Do not embed detailed feature-status history in this file.
+
+When a task depends on whether a particular frontend capability already exists:
+
+1. inspect the relevant feature directory;
+2. inspect the generated API contract when needed;
+3. consult current-state/feature documentation only if necessary.
+
+Do not assume historical implementation status from memory.
+
+If documentation says a feature is missing but code exists, verify the implementation and report the stale documentation rather than rebuilding it.
+
+---
+
+## 34. Do Not
+
+Do not:
+
+- introduce TanStack Query for server state;
+- introduce Formik;
+- introduce Auth0 or Supabase;
+- store JWTs in `localStorage`;
+- use `any` as an escape hatch;
+- duplicate generated backend DTOs unnecessarily;
+- hand-write parallel API clients where RTK Query/generated APIs already exist;
+- copy server state into Redux slices;
+- put authoritative business rules in components;
+- invent backend fields/endpoints;
+- fake unsupported backend behavior;
+- hard-code role names when permission checks exist;
+- hide backend errors;
+- create parallel design systems;
+- fork the Metronic layout unnecessarily;
+- perform unrelated UI refactors;
+- add dependencies without justification;
+- create broad abstractions for a single feature;
+- treat browser validation as security;
+- expose sensitive values the backend intentionally masks.
+
+---
+
+## 35. Prefer
+
+Prefer:
+
+- generated contracts over handwritten duplicates;
+- RTK Query over manual fetching;
+- URL state for shareable navigation state;
+- React Hook Form + Zod for forms;
+- Metronic/shared components over feature-specific duplication;
+- feature-local code over premature globalization;
+- permissions over role-name assumptions;
+- backend-calculated values over frontend reconstruction;
+- user-observable tests over implementation-detail tests;
+- responsive behavior by default;
+- targeted inspection over broad repository scans;
+- targeted verification over repeated full-suite runs;
+- existing patterns over new abstractions;
+- concise implementation reports over narration.
+
+---
+
+## 36. Task Execution Principle
+
+For each frontend task:
+
+> **Find the narrowest relevant feature surface, verify the backend contract, reuse established UI/state patterns, implement only the necessary UX, preserve type/auth/permission boundaries, test according to risk, and report concisely.**
+
+Do not spend context reconstructing feature history or rereading unrelated frontend documentation.
