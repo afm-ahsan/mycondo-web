@@ -18,8 +18,9 @@ import {
   Package,
   PartyPopper,
   Receipt,
-  Wallet,
   ShieldUser,
+  Tag,
+  Wallet,
   Users,
   Waves,
   Zap,
@@ -250,12 +251,16 @@ export const MENU_SIDEBAR: MenuConfig = [
         ],
       },
       {
+        title: 'Expense Types',
+        icon: Tag,
+        path: '/finance/expense-types',
+        permission: 'expensetype.view',
+      },
+      {
         title: 'Expenses',
         icon: Receipt,
-        children: [
-          { title: 'Expense Types', path: '/finance/expense-types', permission: 'expensetype.view' },
-          { title: 'Expenses', path: '/finance/expenses', permission: 'expense.view' },
-        ],
+        path: '/finance/expenses',
+        permission: 'expense.view',
       },
       {
         title: 'Resident Ledger',
