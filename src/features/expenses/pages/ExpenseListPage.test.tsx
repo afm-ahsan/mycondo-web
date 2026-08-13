@@ -59,6 +59,14 @@ describe('ExpenseListPage', () => {
     expect(screen.getByText('Recorded')).toBeInTheDocument();
   });
 
+  it('contains the register table in a horizontally-scrollable area instead of overflowing the page', async () => {
+    setUpMocks();
+    renderWithProviders(<ExpenseListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Monthly cleaning');
+    expect(document.querySelector('[data-slot="scroll-area"]')).toBeInTheDocument();
+  });
+
   it('hides Add Expense and row actions for a user without expense.manage', async () => {
     setUpMocks();
     renderWithProviders(<ExpenseListPage />, { auth: { user: viewOnlyUser, isInitialized: true } });
