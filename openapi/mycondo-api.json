@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://localhost:7219/"
+      "url": "http://localhost:5219/"
     }
   ],
   "paths": {
@@ -1375,6 +1375,46 @@
         }
       }
     },
+    "/api/v1/properties/buildings/{id}/primary-photo": {
+      "put": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuildingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/properties/buildings/{buildingId}/flats": {
       "post": {
         "tags": [
@@ -1641,6 +1681,55 @@
         }
       }
     },
+    "/api/v1/properties/buildings/{buildingId}/flats/{flatId}/primary-photo": {
+      "put": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "flatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlatDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/properties/buildings/{buildingId}/gates": {
       "post": {
         "tags": [
@@ -1705,6 +1794,68 @@
                   "items": {
                     "$ref": "#/components/schemas/GateDto"
                   }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/flats": {
+      "get": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfFlatDto"
                 }
               }
             }
@@ -10875,7 +11026,8 @@
           "buildingId",
           "name",
           "code",
-          "address"
+          "address",
+          "primaryPhotoAttachmentId"
         ],
         "type": "object",
         "properties": {
@@ -10894,6 +11046,13 @@
               "null",
               "string"
             ]
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -13225,7 +13384,8 @@
           "flatNumber",
           "floorNumber",
           "flatType",
-          "areaSqFt"
+          "areaSqFt",
+          "primaryPhotoAttachmentId"
         ],
         "type": "object",
         "properties": {
@@ -13260,6 +13420,13 @@
               "string"
             ],
             "format": "double"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },

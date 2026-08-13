@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { PlusIcon } from 'lucide-react';
@@ -33,19 +33,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
-import { useBuilding, useCreateFlat, useDeactivateFlat, useFlatsForBuilding, useUpdateFlat } from '../api/propertyApi';
+import {
+  useBuilding,
+  useBuildings,
+  useCreateFlat,
+  useDeactivateFlat,
+  useFlatsForBuilding,
+  useFlatsForTenant,
+  useSetFlatPrimaryPhoto,
+  useUpdateFlat,
+} from '../api/propertyApi';
+import { BuildingFlatImageField } from '@/components/shared/BuildingFlatImageField';
 
-const FLATS_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
+const FLATS_FILTER_DEFAULTS = { search: '', buildingId: '', page: '1', pageSize: '10' };
 
 const FLAT_TYPES = ['Residential', 'Commercial', 'Other'] as const;
 
+/**
+ * Serves two routes with one component (task: reuse the same underlying APIs/components rather than
+ * a parallel model) — `/admin/buildings/:buildingId/flats` (scoped to one building, via
+ * `useFlatsForBuilding`) and the global Administration `/admin/flats` directory (via
+ * `useFlatsForTenant`, with a Building column/filter). Which mode is active is derived from whether
+ * the route supplied a `buildingId` param.
+ */
 export function FlatListPage() {
-  const { buildingId } = useParams<{ buildingId: string }>();
+  const { buildingId: routeBuildingId } = useParams<{ buildingId: string }>();
+  const isGlobal = !routeBuildingId;
+
   const [filters, setFilters] = useUrlFilters(FLATS_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -56,17 +76,29 @@ export function FlatListPage() {
   const debouncedSearch = useDebouncedValue(search);
   const isSearchPending = search !== debouncedSearch;
 
-  const { data: building } = useBuilding({ id: buildingId! }, { skip: !buildingId });
+  const { data: building } = useBuilding({ id: routeBuildingId! }, { skip: !routeBuildingId });
 
-  const { data, isFetching, isError, error, refetch } = useFlatsForBuilding(
+  const { data: buildingsForFilter } = useBuildings({ page: 1, pageSize: 100 }, { skip: !isGlobal });
+  const buildingNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const b of buildingsForFilter?.items ?? []) map.set(b.buildingId, b.name);
+    return map;
+  }, [buildingsForFilter]);
+
+  const scoped = useFlatsForBuilding(
+    { buildingId: routeBuildingId!, search: debouncedSearch || undefined, page: pagination.pageIndex + 1, pageSize: pagination.pageSize },
+    { skip: isGlobal },
+  );
+  const global = useFlatsForTenant(
     {
-      buildingId: buildingId!,
       search: debouncedSearch || undefined,
+      buildingId: filters.buildingId || undefined,
       page: pagination.pageIndex + 1,
       pageSize: pagination.pageSize,
     },
-    { skip: !buildingId },
+    { skip: !isGlobal },
   );
+  const { data, isFetching, isError, error, refetch } = isGlobal ? global : scoped;
 
   const [deactivateFlat, { isLoading: isDeactivating }] = useDeactivateFlat();
   const [createOpen, setCreateOpen] = useState(false);
@@ -84,9 +116,9 @@ export function FlatListPage() {
   }
 
   async function handleDeactivate() {
-    if (!deactivateTarget || !buildingId) return;
+    if (!deactivateTarget) return;
     try {
-      await deactivateFlat({ buildingId, flatId: deactivateTarget.flatId }).unwrap();
+      await deactivateFlat({ buildingId: deactivateTarget.buildingId, flatId: deactivateTarget.flatId }).unwrap();
       toast.success(`Flat "${deactivateTarget.flatNumber}" deactivated.`);
       setDeactivateTarget(null);
     } catch (err) {
@@ -96,6 +128,16 @@ export function FlatListPage() {
 
   const columns: ColumnDef<FlatDto>[] = [
     { id: 'flatNumber', header: 'Flat', cell: ({ row }) => row.original.flatNumber },
+    ...(isGlobal
+      ? [
+          {
+            id: 'building',
+            header: 'Building',
+            cell: ({ row }: { row: { original: FlatDto } }) =>
+              buildingNameById.get(row.original.buildingId) ?? '—',
+          } satisfies ColumnDef<FlatDto>,
+        ]
+      : []),
     { id: 'floorNumber', header: 'Floor', cell: ({ row }) => row.original.floorNumber ?? '—' },
     { id: 'flatType', header: 'Type', cell: ({ row }) => row.original.flatType },
     { id: 'areaSqFt', header: 'Area (sq ft)', cell: ({ row }) => row.original.areaSqFt ?? '—' },
@@ -104,12 +146,12 @@ export function FlatListPage() {
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 justify-end">
-          <RequirePermission permission="property.update" buildingId={buildingId}>
+          <RequirePermission permission="property.update" buildingId={row.original.buildingId}>
             <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
               Edit
             </Button>
           </RequirePermission>
-          <RequirePermission permission="property.delete" buildingId={buildingId}>
+          <RequirePermission permission="property.delete" buildingId={row.original.buildingId}>
             <Button variant="outline" size="sm" onClick={() => setDeactivateTarget(row.original)}>
               Deactivate
             </Button>
@@ -130,23 +172,29 @@ export function FlatListPage() {
     getCoreRowModel: getCoreRowModel(),
   });
 
-  if (!buildingId) {
+  if (!isGlobal && !routeBuildingId) {
     return null;
   }
+
+  const primaryAction = (
+    <RequirePermission permission="property.create" buildingId={isGlobal ? undefined : routeBuildingId}>
+      <Button onClick={() => setCreateOpen(true)}>
+        <PlusIcon /> Add Flat
+      </Button>
+    </RequirePermission>
+  );
 
   return (
     <>
       <PageHeader
-        title={building ? `Flats — ${building.name}` : 'Flats'}
-        description="Manage the flats belonging to this building."
-        crumbs={[{ label: 'Administration' }, { label: 'Buildings', path: '/admin/buildings' }, { label: 'Flats' }]}
-        primaryAction={
-          <RequirePermission permission="property.create" buildingId={buildingId}>
-            <Button onClick={() => setCreateOpen(true)}>
-              <PlusIcon /> Add Flat
-            </Button>
-          </RequirePermission>
+        title={isGlobal ? 'Flats' : building ? `Flats — ${building.name}` : 'Flats'}
+        description={isGlobal ? 'Manage the flats across every building.' : 'Manage the flats belonging to this building.'}
+        crumbs={
+          isGlobal
+            ? [{ label: 'Administration' }, { label: 'Flats' }]
+            : [{ label: 'Administration' }, { label: 'Buildings', path: '/admin/buildings' }, { label: 'Flats' }]
         }
+        primaryAction={primaryAction}
       />
 
       {isError ? (
@@ -159,13 +207,33 @@ export function FlatListPage() {
             <CardHeader>
               <CardHeading>
                 <CardTitle>Flats</CardTitle>
-                <SearchInput
-                  value={search}
-                  onChange={handleSearchChange}
-                  placeholder="Search by flat number…"
-                  isSearching={isSearchPending}
-                  className="w-64"
-                />
+                <div className="flex items-center gap-2">
+                  {isGlobal && (
+                    <Select
+                      value={filters.buildingId || 'all'}
+                      onValueChange={(value) => setFilters({ buildingId: value === 'all' ? '' : value, page: '1' })}
+                    >
+                      <SelectTrigger className="w-48">
+                        <SelectValue placeholder="All buildings" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All buildings</SelectItem>
+                        {buildingsForFilter?.items.map((b) => (
+                          <SelectItem key={b.buildingId} value={b.buildingId}>
+                            {b.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                  <SearchInput
+                    value={search}
+                    onChange={handleSearchChange}
+                    placeholder="Search by flat number…"
+                    isSearching={isSearchPending}
+                    className="w-64"
+                  />
+                </div>
               </CardHeading>
             </CardHeader>
             <CardTable>
@@ -178,10 +246,10 @@ export function FlatListPage() {
         </DataGrid>
       )}
 
-      <FlatFormDialog buildingId={buildingId} open={createOpen} onOpenChange={setCreateOpen} />
+      <FlatFormDialog buildingId={routeBuildingId} open={createOpen} onOpenChange={setCreateOpen} />
       {editTarget && (
         <FlatFormDialog
-          buildingId={buildingId}
+          buildingId={editTarget.buildingId}
           flat={editTarget}
           open
           onOpenChange={(open) => !open && setEditTarget(null)}
@@ -222,15 +290,22 @@ function FlatFormDialog({
   open,
   onOpenChange,
 }: {
-  buildingId: string;
+  /** The building this flat belongs to (edit) or will be created in (create, scoped route). Omitted
+   * on the global directory's create flow, where the building is chosen in the dialog instead. */
+  buildingId?: string;
   flat?: FlatDto;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
   const [createFlat, { isLoading: isCreating }] = useCreateFlat();
   const [updateFlat, { isLoading: isUpdating }] = useUpdateFlat();
+  const [setFlatPrimaryPhoto] = useSetFlatPrimaryPhoto();
   const isEditing = Boolean(flat);
   const isLoading = isCreating || isUpdating;
+  const needsBuildingPicker = !isEditing && !buildingId;
+  const [pickedBuildingId, setPickedBuildingId] = useState<string | undefined>(undefined);
+  const [buildingError, setBuildingError] = useState<string | null>(null);
+  const targetBuildingId = buildingId ?? pickedBuildingId;
 
   const form = useForm<FlatSchemaType>({
     resolver: zodResolver(flatSchema),
@@ -242,23 +317,30 @@ function FlatFormDialog({
   });
 
   async function onSubmit(values: FlatSchemaType) {
+    if (!targetBuildingId) {
+      setBuildingError('Select a building.');
+      return;
+    }
+    setBuildingError(null);
+
     const floorNumber = values.floorNumber ? Number(values.floorNumber) : null;
     try {
       if (flat) {
         await updateFlat({
-          buildingId,
+          buildingId: targetBuildingId,
           flatId: flat.flatId,
           updateFlatRequest: { flatNumber: values.flatNumber, floorNumber, flatType: values.flatType },
         }).unwrap();
         toast.success('Flat updated.');
       } else {
         await createFlat({
-          buildingId,
+          buildingId: targetBuildingId,
           createFlatRequest: { flatNumber: values.flatNumber, floorNumber, flatType: values.flatType },
         }).unwrap();
         toast.success(`Flat "${values.flatNumber}" created.`);
       }
       form.reset();
+      setPickedBuildingId(undefined);
       onOpenChange(false);
     } catch (err) {
       const apiError = toApiError(err);
@@ -280,6 +362,15 @@ function FlatFormDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            {needsBuildingPicker && (
+              <FormItem>
+                <FormLabel>Building</FormLabel>
+                <FormControl>
+                  <BuildingSelect value={pickedBuildingId} onValueChange={setPickedBuildingId} />
+                </FormControl>
+                {buildingError && <p className="text-destructive text-sm">{buildingError}</p>}
+              </FormItem>
+            )}
             <FormField
               control={form.control}
               name="flatNumber"
@@ -337,6 +428,21 @@ function FlatFormDialog({
             </DialogFooter>
           </form>
         </Form>
+
+        {flat && (
+          <BuildingFlatImageField
+            ownerType="Flat"
+            ownerId={flat.flatId}
+            primaryPhotoAttachmentId={flat.primaryPhotoAttachmentId}
+            onSetPrimaryPhoto={(attachmentId) =>
+              setFlatPrimaryPhoto({
+                buildingId: flat.buildingId,
+                flatId: flat.flatId,
+                setPrimaryPhotoRequest: { attachmentId },
+              }).unwrap()
+            }
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -483,6 +483,14 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/admin/flats"
+            element={
+              <RequirePermission permission="property.view" fallback={<AccessDeniedNotice />}>
+                <FlatListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/security/guests"
             element={
               <RequirePermission permission={PERMISSIONS.visitor.view} fallback={<AccessDeniedNotice />}>

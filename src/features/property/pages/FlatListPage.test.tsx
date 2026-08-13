@@ -58,6 +58,65 @@ function renderFlatListPage(user: AuthUser) {
   );
 }
 
+function renderGlobalFlatsPage(user: AuthUser) {
+  const store = createStore({ auth: { user, isInitialized: true } });
+  return render(
+    <MemoryRouter initialEntries={['/admin/flats']}>
+      <Provider store={store}>
+        <Routes>
+          <Route path="/admin/flats" element={<FlatListPage />} />
+        </Routes>
+      </Provider>
+    </MemoryRouter>,
+  );
+}
+
+function setUpGlobalMocks() {
+  server.use(
+    http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+      HttpResponse.json({
+        items: [{ buildingId: BUILDING_ID, name: 'Aisha Tower', code: 'AISHA', address: null }],
+        page: 1,
+        pageSize: 100,
+        total: 1,
+      }),
+    ),
+    http.get(`${API_BASE}/api/v1/properties/flats`, () =>
+      HttpResponse.json({ items: baseFlats, page: 1, pageSize: 10, total: baseFlats.length }),
+    ),
+    http.post(`${API_BASE}/api/v1/properties/buildings/${BUILDING_ID}/flats`, () =>
+      HttpResponse.json({ flatId: 'flat-new', buildingId: BUILDING_ID, flatNumber: 'B-201', floorNumber: 2, flatType: 'Residential', areaSqFt: null }),
+    ),
+  );
+}
+
+describe('FlatListPage — global Administration directory', () => {
+  it('renders flats across all buildings with a Building column', async () => {
+    setUpGlobalMocks();
+    renderGlobalFlatsPage(adminUser);
+
+    expect(await screen.findByText('A-101')).toBeInTheDocument();
+    expect(screen.getAllByText('Aisha Tower').length).toBeGreaterThan(0);
+    expect(screen.getByRole('heading', { name: 'Flats', level: 1 })).toBeInTheDocument();
+  });
+
+  it('requires a building to be picked when creating a flat from the global directory', async () => {
+    setUpGlobalMocks();
+    const user = userEvent.setup();
+    renderGlobalFlatsPage(adminUser);
+
+    await screen.findByText('A-101');
+    await user.click(screen.getByRole('button', { name: /add flat/i }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(within(dialog).getByText('Building')).toBeInTheDocument();
+    await user.type(screen.getByLabelText('Flat number'), 'B-201');
+    await user.click(screen.getByRole('button', { name: /create flat/i }));
+
+    expect(await screen.findByText('Select a building.')).toBeInTheDocument();
+  });
+});
+
 describe('FlatListPage', () => {
   it('renders the flats belonging to the selected building', async () => {
     setUpMocks();

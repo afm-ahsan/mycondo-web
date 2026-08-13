@@ -37,7 +37,14 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
-import { useBuildings, useCreateBuilding, useDeactivateBuilding, useUpdateBuilding } from '../api/propertyApi';
+import { BuildingFlatImageField } from '@/components/shared/BuildingFlatImageField';
+import {
+  useBuildings,
+  useCreateBuilding,
+  useDeactivateBuilding,
+  useSetBuildingPrimaryPhoto,
+  useUpdateBuilding,
+} from '../api/propertyApi';
 
 const BUILDINGS_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
@@ -216,6 +223,7 @@ function BuildingFormDialog({
 }) {
   const [createBuilding, { isLoading: isCreating }] = useCreateBuilding();
   const [updateBuilding, { isLoading: isUpdating }] = useUpdateBuilding();
+  const [setBuildingPrimaryPhoto] = useSetBuildingPrimaryPhoto();
   const isEditing = Boolean(building);
   const isLoading = isCreating || isUpdating;
 
@@ -310,6 +318,20 @@ function BuildingFormDialog({
             </DialogFooter>
           </form>
         </Form>
+
+        {building && (
+          <BuildingFlatImageField
+            ownerType="Building"
+            ownerId={building.buildingId}
+            primaryPhotoAttachmentId={building.primaryPhotoAttachmentId}
+            onSetPrimaryPhoto={(attachmentId) =>
+              setBuildingPrimaryPhoto({
+                id: building.buildingId,
+                setPrimaryPhotoRequest: { attachmentId },
+              }).unwrap()
+            }
+          />
+        )}
       </DialogContent>
     </Dialog>
   );

@@ -76,6 +76,56 @@ describe('BuildingListPage', () => {
     });
   });
 
+  it('uploads and sets a primary photo when editing a building', async () => {
+    const uploadedBuilding = { ...baseBuildings[0], primaryPhotoAttachmentId: 'attachment-1' };
+    server.use(
+      http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+        HttpResponse.json({ items: baseBuildings, page: 1, pageSize: 10, total: baseBuildings.length }),
+      ),
+      http.get(`${API_BASE}/api/v1/attachments`, () =>
+        HttpResponse.json([
+          {
+            attachmentId: 'attachment-1',
+            ownerType: 'Building',
+            ownerId: 'building-1',
+            storageKey: 'local/building-1/attachment-1-photo.jpg',
+            fileName: 'photo.jpg',
+            contentType: 'image/jpeg',
+            sizeBytes: 1024,
+            createdAtUtc: new Date().toISOString(),
+          },
+        ]),
+      ),
+      http.post(`${API_BASE}/api/v1/attachments`, () =>
+        HttpResponse.json({
+          attachmentId: 'attachment-1',
+          ownerType: 'Building',
+          ownerId: 'building-1',
+          storageKey: 'local/building-1/attachment-1-photo.jpg',
+          fileName: 'photo.jpg',
+          contentType: 'image/jpeg',
+          sizeBytes: 1024,
+          createdAtUtc: new Date().toISOString(),
+        }),
+      ),
+      http.put(`${API_BASE}/api/v1/properties/buildings/:id/primary-photo`, () => HttpResponse.json(uploadedBuilding)),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<BuildingListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Aisha Tower');
+    const row = screen.getByText('Aisha Tower').closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /^edit$/i }));
+
+    const dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText(/click to upload an image/i);
+    const fileInput = dialog.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['image-bytes'], 'photo.jpg', { type: 'image/jpeg' });
+    await user.upload(fileInput, file);
+
+    expect(await within(dialog).findByText('photo.jpg')).toBeInTheDocument();
+  });
+
   it('deactivates a building after confirmation', async () => {
     setUpMocks();
     const user = userEvent.setup();
