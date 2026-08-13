@@ -32,14 +32,14 @@
         }
       }
     },
-    "/api/v1/properties/owners/{userId}/ownerships": {
+    "/api/v1/properties/owners/{residentId}/ownerships": {
       "get": {
         "tags": [
           "Property"
         ],
         "parameters": [
           {
-            "name": "userId",
+            "name": "residentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -56,7 +56,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/UserFlatOwnershipDto"
+                    "$ref": "#/components/schemas/OwnerFlatOwnershipDto"
                   }
                 }
               }
@@ -1942,6 +1942,75 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/CreateFlatOwnershipResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/flat-ownerships/register": {
+      "post": {
+        "tags": [
+          "Property"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterFlatOwnerCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegisterFlatOwnerResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/flat-ownerships/owners/{residentId}/profile": {
+      "put": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "residentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFlatOwnerProfileRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentDto"
                 }
               }
             }
@@ -11946,13 +12015,13 @@
       },
       "CreateFlatOwnershipCommand": {
         "required": [
-          "userId",
+          "residentId",
           "flatId",
           "startDate"
         ],
         "type": "object",
         "properties": {
-          "userId": {
+          "residentId": {
             "type": "string",
             "format": "uuid"
           },
@@ -11969,7 +12038,7 @@
       "CreateFlatOwnershipResult": {
         "required": [
           "flatOwnershipId",
-          "userId",
+          "residentId",
           "flatId",
           "startDate"
         ],
@@ -11979,7 +12048,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "residentId": {
             "type": "string",
             "format": "uuid"
           },
@@ -13449,9 +13518,10 @@
       "FlatOwnerRegisterDto": {
         "required": [
           "flatOwnershipId",
-          "userId",
+          "residentId",
           "ownerFullName",
           "ownerEmail",
+          "ownerPhone",
           "flatId",
           "flatNumber",
           "buildingId",
@@ -13466,7 +13536,7 @@
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "residentId": {
             "type": "string",
             "format": "uuid"
           },
@@ -13474,7 +13544,16 @@
             "type": "string"
           },
           "ownerEmail": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "ownerPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "flatId": {
             "type": "string",
@@ -13509,7 +13588,8 @@
       "FlatOwnershipDto": {
         "required": [
           "flatOwnershipId",
-          "userId",
+          "residentId",
+          "ownerFullName",
           "flatId",
           "status",
           "startDate",
@@ -13521,9 +13601,12 @@
             "type": "string",
             "format": "uuid"
           },
-          "userId": {
+          "residentId": {
             "type": "string",
             "format": "uuid"
+          },
+          "ownerFullName": {
+            "type": "string"
           },
           "flatId": {
             "type": "string",
@@ -15559,6 +15642,53 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "OwnerFlatOwnershipDto": {
+        "required": [
+          "flatOwnershipId",
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "status",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatOwnershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
           }
         }
       },
@@ -19402,6 +19532,169 @@
           }
         }
       },
+      "RegisterFlatOwnerCommand": {
+        "required": [
+          "flatId",
+          "startDate",
+          "fullName",
+          "phone",
+          "email",
+          "alternatePhone",
+          "nationalIdNumber",
+          "passportNumber",
+          "dateOfBirth",
+          "gender",
+          "presentAddress",
+          "permanentAddress",
+          "fatherName",
+          "motherName",
+          "maritalStatus",
+          "profession",
+          "employer",
+          "officeAddress",
+          "emergencyContactName",
+          "emergencyContactPhone"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alternatePhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "passportNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "presentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "motherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maritalStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "profession": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "employer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Atomically registers a new Flat Owner: creates the shared `Resident` party record (Owner type,\r\nwith the full identity/contact/family-professional profile captured by the registration wizard) and\r\ngrants the first `FlatOwnership` in one operation. Deliberately does not go through a\r\nDraft/Submitted/Verified approval lifecycle like Tenant Registration — ownership registration has no\r\nconcrete approval requirement, so this both creates and finalizes the record; additional owned Flats\r\nare added afterward via the existing `CreateFlatOwnershipCommand` (ownership-specific operation,\r\nnot folded into this one)."
+      },
+      "RegisterFlatOwnerResult": {
+        "required": [
+          "residentId",
+          "flatOwnershipId",
+          "resident"
+        ],
+        "type": "object",
+        "properties": {
+          "residentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatOwnershipId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "resident": {
+            "$ref": "#/components/schemas/ResidentDto"
+          }
+        }
+      },
       "RegisterServiceProviderCommand": {
         "required": [
           "fullName",
@@ -19751,7 +20044,22 @@
           "fullName",
           "phone",
           "email",
-          "residentType"
+          "residentType",
+          "alternatePhone",
+          "nationalIdNumberMasked",
+          "passportNumberMasked",
+          "dateOfBirth",
+          "gender",
+          "presentAddress",
+          "permanentAddress",
+          "fatherName",
+          "motherName",
+          "maritalStatus",
+          "profession",
+          "employer",
+          "officeAddress",
+          "emergencyContactName",
+          "emergencyContactPhone"
         ],
         "type": "object",
         "properties": {
@@ -19780,6 +20088,97 @@
           },
           "residentType": {
             "type": "string"
+          },
+          "alternatePhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "passportNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "presentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "motherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maritalStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "profession": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "employer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -20696,6 +21095,137 @@
           }
         }
       },
+      "UpdateFlatOwnerProfileRequest": {
+        "required": [
+          "fullName",
+          "phone",
+          "email",
+          "alternatePhone",
+          "nationalIdNumber",
+          "passportNumber",
+          "dateOfBirth",
+          "gender",
+          "presentAddress",
+          "permanentAddress",
+          "fatherName",
+          "motherName",
+          "maritalStatus",
+          "profession",
+          "employer",
+          "officeAddress",
+          "emergencyContactName",
+          "emergencyContactPhone"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alternatePhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "passportNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "presentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "motherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maritalStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "profession": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "employer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "UpdateFlatRequest": {
         "required": [
           "flatNumber",
@@ -20996,53 +21526,6 @@
               "string"
             ],
             "format": "date-time"
-          }
-        }
-      },
-      "UserFlatOwnershipDto": {
-        "required": [
-          "flatOwnershipId",
-          "flatId",
-          "flatNumber",
-          "buildingId",
-          "buildingName",
-          "status",
-          "startDate",
-          "endDate"
-        ],
-        "type": "object",
-        "properties": {
-          "flatOwnershipId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "flatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "flatNumber": {
-            "type": "string"
-          },
-          "buildingId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "buildingName": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "startDate": {
-            "type": "string",
-            "format": "date"
-          },
-          "endDate": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date"
           }
         }
       },
