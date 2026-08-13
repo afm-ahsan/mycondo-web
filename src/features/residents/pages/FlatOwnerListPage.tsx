@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
@@ -26,7 +27,6 @@ import {
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -39,22 +39,24 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
-import { UserSelect, type UserSelectValue } from '@/components/shared/UserSelect';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import {
   useCreateFlatOwnership,
   useEndFlatOwnership,
   useFlatOwners,
-  useFlatOwnershipsForUser,
+  useFlatOwnershipsForOwner,
+  useUpdateFlatOwnerProfile,
 } from '../api/residentsApi';
 
 const OWNERS_FILTER_DEFAULTS = { search: '', status: 'Active', page: '1', pageSize: '10' };
@@ -77,7 +79,6 @@ export function FlatOwnerListPage() {
     pageSize: pagination.pageSize,
   });
 
-  const [createOpen, setCreateOpen] = useState(false);
   const [detailTarget, setDetailTarget] = useState<FlatOwnerRegisterDto | null>(null);
   const [endTarget, setEndTarget] = useState<FlatOwnerRegisterDto | null>(null);
 
@@ -101,7 +102,7 @@ export function FlatOwnerListPage() {
         </button>
       ),
     },
-    { id: 'email', header: 'Email', cell: ({ row }) => row.original.ownerEmail },
+    { id: 'contact', header: 'Contact', cell: ({ row }) => row.original.ownerEmail ?? row.original.ownerPhone ?? '—' },
     {
       id: 'flat',
       header: 'Flat',
@@ -150,8 +151,10 @@ export function FlatOwnerListPage() {
         crumbs={[{ label: 'Resident Management' }, { label: 'Flat Owners' }]}
         primaryAction={
           <RequirePermission permission="ownership.manage">
-            <Button onClick={() => setCreateOpen(true)}>
-              <PlusIcon /> Add Owner
+            <Button asChild>
+              <Link to="/residents/flat-owners/new">
+                <PlusIcon /> Add Owner
+              </Link>
             </Button>
           </RequirePermission>
         }
@@ -162,7 +165,13 @@ export function FlatOwnerListPage() {
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
       ) : (
-        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No flat owners match these filters.">
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No flat owners match these filters."
+          tableLayout={{ cellBorder: true }}
+        >
           <Card>
             <CardHeader>
               <CardHeading>
@@ -170,7 +179,7 @@ export function FlatOwnerListPage() {
                 <SearchInput
                   value={search}
                   onChange={handleSearchChange}
-                  placeholder="Search by owner name or email…"
+                  placeholder="Search by owner name, email, or phone…"
                   isSearching={isSearchPending}
                   className="w-64"
                 />
@@ -189,7 +198,10 @@ export function FlatOwnerListPage() {
               </CardToolbar>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />
@@ -198,7 +210,6 @@ export function FlatOwnerListPage() {
         </DataGrid>
       )}
 
-      <CreateFlatOwnershipDialog open={createOpen} onOpenChange={setCreateOpen} />
       {detailTarget && (
         <FlatOwnerDetailDialog owner={detailTarget} open onOpenChange={(open) => !open && setDetailTarget(null)} />
       )}
@@ -209,109 +220,12 @@ export function FlatOwnerListPage() {
   );
 }
 
-const createOwnershipSchema = z.object({
-  buildingId: z.string().min(1, { message: 'Building is required.' }),
-  flatId: z.string().min(1, { message: 'Flat is required.' }),
-  startDate: z.string().min(1, { message: 'Start date is required.' }),
+const ownerProfileSchema = z.object({
+  fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
+  phone: z.string().optional().or(z.literal('')),
+  email: z.string().email({ message: 'Enter a valid email address.' }).optional().or(z.literal('')),
 });
-type CreateOwnershipSchemaType = z.infer<typeof createOwnershipSchema>;
-
-function CreateFlatOwnershipDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
-  const [createOwnership, { isLoading }] = useCreateFlatOwnership();
-  const [selectedUser, setSelectedUser] = useState<UserSelectValue | null>(null);
-
-  const form = useForm<CreateOwnershipSchemaType>({
-    resolver: zodResolver(createOwnershipSchema),
-    defaultValues: { buildingId: '', flatId: '', startDate: new Date().toISOString().slice(0, 10) },
-  });
-  const buildingId = form.watch('buildingId');
-
-  async function onSubmit(values: CreateOwnershipSchemaType) {
-    if (!selectedUser) {
-      toast.error('Select the owner\'s user account first.');
-      return;
-    }
-    try {
-      await createOwnership({
-        createFlatOwnershipCommand: { userId: selectedUser.userId, flatId: values.flatId, startDate: values.startDate },
-      }).unwrap();
-      toast.success(`Ownership granted to ${selectedUser.fullName}.`);
-      form.reset();
-      setSelectedUser(null);
-      onOpenChange(false);
-    } catch (err) {
-      toast.error(toUserMessage(err));
-    }
-  }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Add Owner</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium">Owner</label>
-            <UserSelect value={selectedUser} onChange={setSelectedUser} />
-            <p className="text-xs text-muted-foreground">
-              The owner must already have a MyCondo account. If they don&apos;t yet, create one first
-              from Administration &gt; Users.
-            </p>
-          </div>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <FormField
-                control={form.control}
-                name="buildingId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Building</FormLabel>
-                    <FormControl>
-                      <BuildingSelect value={field.value} onValueChange={field.onChange} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="flatId"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Flat</FormLabel>
-                    <FormControl>
-                      <FlatSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="startDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Ownership effective date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <DialogFooter>
-                <Button type="submit" disabled={isLoading || !selectedUser}>
-                  {isLoading ? 'Granting…' : 'Grant ownership'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </Form>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
+type OwnerProfileSchemaType = z.infer<typeof ownerProfileSchema>;
 
 function FlatOwnerDetailDialog({
   owner,
@@ -322,22 +236,174 @@ function FlatOwnerDetailDialog({
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
-  const { data: ownerships, isLoading } = useFlatOwnershipsForUser({ userId: owner.userId }, { skip: !open });
+  const { data: ownerships, isLoading } = useFlatOwnershipsForOwner({ residentId: owner.residentId }, { skip: !open });
+  const [updateProfile, { isLoading: isSaving }] = useUpdateFlatOwnerProfile();
+  const [createOwnership, { isLoading: isAddingFlat }] = useCreateFlatOwnership();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isAddingFlatOpen, setIsAddingFlatOpen] = useState(false);
+  const [addFlatBuildingId, setAddFlatBuildingId] = useState('');
+  const [addFlatFlatId, setAddFlatFlatId] = useState('');
+
+  const form = useForm<OwnerProfileSchemaType>({
+    resolver: zodResolver(ownerProfileSchema),
+    defaultValues: { fullName: owner.ownerFullName, phone: owner.ownerPhone ?? '', email: owner.ownerEmail ?? '' },
+  });
+
+  async function onSubmit(values: OwnerProfileSchemaType) {
+    try {
+      await updateProfile({
+        residentId: owner.residentId,
+        updateFlatOwnerProfileRequest: {
+          fullName: values.fullName,
+          phone: values.phone || null,
+          email: values.email || null,
+          alternatePhone: null,
+          nationalIdNumber: null,
+          passportNumber: null,
+          dateOfBirth: null,
+          gender: null,
+          presentAddress: null,
+          permanentAddress: null,
+          fatherName: null,
+          motherName: null,
+          maritalStatus: null,
+          profession: null,
+          employer: null,
+          officeAddress: null,
+          emergencyContactName: null,
+          emergencyContactPhone: null,
+        },
+      }).unwrap();
+      toast.success('Owner profile updated.');
+      setIsEditing(false);
+    } catch (err) {
+      const apiError = toApiError(err);
+      if (!applyApiErrorToForm(form, apiError)) {
+        toast.error(toUserMessage(apiError ?? err));
+      }
+    }
+  }
+
+  async function handleAddFlat() {
+    if (!addFlatFlatId) return;
+    try {
+      await createOwnership({
+        createFlatOwnershipCommand: {
+          residentId: owner.residentId,
+          flatId: addFlatFlatId,
+          startDate: new Date().toISOString().slice(0, 10),
+        },
+      }).unwrap();
+      toast.success('Additional flat ownership granted.');
+      setIsAddingFlatOpen(false);
+      setAddFlatBuildingId('');
+      setAddFlatFlatId('');
+    } catch (err) {
+      toast.error(toUserMessage(err));
+    }
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent className="max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{owner.ownerFullName}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4 text-sm">
-          <dl className="grid grid-cols-3 gap-y-2">
-            <dt className="text-muted-foreground">Email</dt>
-            <dd className="col-span-2">{owner.ownerEmail}</dd>
-          </dl>
+          {isEditing ? (
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="fullName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full name</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? 'Saving…' : 'Save changes'}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          ) : (
+            <>
+              <dl className="grid grid-cols-3 gap-y-2">
+                <dt className="text-muted-foreground">Email</dt>
+                <dd className="col-span-2">{owner.ownerEmail ?? '—'}</dd>
+                <dt className="text-muted-foreground">Phone</dt>
+                <dd className="col-span-2">{owner.ownerPhone ?? '—'}</dd>
+              </dl>
+              <RequirePermission permission="ownership.manage">
+                <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                  Edit profile
+                </Button>
+              </RequirePermission>
+            </>
+          )}
 
-          <div>
-            <p className="text-muted-foreground mb-1.5">Flats owned</p>
+          <div className="border-t pt-4">
+            <div className="mb-1.5 flex items-center justify-between">
+              <p className="text-muted-foreground">Flats owned</p>
+              <RequirePermission permission="ownership.manage">
+                <Button type="button" variant="ghost" size="sm" onClick={() => setIsAddingFlatOpen((v) => !v)}>
+                  {isAddingFlatOpen ? 'Cancel' : '+ Add flat'}
+                </Button>
+              </RequirePermission>
+            </div>
+
+            {isAddingFlatOpen && (
+              <div className="mb-3 space-y-2 rounded-md border p-3">
+                <BuildingSelect
+                  value={addFlatBuildingId}
+                  onValueChange={(v) => {
+                    setAddFlatBuildingId(v);
+                    setAddFlatFlatId('');
+                  }}
+                />
+                <FlatSelect buildingId={addFlatBuildingId} value={addFlatFlatId} onValueChange={setAddFlatFlatId} />
+                <Button type="button" size="sm" onClick={handleAddFlat} disabled={!addFlatFlatId || isAddingFlat}>
+                  {isAddingFlat ? 'Granting…' : 'Grant ownership'}
+                </Button>
+              </div>
+            )}
+
             {isLoading ? (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <InlineSpinner /> Loading...

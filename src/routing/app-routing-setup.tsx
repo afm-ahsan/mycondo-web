@@ -144,6 +144,7 @@ const RolePermissionMatrixPage = lazyPage(identity, 'RolePermissionMatrixPage');
 const residents = () => import('@/features/residents');
 const ResidentListPage = lazyPage(residents, 'ResidentListPage');
 const FlatOwnerListPage = lazyPage(residents, 'FlatOwnerListPage');
+const FlatOwnerRegistrationWizardPage = lazyPage(residents, 'FlatOwnerRegistrationWizardPage');
 
 const expenses = () => import('@/features/expenses');
 const ExpenseTypeListPage = lazyPage(expenses, 'ExpenseTypeListPage');
@@ -439,6 +440,14 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission="ownership.manage" fallback={<AccessDeniedNotice />}>
                 <FlatOwnerListPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/residents/flat-owners/new"
+            element={
+              <RequirePermission permission="ownership.manage" fallback={<AccessDeniedNotice />}>
+                <FlatOwnerRegistrationWizardPage />
               </RequirePermission>
             }
           />
