@@ -137,6 +137,20 @@ describe('FlatListPage', () => {
     expect(screen.queryByRole('button', { name: /deactivate/i })).not.toBeInTheDocument();
   });
 
+  it('keeps the Edit dialog within the viewport height and scrollable', async () => {
+    setUpMocks();
+    const user = userEvent.setup();
+    renderFlatListPage(adminUser);
+
+    await screen.findByText('A-101');
+    const row = screen.getByText('A-101').closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /^edit$/i }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.className).toMatch(/max-h-\[85vh\]/);
+    expect(dialog.className).toMatch(/overflow-y-auto/);
+  });
+
   it('creates a new flat', async () => {
     setUpMocks();
     const user = userEvent.setup();
