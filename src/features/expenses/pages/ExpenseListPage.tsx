@@ -39,6 +39,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
@@ -147,69 +149,75 @@ export function ExpenseListPage() {
         }
       />
 
-      <div className="space-y-4">
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="space-y-1.5 w-full sm:w-64">
-            <label className="text-xs text-muted-foreground">Building</label>
-            <BuildingSelect
-              value={filters.buildingId || undefined}
-              onValueChange={(v) => setFilters({ buildingId: v, page: '1' })}
-              placeholder="All buildings"
-            />
-          </div>
-          <div className="space-y-1.5 w-44">
-            <label className="text-xs text-muted-foreground">Type</label>
-            <Select value={filters.expenseTypeId} onValueChange={(v) => setFilters({ expenseTypeId: v, page: '1' })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All types</SelectItem>
-                {activeTypes?.map((t) => (
-                  <SelectItem key={t.expenseTypeId} value={t.expenseTypeId}>
-                    {t.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-1.5 w-36">
-            <label className="text-xs text-muted-foreground">Status</label>
-            <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All statuses</SelectItem>
-                <SelectItem value="Recorded">Recorded</SelectItem>
-                <SelectItem value="Voided">Voided</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
-
-        {isError ? (
+      {isError ? (
+        <Card>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
+        </Card>
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No expenses match these filters."
+          tableLayout={{ cellBorder: true }}
+        >
           <Card>
-            <ErrorState description={toUserMessage(error)} onRetry={refetch} />
-          </Card>
-        ) : (
-          <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No expenses match these filters.">
-            <Card>
-              <CardHeader>
-                <CardHeading>
-                  <CardTitle>Expense register</CardTitle>
-                </CardHeading>
-              </CardHeader>
-              <CardTable>
+            <CardHeader className="flex-wrap gap-3">
+              <CardHeading>
+                <CardTitle>Expense register</CardTitle>
+              </CardHeading>
+              <div className="flex flex-wrap items-end gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Building</Label>
+                  <BuildingSelect
+                    value={filters.buildingId || undefined}
+                    onValueChange={(v) => setFilters({ buildingId: v, page: '1' })}
+                    placeholder="All buildings"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Type</Label>
+                  <Select value={filters.expenseTypeId} onValueChange={(v) => setFilters({ expenseTypeId: v, page: '1' })}>
+                    <SelectTrigger className="w-44">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All types</SelectItem>
+                      {activeTypes?.map((t) => (
+                        <SelectItem key={t.expenseTypeId} value={t.expenseTypeId}>
+                          {t.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Status</Label>
+                  <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
+                    <SelectTrigger className="w-36">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="Recorded">Recorded</SelectItem>
+                      <SelectItem value="Voided">Voided</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
                 <DataGridTable />
-              </CardTable>
-              <CardFooter>
-                <DataGridPagination />
-              </CardFooter>
-            </Card>
-          </DataGrid>
-        )}
-      </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <ExpenseFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       {editTarget && (

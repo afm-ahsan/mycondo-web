@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -155,7 +156,13 @@ export function ExpenseTypeListPage() {
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
       ) : (
-        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No expense types match these filters.">
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No expense types match these filters."
+          tableLayout={{ cellBorder: true }}
+        >
           <Card>
             <CardHeader>
               <CardHeading>
@@ -182,7 +189,10 @@ export function ExpenseTypeListPage() {
               </CardToolbar>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />

@@ -76,6 +76,20 @@ describe('BuildingListPage', () => {
     });
   });
 
+  it('keeps the Edit dialog within the viewport height and scrollable', async () => {
+    setUpMocks();
+    const user = userEvent.setup();
+    renderWithProviders(<BuildingListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Aisha Tower');
+    const row = screen.getByText('Aisha Tower').closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /^edit$/i }));
+
+    const dialog = await screen.findByRole('dialog');
+    expect(dialog.className).toMatch(/max-h-\[85vh\]/);
+    expect(dialog.className).toMatch(/overflow-y-auto/);
+  });
+
   it('uploads and sets a primary photo when editing a building', async () => {
     const uploadedBuilding = { ...baseBuildings[0], primaryPhotoAttachmentId: 'attachment-1' };
     server.use(
