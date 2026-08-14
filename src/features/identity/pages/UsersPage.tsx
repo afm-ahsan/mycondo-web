@@ -2,17 +2,6 @@ import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { MoreHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
@@ -24,11 +13,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { toUserMessage } from '@/api/errors';
 import type { UserSummaryDto } from '@/api/generated/mycondoApi';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
+import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -40,6 +32,11 @@ import { ViewUserDialog } from '../components/ViewUserDialog';
 import { useDisableUser, useEnableUser, useRoles, useUsers } from '../api/identityApi';
 
 const USERS_FILTER_DEFAULTS = { search: '', roleId: 'all', status: 'all', page: '1', pageSize: '10' };
+
+const userStatusToneMap: StatusBadgeMap<'Active' | 'Disabled'> = {
+  Active: { label: 'Active', variant: 'success' },
+  Disabled: { label: 'Disabled', variant: 'destructive' },
+};
 
 type PendingStatusChange = { userId: string; fullName: string; type: 'enable' | 'disable' };
 type DialogTarget = { userId: string; fullName: string };
@@ -106,9 +103,7 @@ export function UsersPage() {
       id: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge variant={row.original.isActive ? 'success' : 'destructive'} appearance="light">
-          {row.original.isActive ? 'Active' : 'Disabled'}
-        </Badge>
+        <StatusBadge status={row.original.isActive ? 'Active' : 'Disabled'} toneMap={userStatusToneMap} />
       ),
     },
     {
@@ -222,7 +217,10 @@ export function UsersPage() {
 
             <div className="hidden md:block">
               <CardTable>
-                <DataGridTable />
+                <ScrollArea>
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </CardTable>
             </div>
             <div className="divide-border divide-y md:hidden">
@@ -251,30 +249,21 @@ export function UsersPage() {
         </DataGrid>
       )}
 
-      <AlertDialog open={pendingStatusChange !== null} onOpenChange={(open) => !open && setPendingStatusChange(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {pendingStatusChange?.type === 'disable' ? 'Disable this user?' : 'Enable this user?'}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {pendingStatusChange?.type === 'disable'
-                ? `${pendingStatusChange.fullName} will no longer be able to sign in.`
-                : `${pendingStatusChange?.fullName} will be able to sign in again.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmStatusChange}
-              disabled={isDisabling || isEnabling}
-              variant={pendingStatusChange?.type === 'disable' ? 'destructive' : 'primary'}
-            >
-              {pendingStatusChange?.type === 'disable' ? 'Disable' : 'Enable'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmActionDialog
+        open={pendingStatusChange !== null}
+        onOpenChange={(open) => !open && setPendingStatusChange(null)}
+        title={pendingStatusChange?.type === 'disable' ? 'Disable this user?' : 'Enable this user?'}
+        description={
+          pendingStatusChange?.type === 'disable'
+            ? `${pendingStatusChange.fullName} will no longer be able to sign in.`
+            : `${pendingStatusChange?.fullName} will be able to sign in again.`
+        }
+        confirmLabel={pendingStatusChange?.type === 'disable' ? 'Disable' : 'Enable'}
+        loadingLabel="Saving…"
+        isLoading={isDisabling || isEnabling}
+        onConfirm={handleConfirmStatusChange}
+        confirmVariant={pendingStatusChange?.type === 'disable' ? 'destructive' : 'primary'}
+      />
 
       {viewTarget && (
         <ViewUserDialog
@@ -319,9 +308,7 @@ function UserCard({
     <div className="flex flex-col gap-1 px-5 py-3">
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium">{user.fullName}</span>
-        <Badge variant={user.isActive ? 'success' : 'destructive'} appearance="light">
-          {user.isActive ? 'Active' : 'Disabled'}
-        </Badge>
+        <StatusBadge status={user.isActive ? 'Active' : 'Disabled'} toneMap={userStatusToneMap} />
       </div>
       <div className="text-muted-foreground text-xs">{user.email}</div>
       <div className="flex items-center gap-3 pt-1">

@@ -7,7 +7,6 @@ import { toast } from 'sonner';
 import { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
 import type { ExpenseDto } from '@/api/generated/mycondoApi';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
@@ -42,6 +41,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { Textarea } from '@/components/ui/textarea';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
@@ -54,6 +54,11 @@ import { useActiveExpenseTypes, useCreateExpense, useExpenses, useUpdateExpense,
 
 const EXPENSES_FILTER_DEFAULTS = {
   buildingId: '', expenseTypeId: 'all', status: 'all', page: '1', pageSize: '10',
+};
+
+const expenseStatusToneMap: StatusBadgeMap<'Recorded' | 'Voided'> = {
+  Recorded: { label: 'Recorded', variant: 'success' },
+  Voided: { label: 'Voided', variant: 'secondary' },
 };
 
 const PAYMENT_METHODS = [
@@ -99,9 +104,7 @@ export function ExpenseListPage() {
       id: 'status',
       header: 'Status',
       cell: ({ row }) => (
-        <Badge variant={row.original.status === 'Recorded' ? 'success' : 'secondary'} appearance="light">
-          {row.original.status}
-        </Badge>
+        <StatusBadge status={row.original.status as 'Recorded' | 'Voided'} toneMap={expenseStatusToneMap} />
       ),
     },
     {

@@ -7,6 +7,7 @@ import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardTo
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toUserMessage } from '@/api/errors';
@@ -86,7 +87,7 @@ export function TenantRegistrationListPage() {
     <>
       <PageHeader
         title="Tenant Registrations"
-        crumbs={[{ label: 'Tenant Registrations' }]}
+        crumbs={[{ label: 'Residents' }, { label: 'Tenant Registrations' }]}
         primaryAction={
           <RequirePermission permission={PERMISSIONS.occupancyRegistration.create}>
             <Button asChild>
@@ -129,7 +130,10 @@ export function TenantRegistrationListPage() {
                 (4 columns) that a stacked card per row reads better than a scrolling table. */}
             <div className="hidden md:block">
               <CardTable>
-                <DataGridTable />
+                <ScrollArea>
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
               </CardTable>
             </div>
             <div className="divide-border divide-y md:hidden">

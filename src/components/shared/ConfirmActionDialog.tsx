@@ -8,6 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { type buttonVariants } from '@/components/ui/button';
+import { type VariantProps } from 'class-variance-authority';
 
 interface ConfirmActionDialogProps {
   open: boolean;
@@ -18,6 +20,10 @@ interface ConfirmActionDialogProps {
   loadingLabel: string;
   isLoading: boolean;
   onConfirm: () => void;
+  /** Visual weight of the confirm button. Defaults to `destructive`, this component's original and
+   * still most common use (Deactivate/Delete); pass `primary` for reversible confirmations like
+   * re-enabling something. */
+  confirmVariant?: VariantProps<typeof buttonVariants>['variant'];
 }
 
 /**
@@ -38,6 +44,7 @@ export function ConfirmActionDialog({
   loadingLabel,
   isLoading,
   onConfirm,
+  confirmVariant = 'destructive',
 }: ConfirmActionDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(next) => !isLoading && onOpenChange(next)}>
@@ -51,6 +58,7 @@ export function ConfirmActionDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
+            variant={confirmVariant}
             disabled={isLoading}
             onClick={(e) => {
               e.preventDefault();

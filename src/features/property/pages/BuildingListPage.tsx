@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
@@ -136,7 +137,7 @@ export function BuildingListPage() {
       <PageHeader
         title="Buildings"
         description="Manage the buildings in this property portfolio."
-        crumbs={[{ label: 'Administration' }, { label: 'Buildings' }]}
+        crumbs={[{ label: 'Property' }, { label: 'Buildings' }]}
         primaryAction={
           <RequirePermission permission="property.create">
             <Button onClick={() => setCreateOpen(true)}>
@@ -166,7 +167,10 @@ export function BuildingListPage() {
               </CardHeading>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />
