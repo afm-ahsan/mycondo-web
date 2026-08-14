@@ -8,6 +8,7 @@ import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { RequirePlatformAuth } from '@/lib/auth/RequirePlatformAuth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
+import { PlatformLayout } from '@/layouts/platform/layout';
 import { Navigate, Outlet, Route, Routes } from 'react-router';
 import { lazyPage } from './lazyPage';
 
@@ -44,6 +45,10 @@ const NewOrganizationWizardPage = lazyPage(
 const PlatformOrganizationDetailPage = lazyPage(
   () => import('@/features/platform/pages/PlatformOrganizationDetailPage'),
   'PlatformOrganizationDetailPage',
+);
+const PlatformOrganizationsListPage = lazyPage(
+  () => import('@/features/platform/pages/PlatformOrganizationsListPage'),
+  'PlatformOrganizationsListPage',
 );
 
 // Security
@@ -1144,36 +1149,42 @@ export function AppRoutingSetup() {
           }
         />
       </Route>
-      <Route
-        path="/platform/dashboard"
-        element={
-          <RequirePlatformAuth>
-            <Suspense fallback={<PageSkeleton />}>
-              <PlatformDashboardPage />
-            </Suspense>
-          </RequirePlatformAuth>
-        }
-      />
-      <Route
-        path="/platform/organizations/new"
-        element={
-          <RequirePlatformAuth>
-            <Suspense fallback={<PageSkeleton />}>
-              <NewOrganizationWizardPage />
-            </Suspense>
-          </RequirePlatformAuth>
-        }
-      />
-      <Route
-        path="/platform/organizations/:id"
-        element={
-          <RequirePlatformAuth>
-            <Suspense fallback={<PageSkeleton />}>
-              <PlatformOrganizationDetailPage />
-            </Suspense>
-          </RequirePlatformAuth>
-        }
-      />
+      <Route element={<RequirePlatformAuth><Outlet /></RequirePlatformAuth>}>
+        <Route element={<PlatformLayout />}>
+          <Route
+            path="/platform/dashboard"
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <PlatformDashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/platform/organizations"
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <PlatformOrganizationsListPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/platform/organizations/new"
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <NewOrganizationWizardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/platform/organizations/:id"
+            element={
+              <Suspense fallback={<PageSkeleton />}>
+                <PlatformOrganizationDetailPage />
+              </Suspense>
+            }
+          />
+        </Route>
+      </Route>
       <Route path="*" element={<Navigate to="/error/404" />} />
     </Routes>
   );
