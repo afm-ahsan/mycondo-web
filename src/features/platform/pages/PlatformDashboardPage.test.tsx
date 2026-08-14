@@ -1,7 +1,6 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
-import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { PlatformAuthUser } from '@/store/slices/platformAuthSlice';
@@ -50,35 +49,13 @@ function mockDashboard(organizations = [organization()]) {
 }
 
 describe('PlatformDashboardPage', () => {
-  it('renders summary stats and the organization list', async () => {
+  it('renders summary stats and recently added organizations', async () => {
     mockDashboard();
     renderWithProviders(<PlatformDashboardPage />, { platformAuth: { user: superAdmin, isInitialized: true } });
 
     expect(await screen.findByText('Akter Residence Park')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'New Organization' })).toBeInTheDocument();
-  });
-
-  it('suspends an active organization after confirmation', async () => {
-    mockDashboard();
-    let suspendCalled = false;
-    server.use(
-      http.post(`${API_BASE}/api/v1/platform/organizations/tenant-1/suspend`, () => {
-        suspendCalled = true;
-        return new HttpResponse(null, { status: 204 });
-      }),
-    );
-
-    const user = userEvent.setup();
-    renderWithProviders(<PlatformDashboardPage />, { platformAuth: { user: superAdmin, isInitialized: true } });
-
-    await screen.findByText('Akter Residence Park');
-    await user.click(screen.getByRole('button', { name: 'Suspend' }));
-    // Two "Suspend" buttons exist once the confirmation dialog opens (the row action + the dialog's
-    // own confirm button) — the dialog's is the one added last.
-    const suspendButtons = await screen.findAllByRole('button', { name: 'Suspend' });
-    await user.click(suspendButtons[suspendButtons.length - 1]);
-
-    await waitFor(() => expect(suspendCalled).toBe(true));
+    expect(screen.getByRole('link', { name: 'View all organizations' })).toBeInTheDocument();
   });
 
   it('hides the New Organization action without platform.organization.create', async () => {

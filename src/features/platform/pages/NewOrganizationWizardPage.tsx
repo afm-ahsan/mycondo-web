@@ -86,7 +86,11 @@ export function NewOrganizationWizardPage() {
     <>
       <PageHeader
         title="New Organization"
-        crumbs={[{ label: 'Platform Administration', path: '/platform/dashboard' }, { label: 'New Organization' }]}
+        crumbs={[
+          { label: 'Dashboard', path: '/platform/dashboard' },
+          { label: 'Organizations', path: '/platform/organizations' },
+          { label: 'New Organization' },
+        ]}
       />
       <Card className="mx-auto max-w-2xl">
         <CardHeader>

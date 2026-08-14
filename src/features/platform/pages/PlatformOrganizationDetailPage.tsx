@@ -105,7 +105,8 @@ export function PlatformOrganizationDetailPage() {
       <PageHeader
         title={isLoading ? 'Loading…' : (org?.name ?? 'Organization')}
         crumbs={[
-          { label: 'Platform Administration', path: '/platform/dashboard' },
+          { label: 'Dashboard', path: '/platform/dashboard' },
+          { label: 'Organizations', path: '/platform/organizations' },
           { label: org?.name ?? 'Organization' },
         ]}
         secondaryActions={

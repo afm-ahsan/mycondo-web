@@ -1,118 +1,42 @@
-import { useState } from 'react';
 import { Building2, CheckCircle2, PauseCircle, Sparkles } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
-import { toast } from 'sonner';
+import { Link } from 'react-router-dom';
 import { toUserMessage } from '@/api/errors';
-import { setPlatformAccessToken } from '@/api/platformBaseApi';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/status-badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { KpiCard } from '@/components/shared/KpiCard';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { formatDate } from '@/lib/helpers';
 import { PLATFORM_PERMISSIONS } from '@/lib/auth/platformPermissionKeys';
 import { RequirePlatformPermission } from '@/lib/auth/RequirePlatformPermission';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
-import {
-  useActivateOrganizationMutation,
-  useGetOrganizationSummaryStatsQuery,
-  useListOrganizationsQuery,
-  useReactivateOrganizationMutation,
-  useSuspendOrganizationMutation,
-} from '../api/platformOrganizationsApi';
-import { usePlatformLogout } from '../api/platformAuthApi';
+import { useAppSelector } from '@/store/hooks';
+import { useGetOrganizationSummaryStatsQuery, useListOrganizationsQuery } from '../api/platformOrganizationsApi';
 import { organizationStatusToneMap, type OrganizationStatus } from '../lib/organizationStatus';
 
-const ORGANIZATIONS_COLUMN_COUNT = 6;
-const PAGE_SIZE = 20;
-
-type PendingAction =
-  | { type: 'suspend' | 'activate' | 'reactivate'; organizationId: string; organizationName: string }
-  | null;
+const RECENT_ORGANIZATIONS_COUNT = 5;
 
 export function PlatformDashboardPage() {
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
   const user = useAppSelector((s) => s.platformAuth.user);
-  const [logout, { isLoading: isLoggingOut }] = usePlatformLogout();
 
   const { data: stats, isLoading: isStatsLoading } = useGetOrganizationSummaryStatsQuery();
   const {
-    data: page,
-    isLoading: isListLoading,
-    isError: isListError,
-    error: listError,
-    refetch: refetchList,
-  } = useListOrganizationsQuery({ page: 1, pageSize: PAGE_SIZE });
+    data: recentPage,
+    isLoading: isRecentLoading,
+    isError: isRecentError,
+    error: recentError,
+    refetch: refetchRecent,
+  } = useListOrganizationsQuery({ page: 1, pageSize: RECENT_ORGANIZATIONS_COUNT });
 
-  const [suspendOrganization, { isLoading: isSuspending }] = useSuspendOrganizationMutation();
-  const [activateOrganization, { isLoading: isActivating }] = useActivateOrganizationMutation();
-  const [reactivateOrganization, { isLoading: isReactivating }] = useReactivateOrganizationMutation();
-  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
-  const isMutating = isSuspending || isActivating || isReactivating;
-
-  async function handleLogout() {
-    try {
-      await logout().unwrap();
-    } finally {
-      setPlatformAccessToken(null);
-      dispatch(platformSessionEnded());
-      navigate('/platform/login');
-    }
-  }
-
-  async function handleConfirmAction() {
-    if (!pendingAction) return;
-    try {
-      if (pendingAction.type === 'suspend') {
-        await suspendOrganization(pendingAction.organizationId).unwrap();
-        toast.success(`${pendingAction.organizationName} suspended.`);
-      } else if (pendingAction.type === 'activate') {
-        await activateOrganization(pendingAction.organizationId).unwrap();
-        toast.success(`${pendingAction.organizationName} activated.`);
-      } else {
-        await reactivateOrganization(pendingAction.organizationId).unwrap();
-        toast.success(`${pendingAction.organizationName} reactivated.`);
-      }
-      setPendingAction(null);
-    } catch (err) {
-      toast.error(toUserMessage(err));
-    }
-  }
-
-  const organizations = page?.items ?? [];
+  const recentOrganizations = recentPage?.items ?? [];
 
   return (
     <>
       <PageHeader
         title="Platform Administration"
         description={`Signed in as ${user?.displayName} (${user?.email})`}
-        primaryAction={
-          <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.create}>
-            <Button asChild>
-              <Link to="/platform/organizations/new">New Organization</Link>
-            </Button>
-          </RequirePlatformPermission>
-        }
-        secondaryActions={
-          <Button variant="outline" onClick={handleLogout} disabled={isLoggingOut}>
-            Sign out
-          </Button>
-        }
       />
 
       <div className="grid grid-cols-2 gap-4 mb-4 sm:grid-cols-4">
@@ -123,137 +47,52 @@ export function PlatformDashboardPage() {
       </div>
 
       <Card>
-        <CardContent>
-          {isListError && <ErrorState description={toUserMessage(listError)} onRetry={refetchList} />}
+        <CardHeader>
+          <CardTitle>Recently added organizations</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-1">
+          {isRecentError && <ErrorState description={toUserMessage(recentError)} onRetry={refetchRecent} />}
 
-          {!isListError && !isListLoading && organizations.length === 0 && (
-            <EmptyState
-              title="No organizations yet"
-              description="Organizations you provision will appear here."
-            />
+          {!isRecentError && isRecentLoading && (
+            <div className="flex items-center gap-2 text-muted-foreground py-4">
+              <InlineSpinner /> Loading…
+            </div>
           )}
 
-          {!isListError && (isListLoading || organizations.length > 0) && (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Organization</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Administrator</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>Modules</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {isListLoading ? (
-                  <TableSkeleton columns={ORGANIZATIONS_COLUMN_COUNT} />
-                ) : (
-                  organizations.map((org) => (
-                    <TableRow key={org.tenantId}>
-                      <TableCell>
-                        <Link to={`/platform/organizations/${org.tenantId}`} className="font-medium hover:underline">
-                          {org.name}
-                        </Link>
-                        {org.code && <span className="text-muted-foreground ml-1.5 text-xs">({org.code})</span>}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={org.status as OrganizationStatus} toneMap={organizationStatusToneMap} />
-                      </TableCell>
-                      <TableCell>
-                        {org.primaryAdministratorFullName ? (
-                          <div className="text-sm">
-                            <div>{org.primaryAdministratorFullName}</div>
-                            <div className="text-muted-foreground text-xs">{org.primaryAdministratorEmail}</div>
-                          </div>
-                        ) : (
-                          <span className="text-muted-foreground text-sm">—</span>
-                        )}
-                      </TableCell>
-                      <TableCell className="text-sm">{formatDate(org.createdAtUtc)}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary" appearance="light">
-                          {org.enabledModuleCount}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button asChild variant="outline" size="sm">
-                            <Link to={`/platform/organizations/${org.tenantId}`}>View</Link>
-                          </Button>
-                          {org.status === 'Active' && (
-                            <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.suspend}>
-                              <Button
-                                variant="destructive"
-                                size="sm"
-                                disabled={isMutating}
-                                onClick={() =>
-                                  setPendingAction({ type: 'suspend', organizationId: org.tenantId, organizationName: org.name })
-                                }
-                              >
-                                Suspend
-                              </Button>
-                            </RequirePlatformPermission>
-                          )}
-                          {org.status === 'PendingActivation' && (
-                            <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.activate}>
-                              <Button
-                                size="sm"
-                                disabled={isMutating}
-                                onClick={() =>
-                                  setPendingAction({ type: 'activate', organizationId: org.tenantId, organizationName: org.name })
-                                }
-                              >
-                                Activate
-                              </Button>
-                            </RequirePlatformPermission>
-                          )}
-                          {org.status === 'Suspended' && (
-                            <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.reactivate}>
-                              <Button
-                                size="sm"
-                                disabled={isMutating}
-                                onClick={() =>
-                                  setPendingAction({ type: 'reactivate', organizationId: org.tenantId, organizationName: org.name })
-                                }
-                              >
-                                Reactivate
-                              </Button>
-                            </RequirePlatformPermission>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+          {!isRecentError && !isRecentLoading && recentOrganizations.length === 0 && (
+            <EmptyState title="No organizations yet" description="Organizations you provision will appear here." />
           )}
+
+          {!isRecentError &&
+            !isRecentLoading &&
+            recentOrganizations.map((org) => (
+              <Link
+                key={org.tenantId}
+                to={`/platform/organizations/${org.tenantId}`}
+                className="flex items-center justify-between gap-3 rounded-md px-2 py-2.5 -mx-2 hover:bg-muted"
+              >
+                <div className="min-w-0">
+                  <div className="font-medium truncate">
+                    {org.name}
+                    {org.code && <span className="text-muted-foreground ml-1.5 text-xs">({org.code})</span>}
+                  </div>
+                  <div className="text-muted-foreground text-xs">Created {formatDate(org.createdAtUtc)}</div>
+                </div>
+                <StatusBadge status={org.status as OrganizationStatus} toneMap={organizationStatusToneMap} />
+              </Link>
+            ))}
         </CardContent>
+        <CardFooter className="justify-between">
+          <Button asChild variant="outline" size="sm">
+            <Link to="/platform/organizations">View all organizations</Link>
+          </Button>
+          <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.create}>
+            <Button asChild size="sm">
+              <Link to="/platform/organizations/new">New Organization</Link>
+            </Button>
+          </RequirePlatformPermission>
+        </CardFooter>
       </Card>
-
-      <ConfirmActionDialog
-        open={pendingAction !== null}
-        onOpenChange={(open) => !open && setPendingAction(null)}
-        title={
-          pendingAction?.type === 'suspend'
-            ? 'Suspend this organization?'
-            : pendingAction?.type === 'activate'
-              ? 'Activate this organization?'
-              : 'Reactivate this organization?'
-        }
-        description={
-          pendingAction?.type === 'suspend'
-            ? `${pendingAction.organizationName}'s users will no longer be able to sign in. Its data is preserved and this can be reversed with Reactivate.`
-            : `${pendingAction?.organizationName ?? 'This organization'} will become Active and its users will be able to sign in.`
-        }
-        confirmLabel={
-          pendingAction?.type === 'suspend' ? 'Suspend' : pendingAction?.type === 'activate' ? 'Activate' : 'Reactivate'
-        }
-        loadingLabel="Working…"
-        isLoading={isMutating}
-        onConfirm={handleConfirmAction}
-      />
     </>
   );
 }
