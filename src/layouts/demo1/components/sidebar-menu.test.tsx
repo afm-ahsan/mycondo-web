@@ -18,10 +18,9 @@ function makeUser(permissions: string[]): AuthUser {
   };
 }
 
-// "Facilities" renders twice when the group is visible — once as the `{ heading: 'Facilities' }`
-// section label, once as the group's own accordion trigger title (same MENU_SIDEBAR shape as the
-// pre-existing "Security & Access" group) — so this counts occurrences rather than using getByText,
-// which throws on more than one match.
+// "Facilities" is a child of the shared `{ heading: 'Property' }` section, not its own heading, so it
+// renders once (its own accordion trigger title) when visible — this still counts occurrences rather
+// than using getByText, which throws on more than one match, in case that changes again.
 function facilitiesCount() {
   return screen.queryAllByText('Facilities').length;
 }
@@ -69,7 +68,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
       },
     });
 
-    expect(facilitiesCount()).toBe(2);
+    expect(facilitiesCount()).toBe(1);
 
     await expandGroup(user, 'Facilities');
     expect(screen.getByText('Community Hall')).toBeInTheDocument();
@@ -95,7 +94,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
       auth: { user: makeUser(['facility.booking.view']), isInitialized: true },
     });
 
-    expect(facilitiesCount()).toBe(2);
+    expect(facilitiesCount()).toBe(1);
 
     await expandGroup(user, 'Facilities');
     expect(screen.getByText('Community Hall')).toBeInTheDocument();
@@ -123,7 +122,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
       auth: { user: makeUser(['pool.checkin', 'pool.view']), isInitialized: true },
     });
 
-    expect(facilitiesCount()).toBe(2);
+    expect(facilitiesCount()).toBe(1);
 
     await expandGroup(user, 'Facilities');
     expect(screen.getByText('Swimming Pool')).toBeInTheDocument();
@@ -137,6 +136,8 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
   });
 });
 
+// "Operations" is a child of the shared `{ heading: 'Property' }` section, not its own heading, so it
+// renders once (its own accordion trigger title) when visible.
 function operationsCount() {
   return screen.queryAllByText('Operations').length;
 }
@@ -161,7 +162,7 @@ describe('SidebarMenu — Operations group (Slice H)', () => {
       },
     });
 
-    expect(operationsCount()).toBe(2);
+    expect(operationsCount()).toBe(1);
 
     await expandGroup(user, 'Operations');
     expect(screen.getByText('Generator')).toBeInTheDocument();
@@ -186,7 +187,7 @@ describe('SidebarMenu — Operations group (Slice H)', () => {
       auth: { user: makeUser(['gascylinder.purchase.manage', 'gascylinder.report']), isInitialized: true },
     });
 
-    expect(operationsCount()).toBe(2);
+    expect(operationsCount()).toBe(1);
 
     await expandGroup(user, 'Operations');
     expect(screen.queryByText('Generator')).not.toBeInTheDocument();

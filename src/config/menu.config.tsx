@@ -1,8 +1,8 @@
 import {
-  AlertCircle,
   BarChart3,
   BookOpen,
   Building,
+  Building2,
   Car,
   Clock,
   FileText,
@@ -17,9 +17,11 @@ import {
   Lightbulb,
   Package,
   PartyPopper,
+  Plug,
   Receipt,
   ShieldUser,
   Tag,
+  UserCog,
   Wallet,
   Users,
   Waves,
@@ -42,12 +44,12 @@ export const MENU_SIDEBAR: MenuConfig = [
       { title: 'My Invoices', path: '/me/invoices' },
     ],
   },
-  { heading: 'Resident Management' },
+  { heading: 'Management' },
   {
-    title: 'Resident Management',
+    title: 'Residents',
     icon: Users,
     children: [
-      { title: 'Residents', path: '/residents', permission: 'resident.view' },
+      { title: 'Resident Directory', path: '/residents', permission: 'resident.view' },
       { title: 'Flat Owners', path: '/residents/flat-owners', permission: 'ownership.manage' },
       {
         title: 'Tenant Registrations',
@@ -66,18 +68,14 @@ export const MENU_SIDEBAR: MenuConfig = [
       },
     ],
   },
-  { heading: 'Administration' },
   {
     title: 'Administration',
-    icon: Building,
+    icon: UserCog,
     children: [
-      { title: 'Buildings', path: '/admin/buildings', permission: 'property.view' },
-      { title: 'Flats', path: '/admin/flats', permission: 'property.view' },
       { title: 'Users', path: '/admin/users', permission: 'user.view' },
       { title: 'Roles & Permissions', path: '/admin/roles', permission: 'role.view' },
     ],
   },
-  { heading: 'Security & Access' },
   {
     title: 'Security & Access',
     icon: ShieldUser,
@@ -197,29 +195,21 @@ export const MENU_SIDEBAR: MenuConfig = [
       },
     ],
   },
-  { heading: 'Front Desk' },
   {
     title: 'Front Desk',
     icon: Package,
     children: [
-      {
-        title: 'Parcels',
-        icon: Package,
-        children: [
-          { title: 'Parcel Register', path: '/security/parcels', permission: PERMISSIONS.parcel.view },
-          { title: 'Receive Parcel', path: '/security/parcels/new', permission: PERMISSIONS.parcel.receive },
-        ],
-      },
+      { title: 'Parcel Register', path: '/security/parcels', permission: PERMISSIONS.parcel.view },
+      { title: 'Receive Parcel', path: '/security/parcels/new', permission: PERMISSIONS.parcel.receive },
     ],
   },
   { heading: 'Finance' },
   {
-    title: 'Finance',
-    icon: Receipt,
+    title: 'Billing',
+    icon: FileText,
     children: [
       {
         title: 'Service Charges',
-        icon: FileText,
         children: [
           {
             title: 'Rules',
@@ -244,127 +234,67 @@ export const MENU_SIDEBAR: MenuConfig = [
         ],
       },
       {
-        title: 'Payments & Receipts',
-        icon: Wallet,
-        children: [
-          { title: 'Payments', path: '/billing/payments', permission: PERMISSIONS.payment.view },
-          { title: 'Record Payment', path: '/billing/payments/new', permission: PERMISSIONS.payment.record },
-        ],
-      },
-      {
-        title: 'Expense Types',
-        icon: Tag,
-        path: '/finance/expense-types',
-        permission: 'expensetype.view',
-      },
-      {
-        title: 'Expenses',
-        icon: Receipt,
-        path: '/finance/expenses',
-        permission: 'expense.view',
-      },
-      {
-        title: 'Resident Ledger',
-        icon: BookOpen,
-        path: '/billing/ledger',
-        permission: PERMISSIONS.payment.view,
-      },
-      {
         title: 'Outstanding Invoices',
-        icon: AlertCircle,
         path: '/billing/outstanding-invoices',
         permission: PERMISSIONS.billing.invoiceView,
       },
+    ],
+  },
+  {
+    title: 'Payments & Receipts',
+    icon: Wallet,
+    children: [
+      { title: 'Payments', path: '/billing/payments', permission: PERMISSIONS.payment.view },
+      { title: 'Record Payment', path: '/billing/payments/new', permission: PERMISSIONS.payment.record },
+    ],
+  },
+  {
+    title: 'Expense Types',
+    icon: Tag,
+    path: '/finance/expense-types',
+    permission: 'expensetype.view',
+  },
+  {
+    title: 'Expenses',
+    icon: Receipt,
+    path: '/finance/expenses',
+    permission: 'expense.view',
+  },
+  {
+    title: 'Resident Ledger',
+    icon: BookOpen,
+    path: '/billing/ledger',
+    permission: PERMISSIONS.payment.view,
+  },
+  {
+    title: 'Reports',
+    icon: BarChart3,
+    children: [
       {
-        title: 'Reports',
-        icon: BarChart3,
-        children: [
-          {
-            title: 'Financial Summary',
-            path: '/billing/reports/financial-summary',
-            permission: PERMISSIONS.report.financialView,
-          },
-          {
-            title: 'Receivables Ageing',
-            path: '/billing/reports/receivables-ageing',
-            permission: PERMISSIONS.report.financialView,
-          },
-        ],
+        title: 'Financial Summary',
+        path: '/billing/reports/financial-summary',
+        permission: PERMISSIONS.report.financialView,
       },
       {
-        title: 'Electricity',
-        icon: Lightbulb,
-        children: [
-          { title: 'Meters', path: '/utilities/electricity/meters', permission: PERMISSIONS.utility.meterView },
-          {
-            title: 'Readings',
-            path: '/utilities/electricity/readings',
-            permission: PERMISSIONS.utility.readingView,
-          },
-          {
-            title: 'Record Reading',
-            path: '/utilities/electricity/readings/new',
-            permission: PERMISSIONS.utility.readingRecord,
-          },
-          {
-            title: 'Rate Plans',
-            path: '/utilities/electricity/rate-plans',
-            permission: PERMISSIONS.utility.ratePlanView,
-          },
-          {
-            title: 'Billed vs Unbilled',
-            path: '/utilities/electricity/reports/billed-vs-unbilled',
-            permission: PERMISSIONS.utility.readingView,
-          },
-          {
-            title: 'Consumption History',
-            path: '/utilities/electricity/reports/consumption-history',
-            permission: PERMISSIONS.utility.readingView,
-          },
-        ],
-      },
-      {
-        title: 'Gas',
-        icon: Gauge,
-        children: [
-          { title: 'Meters', path: '/utilities/gas/meters', permission: PERMISSIONS.utility.meterView },
-          { title: 'Readings', path: '/utilities/gas/readings', permission: PERMISSIONS.utility.readingView },
-          {
-            title: 'Record Reading',
-            path: '/utilities/gas/readings/new',
-            permission: PERMISSIONS.utility.readingRecord,
-          },
-          {
-            title: 'Rate Plans',
-            path: '/utilities/gas/rate-plans',
-            permission: PERMISSIONS.utility.ratePlanView,
-          },
-          {
-            title: 'Billed vs Unbilled',
-            path: '/utilities/gas/reports/billed-vs-unbilled',
-            permission: PERMISSIONS.utility.readingView,
-          },
-          {
-            title: 'Consumption History',
-            path: '/utilities/gas/reports/consumption-history',
-            permission: PERMISSIONS.utility.readingView,
-          },
-        ],
-      },
-      {
-        title: 'Utility Reports',
-        icon: BarChart3,
-        children: [
-          {
-            title: 'Consumption Summary',
-            path: '/utilities/reports/consumption-summary',
-            permission: PERMISSIONS.utility.report,
-          },
-        ],
+        title: 'Receivables Ageing',
+        path: '/billing/reports/receivables-ageing',
+        permission: PERMISSIONS.report.financialView,
       },
     ],
   },
-  { heading: 'Facilities' },
+  { heading: 'Property' },
+  {
+    title: 'Buildings',
+    icon: Building,
+    path: '/admin/buildings',
+    permission: 'property.view',
+  },
+  {
+    title: 'Flats',
+    icon: Building2,
+    path: '/admin/flats',
+    permission: 'property.view',
+  },
   {
     title: 'Facilities',
     icon: Landmark,
@@ -440,7 +370,78 @@ export const MENU_SIDEBAR: MenuConfig = [
       },
     ],
   },
-  { heading: 'Operations' },
+  {
+    title: 'Utilities',
+    icon: Plug,
+    children: [
+      {
+        title: 'Electricity',
+        icon: Lightbulb,
+        children: [
+          { title: 'Meters', path: '/utilities/electricity/meters', permission: PERMISSIONS.utility.meterView },
+          {
+            title: 'Readings',
+            path: '/utilities/electricity/readings',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Record Reading',
+            path: '/utilities/electricity/readings/new',
+            permission: PERMISSIONS.utility.readingRecord,
+          },
+          {
+            title: 'Rate Plans',
+            path: '/utilities/electricity/rate-plans',
+            permission: PERMISSIONS.utility.ratePlanView,
+          },
+          {
+            title: 'Billed vs Unbilled',
+            path: '/utilities/electricity/reports/billed-vs-unbilled',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Consumption History',
+            path: '/utilities/electricity/reports/consumption-history',
+            permission: PERMISSIONS.utility.readingView,
+          },
+        ],
+      },
+      {
+        title: 'Gas',
+        icon: Gauge,
+        children: [
+          { title: 'Meters', path: '/utilities/gas/meters', permission: PERMISSIONS.utility.meterView },
+          { title: 'Readings', path: '/utilities/gas/readings', permission: PERMISSIONS.utility.readingView },
+          {
+            title: 'Record Reading',
+            path: '/utilities/gas/readings/new',
+            permission: PERMISSIONS.utility.readingRecord,
+          },
+          {
+            title: 'Rate Plans',
+            path: '/utilities/gas/rate-plans',
+            permission: PERMISSIONS.utility.ratePlanView,
+          },
+          {
+            title: 'Billed vs Unbilled',
+            path: '/utilities/gas/reports/billed-vs-unbilled',
+            permission: PERMISSIONS.utility.readingView,
+          },
+          {
+            title: 'Consumption History',
+            path: '/utilities/gas/reports/consumption-history',
+            permission: PERMISSIONS.utility.readingView,
+          },
+        ],
+      },
+      {
+        title: 'Consumption Summary',
+        icon: BarChart3,
+        path: '/utilities/reports/consumption-summary',
+        permission: PERMISSIONS.utility.report,
+      },
+    ],
+  },
   {
     title: 'Operations',
     icon: Zap,
