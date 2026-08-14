@@ -29,6 +29,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -191,8 +192,8 @@ export function FlatListPage() {
         description={isGlobal ? 'Manage the flats across every building.' : 'Manage the flats belonging to this building.'}
         crumbs={
           isGlobal
-            ? [{ label: 'Administration' }, { label: 'Flats' }]
-            : [{ label: 'Administration' }, { label: 'Buildings', path: '/admin/buildings' }, { label: 'Flats' }]
+            ? [{ label: 'Property' }, { label: 'Flats' }]
+            : [{ label: 'Property' }, { label: 'Buildings', path: '/admin/buildings' }, { label: 'Flats' }]
         }
         primaryAction={primaryAction}
       />
@@ -237,7 +238,10 @@ export function FlatListPage() {
               </CardHeading>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />

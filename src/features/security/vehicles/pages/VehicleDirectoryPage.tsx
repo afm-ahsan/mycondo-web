@@ -37,6 +37,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
@@ -78,7 +79,7 @@ export function VehicleDirectoryPage() {
   const [blockTarget, setBlockTarget] = useState<VehicleDto | null>(null);
   const [blockReason, setBlockReason] = useState('');
 
-  const { data, isFetching } = useVehicles({
+  const { data, isFetching, isError, error, refetch } = useVehicles({
     search: debouncedSearch || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
@@ -189,56 +190,62 @@ export function VehicleDirectoryPage() {
         title="Vehicle Directory"
         crumbs={[{ label: 'Security & Access' }, { label: 'Vehicle Access' }, { label: 'Directory' }]}
       />
-      <DataGrid
-        table={table}
-        recordCount={total}
-        isLoading={isFetching}
-        emptyMessage="No vehicles yet."
-        tableLayout={{ cellBorder: true }}
-      >
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Vehicles</CardTitle>
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search by registration number…"
-                isSearching={isSearchPending}
-                className="w-64"
-              />
-            </CardHeading>
-            <CardToolbar>
-              <Button variant="outline" asChild>
-                <Link to="/security/vehicles/currently-inside">
-                  <Car /> Currently inside
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/security/vehicles/checkin-out">
-                  <LogIn /> Check in / out
-                </Link>
-              </Button>
-              <RequirePermission permission={PERMISSIONS.vehicle.create}>
-                <Button asChild>
-                  <Link to="/security/vehicles/new">
-                    <Plus /> Register Vehicle
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
+        </Card>
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No vehicles yet."
+          tableLayout={{ cellBorder: true }}
+        >
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Vehicles</CardTitle>
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search by registration number…"
+                  isSearching={isSearchPending}
+                  className="w-64"
+                />
+              </CardHeading>
+              <CardToolbar>
+                <Button variant="outline" asChild>
+                  <Link to="/security/vehicles/currently-inside">
+                    <Car /> Currently inside
                   </Link>
                 </Button>
-              </RequirePermission>
-            </CardToolbar>
-          </CardHeader>
-          <CardTable>
-            <ScrollArea>
-              <DataGridTable />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
-        </Card>
-      </DataGrid>
+                <Button variant="outline" asChild>
+                  <Link to="/security/vehicles/checkin-out">
+                    <LogIn /> Check in / out
+                  </Link>
+                </Button>
+                <RequirePermission permission={PERMISSIONS.vehicle.create}>
+                  <Button asChild>
+                    <Link to="/security/vehicles/new">
+                      <Plus /> Register Vehicle
+                    </Link>
+                  </Button>
+                </RequirePermission>
+              </CardToolbar>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <Dialog open={blockTarget !== null} onOpenChange={(open) => !open && setBlockTarget(null)}>
         <DialogContent>
