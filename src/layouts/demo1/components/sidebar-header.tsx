@@ -5,7 +5,13 @@ import { cn } from '@/lib/utils';
 import { useSettings } from '@/providers/settings-provider';
 import { Button } from '@/components/ui/button';
 
-export function SidebarHeader() {
+interface SidebarHeaderProps {
+  // Omitted in contexts that aren't scoped to one tenant (Platform Admin manages every
+  // organization at once) — showing a single tenant's name there would misrepresent the screen.
+  tenantName?: string;
+}
+
+export function SidebarHeader({ tenantName }: SidebarHeaderProps) {
   const { settings, storeOption } = useSettings();
 
   const handleToggleClick = () => {
@@ -17,31 +23,22 @@ export function SidebarHeader() {
 
   return (
     <div className="sidebar-header hidden lg:flex items-center relative justify-between px-3 lg:px-6 shrink-0">
-      <Link to="/">
-        <div className="dark:hidden">
-          <img
-            src={toAbsoluteUrl('/media/app/default-logo.svg')}
-            className="default-logo h-[22px] max-w-none"
-            alt="Default Logo"
-          />
-          <img
-            src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo h-[22px] max-w-none"
-            alt="Mini Logo"
-          />
-        </div>
-        <div className="hidden dark:block">
-          <img
-            src={toAbsoluteUrl('/media/app/default-logo-dark.svg')}
-            className="default-logo h-[22px] max-w-none"
-            alt="Default Dark Logo"
-          />
-          <img
-            src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-            className="small-logo h-[22px] max-w-none"
-            alt="Mini Logo"
-          />
-        </div>
+      <Link to="/" className="flex min-w-0 items-center gap-2.5">
+        <img
+          src={toAbsoluteUrl('/media/app/condobd-logo.png')}
+          className="default-logo h-9 w-auto max-w-none shrink-0"
+          alt="CondoBD"
+        />
+        <img
+          src={toAbsoluteUrl('/media/app/condobd-logo.png')}
+          className="small-logo h-8 w-auto max-w-none shrink-0"
+          alt="CondoBD"
+        />
+        {tenantName && (
+          <span className="default-logo text-primary truncate text-base font-semibold">
+            {tenantName}
+          </span>
+        )}
       </Link>
       <Button
         onClick={handleToggleClick}

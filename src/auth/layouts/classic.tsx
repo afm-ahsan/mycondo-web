@@ -16,12 +16,12 @@ export function ClassicLayout() {
         `}
       </style>
       <main className="flex flex-col items-center justify-center grow bg-center bg-no-repeat page-bg">
-        <div className="m-5">
+        <div className="m-5 mb-6">
           <Link to="/">
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-              className="h-[35px] max-w-none"
-              alt="MyCondo"
+              src={toAbsoluteUrl('/media/app/condobd-logo.png')}
+              className="h-16 w-auto max-w-none"
+              alt="CondoBD"
             />
           </Link>
         </div>
