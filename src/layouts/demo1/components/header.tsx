@@ -62,9 +62,9 @@ export function Header() {
         <div className="flex gap-1 lg:hidden items-center gap-2.5">
           <Link to="/" className="shrink-0">
             <img
-              src={toAbsoluteUrl('/media/app/mini-logo.svg')}
-              className="h-[25px] w-full"
-              alt="mini-logo"
+              src={toAbsoluteUrl('/media/app/condobd-logo.png')}
+              className="h-7 w-auto max-w-none"
+              alt="CondoBD"
             />
           </Link>
           {mobileMode && (
