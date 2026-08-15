@@ -16,6 +16,9 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { Container } from '@/components/common/container';
+import { HeaderGlobalSearch } from './header-global-search';
+import { HeaderNotifications } from './header-notifications';
+import { HeaderQuickLinksMenu } from './header-quick-links-menu';
 import { SidebarMenu } from './sidebar-menu';
 
 export function Header() {
@@ -39,7 +42,7 @@ export function Header() {
         headerSticky && 'border-b border-border',
       )}
     >
-      <Container className="flex justify-between items-stretch lg:gap-4">
+      <Container className="flex items-stretch lg:gap-4">
         {/* HeaderLogo */}
         <div className="flex gap-1 lg:hidden items-center gap-2.5">
           <Link to="/" className="shrink-0">
@@ -73,17 +76,25 @@ export function Header() {
           )}
         </div>
 
-        {/* HeaderTopbar */}
-        <div className="flex items-center gap-3">
-          <UserDropdownMenu
-            trigger={
-              <img
-                className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer"
-                src={toAbsoluteUrl('/media/avatars/300-2.png')}
-                alt="User Avatar"
-              />
-            }
-          />
+        {/* HeaderTopbar — ms-auto (not justify-between on the parent) pushes this to the end
+            regardless of whether HeaderLogo is visible; justify-between with a single visible
+            flex child (HeaderLogo is lg:hidden) collapses to flex-start, which is why the avatar
+            previously rendered top-left on desktop. */}
+        <div className="flex items-center gap-1.5 ms-auto">
+          <HeaderGlobalSearch />
+          <HeaderNotifications />
+          <HeaderQuickLinksMenu />
+          <div className="ms-1.5">
+            <UserDropdownMenu
+              trigger={
+                <img
+                  className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer"
+                  src={toAbsoluteUrl('/media/avatars/300-2.png')}
+                  alt="User Avatar"
+                />
+              }
+            />
+          </div>
         </div>
       </Container>
     </header>
