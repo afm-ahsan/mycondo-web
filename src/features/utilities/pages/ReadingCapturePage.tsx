@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,10 +22,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useRecordReading } from '../api/readingsApi';
 import type { UtilityType } from '../lib/constants';
-import { recordReadingSchema, type RecordReadingSchemaType } from '../schemas/recordReadingSchema';
+import {
+  recordReadingSchema,
+  type RecordReadingSchemaType,
+} from '../schemas/recordReadingSchema';
 
 interface ReadingCapturePageProps {
   utilityType: UtilityType;
@@ -75,7 +81,9 @@ export function ReadingCapturePage({ utilityType }: ReadingCapturePageProps) {
       }).unwrap();
 
       toast.success('Reading captured.');
-      navigate(`/utilities/${utilityType.toLowerCase()}/readings/${reading.readingId}`);
+      navigate(
+        `/utilities/${utilityType.toLowerCase()}/readings/${reading.readingId}`,
+      );
     } catch (err) {
       const apiError = toApiError(err);
       // A continuity mismatch surfaces as a 409 Conflict — reveal the override field reactively
@@ -96,12 +104,21 @@ export function ReadingCapturePage({ utilityType }: ReadingCapturePageProps) {
     <>
       <PageHeader
         title={`Capture ${utilityType} Reading`}
-        crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Capture Reading' }]}
+        crumbs={[
+          { label: 'Finance' },
+          { label: utilityType },
+          { label: 'Capture Reading' },
+        ]}
       />
-      <Card className="max-w-xl">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-xl pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -186,7 +203,11 @@ export function ReadingCapturePage({ utilityType }: ReadingCapturePageProps) {
                   name="overrideReason"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Override reason (required — previous reading doesn&rsquo;t match the meter&rsquo;s last finalized reading)</FormLabel>
+                      <FormLabel>
+                        Override reason (required — previous reading
+                        doesn&rsquo;t match the meter&rsquo;s last finalized
+                        reading)
+                      </FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>

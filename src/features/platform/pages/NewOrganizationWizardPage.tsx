@@ -1,11 +1,10 @@
 import { useState } from 'react';
+import { ApiError, toUserMessage } from '@/api/errors';
+import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { AlertCircle } from 'lucide-react';
-import { ApiError, toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { PageHeader } from '@/components/shared/PageHeader';
 import {
   Stepper,
   StepperIndicator,
@@ -15,11 +14,12 @@ import {
   StepperTitle,
   StepperTrigger,
 } from '@/components/ui/stepper';
+import { PageHeader } from '@/components/shared/PageHeader';
+import { useCreateOrganizationMutation } from '../api/platformOrganizationsApi';
 import { InitialAdministratorStep } from '../components/InitialAdministratorStep';
 import { ModuleSelectionStep } from '../components/ModuleSelectionStep';
 import { OrganizationIdentityStep } from '../components/OrganizationIdentityStep';
 import { ALL_MODULE_KEYS } from '../lib/moduleKeys';
-import { useCreateOrganizationMutation } from '../api/platformOrganizationsApi';
 import type { InitialAdministratorSchemaType } from '../schemas/initialAdministratorSchema';
 import type { OrganizationIdentitySchemaType } from '../schemas/organizationIdentitySchema';
 
@@ -36,16 +36,22 @@ const STEPS = [
  */
 export function NewOrganizationWizardPage() {
   const navigate = useNavigate();
-  const [createOrganization, { isLoading: isCreating }] = useCreateOrganizationMutation();
+  const [createOrganization, { isLoading: isCreating }] =
+    useCreateOrganizationMutation();
   const [activeStep, setActiveStep] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
-  const [identity, setIdentity] = useState<OrganizationIdentitySchemaType>({ name: '', code: '', slug: '' });
-  const [administrator, setAdministrator] = useState<InitialAdministratorSchemaType>({
-    fullName: '',
-    email: '',
-    password: '',
+  const [identity, setIdentity] = useState<OrganizationIdentitySchemaType>({
+    name: '',
+    code: '',
+    slug: '',
   });
+  const [administrator, setAdministrator] =
+    useState<InitialAdministratorSchemaType>({
+      fullName: '',
+      email: '',
+      password: '',
+    });
 
   function handleIdentityContinue(values: OrganizationIdentitySchemaType) {
     setIdentity(values);
@@ -75,7 +81,9 @@ export function NewOrganizationWizardPage() {
     } catch (err) {
       const apiError = toApiError(err);
       if (apiError?.isConflict) {
-        setError('An organization with this slug or code already exists. Go back and choose a different one.');
+        setError(
+          'An organization with this slug or code already exists. Go back and choose a different one.',
+        );
         return;
       }
       setError(toUserMessage(apiError ?? err));
@@ -92,18 +100,24 @@ export function NewOrganizationWizardPage() {
           { label: 'New Organization' },
         ]}
       />
-      <Card className="mx-auto max-w-2xl">
+      <Card>
         <CardHeader>
           <CardTitle>New Organization</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="max-w-2xl space-y-6">
           <Stepper value={activeStep}>
             <StepperNav className="mb-6">
               {STEPS.map(({ step, title }, index) => (
-                <StepperItem key={step} step={step} disabled={step > activeStep}>
+                <StepperItem
+                  key={step}
+                  step={step}
+                  disabled={step > activeStep}
+                >
                   <StepperTrigger>
                     <StepperIndicator>{step}</StepperIndicator>
-                    <StepperTitle className="hidden sm:block">{title}</StepperTitle>
+                    <StepperTitle className="hidden sm:block">
+                      {title}
+                    </StepperTitle>
                   </StepperTrigger>
                   {index < STEPS.length - 1 && <StepperSeparator />}
                 </StepperItem>
@@ -112,7 +126,11 @@ export function NewOrganizationWizardPage() {
           </Stepper>
 
           {error && (
-            <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -121,7 +139,10 @@ export function NewOrganizationWizardPage() {
           )}
 
           {activeStep === 1 && (
-            <OrganizationIdentityStep defaultValues={identity} onContinue={handleIdentityContinue} />
+            <OrganizationIdentityStep
+              defaultValues={identity}
+              onContinue={handleIdentityContinue}
+            />
           )}
 
           {activeStep === 2 && (
@@ -147,7 +168,12 @@ export function NewOrganizationWizardPage() {
 }
 
 function toApiError(err: unknown): ApiError | null {
-  if (err && typeof err === 'object' && 'data' in err && err.data instanceof ApiError) {
+  if (
+    err &&
+    typeof err === 'object' &&
+    'data' in err &&
+    err.data instanceof ApiError
+  ) {
     return err.data;
   }
   return null;

@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,16 +21,27 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { ResidentSelect, type ResidentSelectValue } from '@/components/shared/ResidentSelect';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import {
+  ResidentSelect,
+  type ResidentSelectValue,
+} from '@/components/shared/ResidentSelect';
 import { useReceiveParcel } from '../api/parcelsApi';
 import { PARCEL_TYPES } from '../lib/constants';
-import { receiveParcelSchema, type ReceiveParcelSchemaType } from '../schemas/receiveParcelSchema';
+import {
+  receiveParcelSchema,
+  type ReceiveParcelSchemaType,
+} from '../schemas/receiveParcelSchema';
 
 export function ReceiveParcelPage() {
   const navigate = useNavigate();
@@ -52,8 +67,12 @@ export function ReceiveParcelPage() {
 
   function handleResidentChange(picked: ResidentSelectValue | null) {
     setResident(picked);
-    form.setValue('recipientResidentId', picked?.residentId, { shouldValidate: true });
-    form.setValue('recipientFlatId', picked?.flatId ?? '', { shouldValidate: true });
+    form.setValue('recipientResidentId', picked?.residentId, {
+      shouldValidate: true,
+    });
+    form.setValue('recipientFlatId', picked?.flatId ?? '', {
+      shouldValidate: true,
+    });
   }
 
   async function onSubmit(values: ReceiveParcelSchemaType) {
@@ -89,12 +108,21 @@ export function ReceiveParcelPage() {
     <>
       <PageHeader
         title="Receive Parcel"
-        crumbs={[{ label: 'Front Desk' }, { label: 'Parcels', path: '/security/parcels' }, { label: 'Receive' }]}
+        crumbs={[
+          { label: 'Front Desk' },
+          { label: 'Parcels', path: '/security/parcels' },
+          { label: 'Receive' },
+        ]}
       />
-      <Card className="max-w-2xl">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-2xl pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -106,7 +134,10 @@ export function ReceiveParcelPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
                 <FormLabel>Recipient resident (optional)</FormLabel>
-                <ResidentSelect value={resident} onChange={handleResidentChange} />
+                <ResidentSelect
+                  value={resident}
+                  onChange={handleResidentChange}
+                />
               </div>
 
               {!resident && (
@@ -117,7 +148,9 @@ export function ReceiveParcelPage() {
                       value={buildingId}
                       onValueChange={(v) => {
                         setBuildingId(v);
-                        form.setValue('recipientFlatId', '', { shouldValidate: true });
+                        form.setValue('recipientFlatId', '', {
+                          shouldValidate: true,
+                        });
                       }}
                     />
                   </div>
@@ -156,7 +189,10 @@ export function ReceiveParcelPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Parcel type</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select type" />
@@ -239,7 +275,10 @@ export function ReceiveParcelPage() {
                     <FormItem>
                       <FormLabel>Storage location (optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Front desk shelf B" {...field} />
+                        <Input
+                          placeholder="e.g. Front desk shelf B"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

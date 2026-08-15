@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,12 +21,21 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useCreateServiceChargeRule } from '../api/serviceChargeRulesApi';
-import { BILLING_FREQUENCIES, CALCULATION_METHODS, FLAT_TYPES } from '../lib/constants';
+import {
+  BILLING_FREQUENCIES,
+  CALCULATION_METHODS,
+  FLAT_TYPES,
+} from '../lib/constants';
 import {
   createServiceChargeRuleSchema,
   type CreateServiceChargeRuleSchemaType,
@@ -64,7 +77,9 @@ export function ServiceChargeRuleFormPage() {
           rate: values.rate,
           unitTypeFilter: values.unitTypeFilter || null,
           frequency: values.frequency,
-          effectiveFrom: new Date(values.effectiveFrom).toISOString().slice(0, 10),
+          effectiveFrom: new Date(values.effectiveFrom)
+            .toISOString()
+            .slice(0, 10),
         },
       }).unwrap();
 
@@ -90,10 +105,15 @@ export function ServiceChargeRuleFormPage() {
           { label: 'New' },
         ]}
       />
-      <Card className="max-w-xl">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-xl pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -110,7 +130,10 @@ export function ServiceChargeRuleFormPage() {
                   <FormItem>
                     <FormLabel>Building</FormLabel>
                     <FormControl>
-                      <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                      <BuildingSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -124,7 +147,10 @@ export function ServiceChargeRuleFormPage() {
                     <FormItem>
                       <FormLabel>Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. Monthly Maintenance" {...field} />
+                        <Input
+                          placeholder="e.g. Monthly Maintenance"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -151,7 +177,10 @@ export function ServiceChargeRuleFormPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Calculation method</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select method" />
@@ -160,7 +189,9 @@ export function ServiceChargeRuleFormPage() {
                         <SelectContent>
                           {CALCULATION_METHODS.map((method) => (
                             <SelectItem key={method} value={method}>
-                              {method === 'FixedAmount' ? 'Fixed Amount' : 'Per Square Foot'}
+                              {method === 'FixedAmount'
+                                ? 'Fixed Amount'
+                                : 'Per Square Foot'}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -190,7 +221,10 @@ export function ServiceChargeRuleFormPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Unit type filter (optional)</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="All unit types" />
@@ -214,7 +248,10 @@ export function ServiceChargeRuleFormPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Billing frequency</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select frequency" />
@@ -230,7 +267,8 @@ export function ServiceChargeRuleFormPage() {
                       </Select>
                       <FormMessage />
                       <p className="text-muted-foreground text-xs">
-                        Informational only — batch generation does not currently schedule by frequency.
+                        Informational only — batch generation does not currently
+                        schedule by frequency.
                       </p>
                     </FormItem>
                   )}

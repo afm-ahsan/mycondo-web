@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { skipToken } from '@reduxjs/toolkit/query/react';
+import { toUserMessage } from '@/api/errors';
+import type { DomesticWorkerProfileDto } from '@/api/generated/mycondoApi';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { skipToken } from '@reduxjs/toolkit/query/react';
 import { AlertTriangle, LogIn, LogOut, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,13 +23,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
-import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
-import { InlineSpinner } from '@/components/feedback/InlineSpinner';
-import { EmptyState } from '@/components/feedback/EmptyState';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   useCheckInWorker,
   useCheckOutWorker,
@@ -37,7 +41,6 @@ import {
   type CheckInDomesticWorkerSchemaType,
   type CheckOutDomesticWorkerSchemaType,
 } from '../schemas/checkInDomesticWorkerSchema';
-import type { DomesticWorkerProfileDto } from '@/api/generated/mycondoApi';
 
 const statusToneMap: StatusBadgeMap<'Active' | 'Suspended' | 'Blocked'> = {
   Active: { label: 'Active', variant: 'success' },
@@ -58,7 +61,8 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Suspended' | 'Blocked'> = {
 export function DomesticWorkerCheckInOutPage() {
   const [query, setQuery] = useState('');
   const [searchTerm, setSearchTerm] = useState<string | null>(null);
-  const [selectedWorker, setSelectedWorker] = useState<DomesticWorkerProfileDto | null>(null);
+  const [selectedWorker, setSelectedWorker] =
+    useState<DomesticWorkerProfileDto | null>(null);
 
   const { data: results, isFetching: isSearching } = useDomesticWorkers(
     searchTerm ? { search: searchTerm, page: 1, pageSize: 5 } : skipToken,
@@ -79,12 +83,12 @@ export function DomesticWorkerCheckInOutPage() {
           { label: 'Check In / Out' },
         ]}
       />
-      <div className="space-y-6 max-w-2xl">
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <CardTitle>Find Worker</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="max-w-2xl space-y-3">
             <div className="flex gap-2">
               <Input
                 placeholder="Search by name or mobile number"
@@ -103,36 +107,49 @@ export function DomesticWorkerCheckInOutPage() {
               </p>
             )}
 
-            {searchTerm && !isSearching && (!results || results.items.length === 0) && (
-              <Alert variant="warning" appearance="light">
-                <AlertIcon>
-                  <AlertTriangle />
-                </AlertIcon>
-                <AlertTitle>No domestic worker found matching &quot;{searchTerm}&quot;.</AlertTitle>
-              </Alert>
-            )}
+            {searchTerm &&
+              !isSearching &&
+              (!results || results.items.length === 0) && (
+                <Alert variant="warning" appearance="light">
+                  <AlertIcon>
+                    <AlertTriangle />
+                  </AlertIcon>
+                  <AlertTitle>
+                    No domestic worker found matching &quot;{searchTerm}&quot;.
+                  </AlertTitle>
+                </Alert>
+              )}
 
-            {searchTerm && !isSearching && results && results.items.length > 0 && !selectedWorker && (
-              <ul className="divide-y divide-border rounded-md border border-border">
-                {results.items.map((worker) => (
-                  <li key={worker.domesticWorkerProfileId}>
-                    <button
-                      type="button"
-                      className="flex w-full items-center justify-between gap-2 p-3 text-left text-sm hover:bg-accent"
-                      onClick={() => setSelectedWorker(worker)}
-                    >
-                      <span>
-                        <span className="font-medium">{worker.fullName}</span>{' '}
-                        <span className="text-muted-foreground">
-                          ({worker.workerType}, {worker.phone})
+            {searchTerm &&
+              !isSearching &&
+              results &&
+              results.items.length > 0 &&
+              !selectedWorker && (
+                <ul className="divide-y divide-border rounded-md border border-border">
+                  {results.items.map((worker) => (
+                    <li key={worker.domesticWorkerProfileId}>
+                      <button
+                        type="button"
+                        className="flex w-full items-center justify-between gap-2 p-3 text-left text-sm hover:bg-accent"
+                        onClick={() => setSelectedWorker(worker)}
+                      >
+                        <span>
+                          <span className="font-medium">{worker.fullName}</span>{' '}
+                          <span className="text-muted-foreground">
+                            ({worker.workerType}, {worker.phone})
+                          </span>
                         </span>
-                      </span>
-                      <StatusBadge status={worker.status as 'Active' | 'Suspended' | 'Blocked'} toneMap={statusToneMap} />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
+                        <StatusBadge
+                          status={
+                            worker.status as 'Active' | 'Suspended' | 'Blocked'
+                          }
+                          toneMap={statusToneMap}
+                        />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
           </CardContent>
         </Card>
 
@@ -142,21 +159,29 @@ export function DomesticWorkerCheckInOutPage() {
               <CardTitle className="flex items-center gap-2">
                 {selectedWorker.fullName}
                 <StatusBadge
-                  status={selectedWorker.status as 'Active' | 'Suspended' | 'Blocked'}
+                  status={
+                    selectedWorker.status as 'Active' | 'Suspended' | 'Blocked'
+                  }
                   toneMap={statusToneMap}
                 />
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="max-w-2xl">
               {selectedWorker.status !== 'Active' && (
-                <Alert variant="destructive" appearance="light" className="mb-4">
+                <Alert
+                  variant="destructive"
+                  appearance="light"
+                  className="mb-4"
+                >
                   <AlertIcon>
                     <AlertTriangle />
                   </AlertIcon>
                   <AlertTitle>
                     This worker is {selectedWorker.status.toLowerCase()}
-                    {selectedWorker.statusReason ? `: ${selectedWorker.statusReason}` : '.'} Check-in may
-                    be rejected by the server.
+                    {selectedWorker.statusReason
+                      ? `: ${selectedWorker.statusReason}`
+                      : '.'}{' '}
+                    Check-in may be rejected by the server.
                   </AlertTitle>
                 </Alert>
               )}
@@ -169,14 +194,18 @@ export function DomesticWorkerCheckInOutPage() {
         )}
       </div>
 
-      <div className="max-w-2xl mt-8">
+      <div className="mt-8">
         <CurrentlyInsideQuickList />
       </div>
     </>
   );
 }
 
-function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: string }) {
+function CheckInForm({
+  domesticWorkerProfileId,
+}: {
+  domesticWorkerProfileId: string;
+}) {
   const [checkIn, { isLoading }] = useCheckInWorker();
   const [error, setError] = useState<string | null>(null);
   const [succeeded, setSucceeded] = useState(false);
@@ -223,7 +252,8 @@ function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: str
     return (
       <Alert variant="success" appearance="light">
         <AlertTitle>
-          Checked in. Use the currently-inside list below to check this worker out later.
+          Checked in. Use the currently-inside list below to check this worker
+          out later.
         </AlertTitle>
       </Alert>
     );
@@ -233,7 +263,11 @@ function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: str
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            onClose={() => setError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -248,7 +282,10 @@ function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: str
             <FormItem>
               <FormLabel>Building</FormLabel>
               <FormControl>
-                <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -279,7 +316,11 @@ function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: str
             <FormItem>
               <FormLabel>Entry gate</FormLabel>
               <FormControl>
-                <GateSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <GateSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -303,9 +344,14 @@ function CheckInForm({ domesticWorkerProfileId }: { domesticWorkerProfileId: str
           name="overrideReason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Override reason (only if the server requires one)</FormLabel>
+              <FormLabel>
+                Override reason (only if the server requires one)
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Fill in only if check-in is rejected requesting an override" {...field} />
+                <Input
+                  placeholder="Fill in only if check-in is rejected requesting an override"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -331,7 +377,7 @@ function CurrentlyInsideQuickList() {
       <CardHeader>
         <CardTitle>Currently Inside</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-w-2xl">
         {isLoading && (
           <p className="text-sm text-muted-foreground flex items-center gap-2">
             <InlineSpinner /> Loading…
@@ -343,7 +389,12 @@ function CurrentlyInsideQuickList() {
         {!isLoading && data && data.items.length > 0 && (
           <ul className="divide-y divide-border">
             {data.items.map((session) => (
-              <CheckOutRow key={session.accessSessionId} accessSessionId={session.accessSessionId} hostFlatId={session.hostFlatId} entryAtUtc={session.entryAtUtc} />
+              <CheckOutRow
+                key={session.accessSessionId}
+                accessSessionId={session.accessSessionId}
+                hostFlatId={session.hostFlatId}
+                entryAtUtc={session.entryAtUtc}
+              />
             ))}
           </ul>
         )}
@@ -367,7 +418,8 @@ function CheckOutRow({
   return (
     <li className="flex items-center justify-between gap-3 py-3 text-sm">
       <span>
-        Flat {hostFlatId ?? '—'} · entered {new Date(entryAtUtc).toLocaleString()}
+        Flat {hostFlatId ?? '—'} · entered{' '}
+        {new Date(entryAtUtc).toLocaleString()}
       </span>
       {open ? (
         <CheckOutInlineForm
@@ -375,7 +427,10 @@ function CheckOutRow({
           isSubmitting={isLoading}
           onCheckOut={async (exitGateId) => {
             try {
-              await checkOut({ id: accessSessionId, checkOutDomesticWorkerRequest: { exitGateId } }).unwrap();
+              await checkOut({
+                id: accessSessionId,
+                checkOutDomesticWorkerRequest: { exitGateId },
+              }).unwrap();
               toast.success('Worker checked out.');
             } catch (err) {
               toast.error(toUserMessage(err));
@@ -411,7 +466,10 @@ function CheckOutInlineForm({
   return (
     <div className="flex items-center gap-2">
       <div className="w-36">
-        <BuildingSelect value={buildingId} onValueChange={(v) => form.setValue('buildingId', v)} />
+        <BuildingSelect
+          value={buildingId}
+          onValueChange={(v) => form.setValue('buildingId', v)}
+        />
       </div>
       <div className="w-36">
         <GateSelect

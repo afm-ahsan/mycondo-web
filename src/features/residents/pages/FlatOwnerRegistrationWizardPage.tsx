@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
+import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form } from '@/components/ui/form';
 import {
@@ -14,13 +15,15 @@ import {
   StepperTrigger,
 } from '@/components/ui/stepper';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { OwnerAdditionalInfoStep } from '../components/OwnerAdditionalInfoStep';
 import { OwnerContactIdentityStep } from '../components/OwnerContactIdentityStep';
 import { OwnerDocumentsStep } from '../components/OwnerDocumentsStep';
 import { OwnerReviewSubmitStep } from '../components/OwnerReviewSubmitStep';
 import { PropertyOwnershipStep } from '../components/PropertyOwnershipStep';
-import { flatOwnerRegistrationSchema, type FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegistrationSchema';
+import {
+  flatOwnerRegistrationSchema,
+  type FlatOwnerRegistrationSchemaType,
+} from '../schemas/flatOwnerRegistrationSchema';
 
 const STEPS = [
   { step: 1, title: 'Property & Ownership' },
@@ -84,20 +87,30 @@ export function FlatOwnerRegistrationWizardPage() {
     <>
       <PageHeader
         title="Flat Owner Registration"
-        crumbs={[{ label: 'Resident Management' }, { label: 'Flat Owners', path: '/residents/flat-owners' }, { label: 'New' }]}
+        crumbs={[
+          { label: 'Resident Management' },
+          { label: 'Flat Owners', path: '/residents/flat-owners' },
+          { label: 'New' },
+        ]}
       />
-      <Card className="mx-auto max-w-3xl">
+      <Card>
         <CardHeader>
           <CardTitle>Flat Owner Registration</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="max-w-3xl space-y-6">
           <Stepper value={activeStep} onValueChange={goToStep}>
             <StepperNav className="mb-6">
               {STEPS.map(({ step, title }, index) => (
-                <StepperItem key={step} step={step} disabled={step > activeStep && !(step === 5 && residentId)}>
+                <StepperItem
+                  key={step}
+                  step={step}
+                  disabled={step > activeStep && !(step === 5 && residentId)}
+                >
                   <StepperTrigger>
                     <StepperIndicator>{step}</StepperIndicator>
-                    <StepperTitle className="hidden sm:block">{title}</StepperTitle>
+                    <StepperTitle className="hidden sm:block">
+                      {title}
+                    </StepperTitle>
                   </StepperTrigger>
                   {index < STEPS.length - 1 && <StepperSeparator />}
                 </StepperItem>
@@ -106,12 +119,22 @@ export function FlatOwnerRegistrationWizardPage() {
           </Stepper>
 
           <Form {...form}>
-            {activeStep === 1 && <PropertyOwnershipStep form={form} onNext={() => goToStep(2)} />}
+            {activeStep === 1 && (
+              <PropertyOwnershipStep form={form} onNext={() => goToStep(2)} />
+            )}
             {activeStep === 2 && (
-              <OwnerContactIdentityStep form={form} onNext={() => goToStep(3)} onBack={() => goToStep(1)} />
+              <OwnerContactIdentityStep
+                form={form}
+                onNext={() => goToStep(3)}
+                onBack={() => goToStep(1)}
+              />
             )}
             {activeStep === 3 && (
-              <OwnerAdditionalInfoStep form={form} onNext={() => goToStep(4)} onBack={() => goToStep(2)} />
+              <OwnerAdditionalInfoStep
+                form={form}
+                onNext={() => goToStep(4)}
+                onBack={() => goToStep(2)}
+              />
             )}
             {activeStep === 4 && (
               <OwnerReviewSubmitStep
@@ -126,7 +149,10 @@ export function FlatOwnerRegistrationWizardPage() {
           </Form>
 
           {activeStep === 5 && residentId && (
-            <OwnerDocumentsStep residentId={residentId} onFinish={() => navigate('/residents/flat-owners')} />
+            <OwnerDocumentsStep
+              residentId={residentId}
+              onFinish={() => navigate('/residents/flat-owners')}
+            />
           )}
         </CardContent>
       </Card>

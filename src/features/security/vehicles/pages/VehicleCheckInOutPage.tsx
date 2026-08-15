@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { skipToken } from '@reduxjs/toolkit/query/react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { skipToken } from '@reduxjs/toolkit/query/react';
 import { AlertTriangle, LogIn, LogOut, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -18,11 +22,10 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
-import { PageHeader } from '@/components/shared/PageHeader';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { PageHeader } from '@/components/shared/PageHeader';
 import {
   useCheckInVehicle,
   useCheckOutVehicle,
@@ -43,14 +46,18 @@ const blockedToneMap: StatusBadgeMap<'Active' | 'Blocked'> = {
 
 export function VehicleCheckInOutPage() {
   const [registrationInput, setRegistrationInput] = useState('');
-  const [searchedRegistration, setSearchedRegistration] = useState<string | null>(null);
+  const [searchedRegistration, setSearchedRegistration] = useState<
+    string | null
+  >(null);
 
   const {
     data: vehicle,
     isFetching: isSearching,
     error: searchError,
   } = useVehicleByRegistration(
-    searchedRegistration ? { registrationNumber: searchedRegistration } : skipToken,
+    searchedRegistration
+      ? { registrationNumber: searchedRegistration }
+      : skipToken,
   );
 
   const { data: trips, refetch: refetchTrips } = useVehicleTrips(
@@ -66,14 +73,18 @@ export function VehicleCheckInOutPage() {
     <>
       <PageHeader
         title="Vehicle Check-in / Check-out"
-        crumbs={[{ label: 'Security & Access' }, { label: 'Vehicle Access', path: '/security/vehicles' }, { label: 'Check In / Out' }]}
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Vehicle Access', path: '/security/vehicles' },
+          { label: 'Check In / Out' },
+        ]}
       />
-      <div className="space-y-4 max-w-xl">
+      <div className="space-y-4">
         <Card>
           <CardHeader>
             <CardTitle>Find Vehicle</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="max-w-xl">
             <div className="flex gap-2">
               <Input
                 placeholder="Search by registration number"
@@ -81,12 +92,17 @@ export function VehicleCheckInOutPage() {
                 onChange={(e) => setRegistrationInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
               />
-              <Button onClick={handleSearch} disabled={!registrationInput.trim()}>
+              <Button
+                onClick={handleSearch}
+                disabled={!registrationInput.trim()}
+              >
                 <Search /> Search
               </Button>
             </div>
 
-            {isSearching && <p className="text-sm text-muted-foreground mt-3">Searching…</p>}
+            {isSearching && (
+              <p className="text-sm text-muted-foreground mt-3">Searching…</p>
+            )}
 
             {searchedRegistration && !isSearching && !vehicle && (
               <Alert variant="warning" appearance="light" className="mt-3">
@@ -108,17 +124,25 @@ export function VehicleCheckInOutPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 {vehicle.registrationNumber}
-                <StatusBadge status={vehicle.isBlocked ? 'Blocked' : 'Active'} toneMap={blockedToneMap} />
+                <StatusBadge
+                  status={vehicle.isBlocked ? 'Blocked' : 'Active'}
+                  toneMap={blockedToneMap}
+                />
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="max-w-xl">
               {vehicle.isBlocked && (
-                <Alert variant="destructive" appearance="light" className="mb-4">
+                <Alert
+                  variant="destructive"
+                  appearance="light"
+                  className="mb-4"
+                >
                   <AlertIcon>
                     <AlertTriangle />
                   </AlertIcon>
                   <AlertTitle>
-                    This vehicle is blocked{vehicle.blockReason ? `: ${vehicle.blockReason}` : '.'}{' '}
+                    This vehicle is blocked
+                    {vehicle.blockReason ? `: ${vehicle.blockReason}` : '.'}{' '}
                     Check-in may be rejected by the server.
                   </AlertTitle>
                 </Alert>
@@ -134,7 +158,11 @@ export function VehicleCheckInOutPage() {
               ) : (
                 // Keyed by vehicle so searching for a different vehicle resets the building/flat/gate
                 // selections instead of carrying over a previous vehicle's in-progress form state.
-                <CheckInForm key={vehicle.vehicleId} vehicleId={vehicle.vehicleId} onCheckedIn={refetchTrips} />
+                <CheckInForm
+                  key={vehicle.vehicleId}
+                  vehicleId={vehicle.vehicleId}
+                  onCheckedIn={refetchTrips}
+                />
               )}
             </CardContent>
           </Card>
@@ -144,7 +172,13 @@ export function VehicleCheckInOutPage() {
   );
 }
 
-function CheckInForm({ vehicleId, onCheckedIn }: { vehicleId: string; onCheckedIn: () => void }) {
+function CheckInForm({
+  vehicleId,
+  onCheckedIn,
+}: {
+  vehicleId: string;
+  onCheckedIn: () => void;
+}) {
   const [checkIn, { isLoading }] = useCheckInVehicle();
   const [error, setError] = useState<string | null>(null);
 
@@ -190,7 +224,11 @@ function CheckInForm({ vehicleId, onCheckedIn }: { vehicleId: string; onCheckedI
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            onClose={() => setError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -205,7 +243,10 @@ function CheckInForm({ vehicleId, onCheckedIn }: { vehicleId: string; onCheckedI
             <FormItem>
               <FormLabel>Building (optional)</FormLabel>
               <FormControl>
-                <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -236,7 +277,11 @@ function CheckInForm({ vehicleId, onCheckedIn }: { vehicleId: string; onCheckedI
             <FormItem>
               <FormLabel>Entry gate</FormLabel>
               <FormControl>
-                <GateSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <GateSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -260,9 +305,14 @@ function CheckInForm({ vehicleId, onCheckedIn }: { vehicleId: string; onCheckedI
           name="overrideReason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Override reason (only if the server requires one)</FormLabel>
+              <FormLabel>
+                Override reason (only if the server requires one)
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Fill in only if check-in is rejected requesting an override" {...field} />
+                <Input
+                  placeholder="Fill in only if check-in is rejected requesting an override"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -317,7 +367,11 @@ function CheckOutForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            onClose={() => setError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -331,7 +385,10 @@ function CheckOutForm({
             <FormItem>
               <FormLabel>Exit building</FormLabel>
               <FormControl>
-                <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -344,7 +401,11 @@ function CheckOutForm({
             <FormItem>
               <FormLabel>Exit gate</FormLabel>
               <FormControl>
-                <GateSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <GateSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

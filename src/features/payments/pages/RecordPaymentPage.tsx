@@ -1,10 +1,16 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
+import type { PaymentDto } from '@/api/generated/mycondoApi';
+import { useRecordPaymentIdempotentMutation } from '@/api/idempotentEndpoints';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { toUserMessage } from '@/api/errors';
-import { useRecordPaymentIdempotentMutation } from '@/api/idempotentEndpoints';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
+import { useIdempotencyKey } from '@/lib/idempotency/useIdempotencyKey';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,15 +23,24 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { ResidentSelect, type ResidentSelectValue } from '@/components/shared/ResidentSelect';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useIdempotencyKey } from '@/lib/idempotency/useIdempotencyKey';
+import {
+  ResidentSelect,
+  type ResidentSelectValue,
+} from '@/components/shared/ResidentSelect';
 import { AllocationSummary } from '../components/AllocationSummary';
 import { PAYMENT_METHODS } from '../lib/constants';
-import { recordPaymentSchema, type RecordPaymentSchemaType } from '../schemas/recordPaymentSchema';
-import type { PaymentDto } from '@/api/generated/mycondoApi';
+import {
+  recordPaymentSchema,
+  type RecordPaymentSchemaType,
+} from '../schemas/recordPaymentSchema';
 
 function today(): string {
   return new Date().toISOString().slice(0, 10);
@@ -37,7 +52,9 @@ export function RecordPaymentPage() {
   const [idempotencyKey, resetIdempotencyKey] = useIdempotencyKey();
   const [error, setError] = useState<string | null>(null);
   const [resident, setResident] = useState<ResidentSelectValue | null>(null);
-  const [recordedPayment, setRecordedPayment] = useState<PaymentDto | null>(null);
+  const [recordedPayment, setRecordedPayment] = useState<PaymentDto | null>(
+    null,
+  );
 
   const form = useForm<RecordPaymentSchemaType>({
     resolver: zodResolver(recordPaymentSchema),
@@ -66,7 +83,9 @@ export function RecordPaymentPage() {
           amount: values.amount,
           paymentMethod: values.paymentMethod,
           referenceNumber: values.referenceNumber || null,
-          businessDate: new Date(values.businessDate).toISOString().slice(0, 10),
+          businessDate: new Date(values.businessDate)
+            .toISOString()
+            .slice(0, 10),
           description: values.description || null,
         },
         idempotencyKey,
@@ -88,11 +107,20 @@ export function RecordPaymentPage() {
   if (recordedPayment) {
     return (
       <>
-        <PageHeader title="Payment Recorded" crumbs={[{ label: 'Finance' }, { label: 'Payments' }, { label: 'Record' }]} />
-        <Card className="max-w-xl">
-          <CardContent className="pt-6 space-y-4">
+        <PageHeader
+          title="Payment Recorded"
+          crumbs={[
+            { label: 'Finance' },
+            { label: 'Payments' },
+            { label: 'Record' },
+          ]}
+        />
+        <Card>
+          <CardContent className="max-w-xl pt-6 space-y-4">
             <Alert variant="success" appearance="light">
-              <AlertTitle>Payment recorded for flat {recordedPayment.flatId}.</AlertTitle>
+              <AlertTitle>
+                Payment recorded for flat {recordedPayment.flatId}.
+              </AlertTitle>
             </Alert>
             <div className="text-sm space-y-1">
               <div className="flex justify-between">
@@ -109,17 +137,31 @@ export function RecordPaymentPage() {
               </div>
             </div>
             <div>
-              <div className="text-sm font-medium mb-1.5">Allocated against</div>
+              <div className="text-sm font-medium mb-1.5">
+                Allocated against
+              </div>
               <AllocationSummary allocations={recordedPayment.allocations} />
             </div>
             <div className="flex gap-2">
-              <Button onClick={() => navigate(`/billing/payments/${recordedPayment.paymentId}`)}>View Payment</Button>
+              <Button
+                onClick={() =>
+                  navigate(`/billing/payments/${recordedPayment.paymentId}`)
+                }
+              >
+                View Payment
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => {
                   setRecordedPayment(null);
                   setResident(null);
-                  form.reset({ ...form.getValues(), flatId: '', amount: 0, referenceNumber: '', description: '' });
+                  form.reset({
+                    ...form.getValues(),
+                    flatId: '',
+                    amount: 0,
+                    referenceNumber: '',
+                    description: '',
+                  });
                 }}
               >
                 Record Another
@@ -133,11 +175,23 @@ export function RecordPaymentPage() {
 
   return (
     <>
-      <PageHeader title="Record Payment" crumbs={[{ label: 'Finance' }, { label: 'Payments' }, { label: 'Record' }]} />
-      <Card className="max-w-xl">
-        <CardContent className="pt-6">
+      <PageHeader
+        title="Record Payment"
+        crumbs={[
+          { label: 'Finance' },
+          { label: 'Payments' },
+          { label: 'Record' },
+        ]}
+      />
+      <Card>
+        <CardContent className="max-w-xl pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -149,9 +203,14 @@ export function RecordPaymentPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
               <div className="space-y-1.5">
                 <FormLabel>Resident</FormLabel>
-                <ResidentSelect value={resident} onChange={handleResidentChange} />
+                <ResidentSelect
+                  value={resident}
+                  onChange={handleResidentChange}
+                />
                 {form.formState.errors.flatId && (
-                  <p className="text-destructive text-sm">{form.formState.errors.flatId.message}</p>
+                  <p className="text-destructive text-sm">
+                    {form.formState.errors.flatId.message}
+                  </p>
                 )}
               </div>
 
@@ -175,7 +234,10 @@ export function RecordPaymentPage() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Method</FormLabel>
-                      <Select value={field.value} onValueChange={field.onChange}>
+                      <Select
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      >
                         <FormControl>
                           <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select method" />
@@ -216,10 +278,15 @@ export function RecordPaymentPage() {
                     <FormItem>
                       <FormLabel>Reference (optional)</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g. cheque or transaction number" {...field} />
+                        <Input
+                          placeholder="e.g. cheque or transaction number"
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-muted-foreground text-xs">User-supplied — not a system-generated receipt number.</p>
+                      <p className="text-muted-foreground text-xs">
+                        User-supplied — not a system-generated receipt number.
+                      </p>
                     </FormItem>
                   )}
                 />

@@ -1,9 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
+import type { FacilityDto } from '@/api/generated/mycondoApi';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertTriangle, LogIn, LogOut } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,70 +30,118 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { FacilitySelect } from '@/components/shared/FacilitySelect';
-import { ResidentSelect, type ResidentSelectValue } from '@/components/shared/ResidentSelect';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useFacilities } from '../../api/facilitiesApi';
-import { useCheckOutPoolSession, usePoolSessions, useCheckInPoolSession } from '../../api/poolApi';
-import { CapacityIndicator } from '../../components/CapacityIndicator';
 import { PageHeader } from '@/components/shared/PageHeader';
+import {
+  ResidentSelect,
+  type ResidentSelectValue,
+} from '@/components/shared/ResidentSelect';
+import { useFacilities } from '../../api/facilitiesApi';
+import {
+  useCheckInPoolSession,
+  useCheckOutPoolSession,
+  usePoolSessions,
+} from '../../api/poolApi';
+import { CapacityIndicator } from '../../components/CapacityIndicator';
 import { parseDenialReasons } from '../../lib/bookingStatus';
-import { poolCheckInSchema, type PoolCheckInSchemaType } from '../../schemas/poolCheckInSchema';
-import type { FacilityDto } from '@/api/generated/mycondoApi';
+import {
+  poolCheckInSchema,
+  type PoolCheckInSchemaType,
+} from '../../schemas/poolCheckInSchema';
 
 export function PoolAccessPage() {
   const [facilityId, setFacilityId] = useState<string | undefined>();
   const [resident, setResident] = useState<ResidentSelectValue | null>(null);
 
-  const { data: poolsData } = useFacilities({ facilityType: 'SwimmingPool', page: 1, pageSize: 100 });
-  const facility = poolsData?.items.find((f) => f.facilityId === facilityId) ?? null;
+  const { data: poolsData } = useFacilities({
+    facilityType: 'SwimmingPool',
+    page: 1,
+    pageSize: 100,
+  });
+  const facility =
+    poolsData?.items.find((f) => f.facilityId === facilityId) ?? null;
 
   return (
-    <div className="max-w-2xl space-y-4">
-      <PageHeader title="Pool Access" crumbs={[{ label: 'Facilities' }, { label: 'Swimming Pool' }, { label: 'Pool Access' }]} />
+    <>
+      <PageHeader
+        title="Pool Access"
+        crumbs={[
+          { label: 'Facilities' },
+          { label: 'Swimming Pool' },
+          { label: 'Pool Access' },
+        ]}
+      />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>1. Choose pool</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <FacilitySelect
-            facilityType="SwimmingPool"
-            value={facilityId}
-            onValueChange={(id) => {
-              setFacilityId(id);
-              setResident(null);
-            }}
-            placeholder="Select a pool"
-          />
-          {facility && <CapacitySection facilityId={facility.facilityId} capacity={Number(facility.capacity)} />}
-        </CardContent>
-      </Card>
-
-      {facility && (
+      <div className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle>2. Find resident</CardTitle>
+            <CardTitle>1. Choose pool</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ResidentSelect value={resident} onChange={setResident} />
+          <CardContent className="max-w-2xl space-y-3">
+            <FacilitySelect
+              facilityType="SwimmingPool"
+              value={facilityId}
+              onValueChange={(id) => {
+                setFacilityId(id);
+                setResident(null);
+              }}
+              placeholder="Select a pool"
+            />
+            {facility && (
+              <CapacitySection
+                facilityId={facility.facilityId}
+                capacity={Number(facility.capacity)}
+              />
+            )}
           </CardContent>
         </Card>
-      )}
 
-      {facility && resident && (
-        <PoolAccessForm key={`${facility.facilityId}-${resident.residentId}`} facility={facility} resident={resident} />
-      )}
-    </div>
+        {facility && (
+          <Card>
+            <CardHeader>
+              <CardTitle>2. Find resident</CardTitle>
+            </CardHeader>
+            <CardContent className="max-w-2xl">
+              <ResidentSelect value={resident} onChange={setResident} />
+            </CardContent>
+          </Card>
+        )}
+
+        {facility && resident && (
+          <PoolAccessForm
+            key={`${facility.facilityId}-${resident.residentId}`}
+            facility={facility}
+            resident={resident}
+          />
+        )}
+      </div>
+    </>
   );
 }
 
-function CapacitySection({ facilityId, capacity }: { facilityId: string; capacity: number }) {
-  const { data } = usePoolSessions({ facilityId, openOnly: true, page: 1, pageSize: 100 });
+function CapacitySection({
+  facilityId,
+  capacity,
+}: {
+  facilityId: string;
+  capacity: number;
+}) {
+  const { data } = usePoolSessions({
+    facilityId,
+    openOnly: true,
+    page: 1,
+    pageSize: 100,
+  });
   const current = data ? Number(data.total) : 0;
   return <CapacityIndicator current={current} capacity={capacity} />;
 }
 
-function PoolAccessForm({ facility, resident }: { facility: FacilityDto; resident: ResidentSelectValue }) {
+function PoolAccessForm({
+  facility,
+  resident,
+}: {
+  facility: FacilityDto;
+  resident: ResidentSelectValue;
+}) {
   const [checkIn, { isLoading }] = useCheckInPoolSession();
   const [checkOut, { isLoading: isCheckingOut }] = useCheckOutPoolSession();
   const [denialReasons, setDenialReasons] = useState<string[]>([]);
@@ -110,7 +163,9 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
     page: 1,
     pageSize: 20,
   });
-  const openAdultSessions = (adultSessions?.items ?? []).filter((s) => s.ageCategory === 'Adult');
+  const openAdultSessions = (adultSessions?.items ?? []).filter(
+    (s) => s.ageCategory === 'Adult',
+  );
 
   const form = useForm<PoolCheckInSchemaType>({
     resolver: zodResolver(poolCheckInSchema),
@@ -176,9 +231,13 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
         <CardHeader>
           <CardTitle>{resident.fullName} is currently checked in</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="max-w-2xl space-y-3">
           {genericError && (
-            <Alert variant="destructive" appearance="light" onClose={() => setGenericError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              onClose={() => setGenericError(null)}
+            >
               <AlertIcon>
                 <AlertTriangle />
               </AlertIcon>
@@ -198,7 +257,7 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
       <CardHeader>
         <CardTitle>3. Check in {resident.fullName}</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="max-w-2xl">
         {denialReasons.length > 0 && (
           <Alert variant="destructive" appearance="light" className="mb-4">
             <AlertIcon>
@@ -215,7 +274,12 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
           </Alert>
         )}
         {genericError && (
-          <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setGenericError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            className="mb-4"
+            onClose={() => setGenericError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -272,7 +336,9 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
                 name="accompaniedBySessionId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Accompanying adult (currently checked in)</FormLabel>
+                    <FormLabel>
+                      Accompanying adult (currently checked in)
+                    </FormLabel>
                     <Select value={field.value} onValueChange={field.onChange}>
                       <FormControl>
                         <SelectTrigger className="w-full">
@@ -281,7 +347,10 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
                       </FormControl>
                       <SelectContent>
                         {openAdultSessions.map((session) => (
-                          <SelectItem key={session.poolSessionId} value={session.poolSessionId}>
+                          <SelectItem
+                            key={session.poolSessionId}
+                            value={session.poolSessionId}
+                          >
                             Session {session.poolSessionId.slice(0, 8)}
                           </SelectItem>
                         ))}
@@ -298,9 +367,14 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
               render={({ field }) => (
                 <FormItem className="flex flex-row items-start gap-2 space-y-0">
                   <FormControl>
-                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
                   </FormControl>
-                  <FormLabel className="font-normal">Safety rules acknowledged</FormLabel>
+                  <FormLabel className="font-normal">
+                    Safety rules acknowledged
+                  </FormLabel>
                   <FormMessage />
                 </FormItem>
               )}
@@ -311,7 +385,9 @@ function PoolAccessForm({ facility, resident }: { facility: FacilityDto; residen
                 name="overrideReason"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Override reason (requires pool.override)</FormLabel>
+                    <FormLabel>
+                      Override reason (requires pool.override)
+                    </FormLabel>
                     <FormControl>
                       <Textarea rows={2} {...field} />
                     </FormControl>

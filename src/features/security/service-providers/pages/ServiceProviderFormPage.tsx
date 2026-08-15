@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,10 +21,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useRegisterServiceProvider } from '../api/serviceProvidersApi';
 import { PROVIDER_TYPES } from '../lib/constants';
 import {
@@ -62,7 +71,9 @@ export function ServiceProviderFormPage() {
         },
       }).unwrap();
 
-      toast.success(`"${provider.fullName}" added to the service provider directory.`);
+      toast.success(
+        `"${provider.fullName}" added to the service provider directory.`,
+      );
       navigate('/security/service-providers');
     } catch (err) {
       const apiError = toApiError(err);
@@ -77,12 +88,21 @@ export function ServiceProviderFormPage() {
     <>
       <PageHeader
         title="Register Service Provider"
-        crumbs={[{ label: 'Security & Access' }, { label: 'Service Providers', path: '/security/service-providers' }, { label: 'Register' }]}
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Service Providers', path: '/security/service-providers' },
+          { label: 'Register' },
+        ]}
       />
-      <Card className="max-w-lg">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-lg pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
@@ -149,7 +169,10 @@ export function ServiceProviderFormPage() {
                   <FormItem>
                     <FormLabel>Service description (optional)</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="e.g. Mathematics tutoring, grades 6-8" {...field} />
+                      <Textarea
+                        placeholder="e.g. Mathematics tutoring, grades 6-8"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
