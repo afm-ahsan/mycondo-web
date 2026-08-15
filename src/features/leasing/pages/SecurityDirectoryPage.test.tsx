@@ -86,6 +86,6 @@ describe('SecurityDirectoryPage', () => {
 
     renderWithProviders(<SecurityDirectoryPage />, { auth: { user: securityUser, isInitialized: true } });
 
-    expect(await screen.findByText('No active occupancies to show.')).toBeInTheDocument();
+    expect(await screen.findByText('No active occupancies found')).toBeInTheDocument();
   });
 });

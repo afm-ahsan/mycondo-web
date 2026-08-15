@@ -37,6 +37,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -199,7 +200,15 @@ export function VehicleDirectoryPage() {
           table={table}
           recordCount={total}
           isLoading={isFetching}
-          emptyMessage="No vehicles yet."
+          emptyMessage={
+            <EmptyState
+              icon={<Car className="size-8" aria-hidden="true" />}
+              title="No vehicles found"
+              description={
+                debouncedSearch ? 'No vehicles match the current search.' : 'No vehicles have been registered yet.'
+              }
+            />
+          }
           tableLayout={{ cellBorder: true }}
         >
           <Card>

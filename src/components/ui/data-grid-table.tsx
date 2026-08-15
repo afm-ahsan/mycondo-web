@@ -1,9 +1,12 @@
 import * as React from 'react';
-import { CSSProperties, Fragment, ReactNode } from 'react';
+import { CSSProperties, Fragment, isValidElement, ReactNode } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useDataGrid } from '@/components/ui/data-grid';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Cell, Column, flexRender, Header, HeaderGroup, Row } from '@tanstack/react-table';
 import { cva } from 'class-variance-authority';
+import { Inbox } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const headerCellSpacingVariants = cva('', {
@@ -234,7 +237,7 @@ function DataGridTableBodyRowSkeletonCell<TData>({ children, column }: { childre
           : '',
       )}
     >
-      {children}
+      {children ?? <Skeleton className="h-4 w-full max-w-40" />}
     </td>
   );
 }
@@ -344,11 +347,25 @@ function DataGridTableBodyRowCell<TData>({
 function DataGridTableEmpty() {
   const { table, props } = useDataGrid();
   const totalColumns = table.getAllColumns().length;
+  const { emptyMessage } = props;
+
+  // A page can pass a fully custom node (e.g. `<EmptyState icon={...} .../>` with a contextual icon
+  // and title) or just a description string/nothing, in which case it's rendered through the same
+  // shared EmptyState with a generic icon/title so every DataGrid gets the standard look for free.
+  const content = isValidElement(emptyMessage) ? (
+    emptyMessage
+  ) : (
+    <EmptyState
+      icon={<Inbox className="size-8" aria-hidden="true" />}
+      title="No records found"
+      description={(emptyMessage as string) || 'No records are available for the current view.'}
+    />
+  );
 
   return (
     <tr>
-      <td colSpan={totalColumns} className="text-center text-muted-foreground py-6">
-        {props.emptyMessage || 'No data available'}
+      <td colSpan={totalColumns} className="text-center">
+        {content}
       </td>
     </tr>
   );

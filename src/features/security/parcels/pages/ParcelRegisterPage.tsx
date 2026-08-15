@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { Package, Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import {
   Card,
@@ -22,6 +22,7 @@ import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { toUserMessage } from '@/api/errors';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -142,7 +143,17 @@ export function ParcelRegisterPage() {
           table={table}
           recordCount={total}
           isLoading={isFetching}
-          emptyMessage="No parcels logged yet."
+          emptyMessage={
+            <EmptyState
+              icon={<Package className="size-8" aria-hidden="true" />}
+              title="No parcels found"
+              description={
+                filters.status || filters.recipientFlatId
+                  ? 'No parcels match the current filters.'
+                  : 'No parcels have been logged yet.'
+              }
+            />
+          }
           tableLayout={{ cellBorder: true }}
         >
           <Card>

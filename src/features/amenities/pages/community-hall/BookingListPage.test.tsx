@@ -98,7 +98,7 @@ describe('BookingListPage', () => {
 
     renderWithProviders(<BookingListPage />, { auth: { user: viewerUser, isInitialized: true } });
 
-    expect(await screen.findByText('No bookings yet.')).toBeInTheDocument();
+    expect(await screen.findByText('No bookings found')).toBeInTheDocument();
   });
 
   it('shows an error state when the request fails', async () => {

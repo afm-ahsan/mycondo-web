@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { Building2, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -35,6 +35,7 @@ import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -203,7 +204,24 @@ export function FlatListPage() {
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
       ) : (
-        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No flats match these filters.">
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage={
+            <EmptyState
+              icon={<Building2 className="size-8" aria-hidden="true" />}
+              title="No flats found"
+              description={
+                debouncedSearch || filters.buildingId
+                  ? 'No flats match the current search or filters.'
+                  : isGlobal
+                    ? 'No flats are currently available for this property.'
+                    : 'No flats have been added to this building yet.'
+              }
+            />
+          }
+        >
           <Card>
             <CardHeader>
               <CardHeading>

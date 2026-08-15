@@ -12,6 +12,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
+import { Gauge, Wrench } from 'lucide-react';
 import { GeneratorSelect } from '@/components/shared/GeneratorSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { formatDate, formatNumber } from '@/lib/helpers';
@@ -100,10 +103,16 @@ export function GeneratorReportsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {(operational ?? []).length === 0 ? (
+                {operationalFetching && !operational ? (
+                  <TableSkeleton columns={7} />
+                ) : (operational ?? []).length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-muted-foreground text-center">
-                      No activity in this period.
+                    <TableCell colSpan={7} className="p-0 text-center">
+                      <EmptyState
+                        icon={<Gauge className="size-8" aria-hidden="true" />}
+                        title="No activity found"
+                        description="No generator activity was recorded in the selected period."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -146,10 +155,16 @@ export function GeneratorReportsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMaintenanceDue.length === 0 ? (
+                {maintenanceDueFetching && !maintenanceDue ? (
+                  <TableSkeleton columns={5} />
+                ) : filteredMaintenanceDue.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-muted-foreground text-center">
-                      No active maintenance schedules.
+                    <TableCell colSpan={5} className="p-0 text-center">
+                      <EmptyState
+                        icon={<Wrench className="size-8" aria-hidden="true" />}
+                        title="No maintenance due"
+                        description="No generators currently have a scheduled maintenance due."
+                      />
                     </TableCell>
                   </TableRow>
                 ) : (

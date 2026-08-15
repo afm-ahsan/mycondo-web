@@ -1,3 +1,4 @@
+import { Receipt } from 'lucide-react';
 import { Card, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -35,7 +36,11 @@ export function MyInvoicesPage() {
           {isError ? (
             <ErrorState description={toUserMessage(error)} onRetry={refetch} />
           ) : !isFetching && (!data || data.length === 0) ? (
-            <EmptyState title="No invoices found" description="Invoices for your flats will appear here once issued." />
+            <EmptyState
+              icon={<Receipt className="size-8" aria-hidden="true" />}
+              title="No invoices found"
+              description="Invoices for your flats will appear here once issued."
+            />
           ) : (
             <ScrollArea>
               <Table>

@@ -12,6 +12,7 @@ import {
 } from '@/components/ui/sheet';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { useOccupancySecurityView, useOccupancySecurityViews } from '../api/leasingApi';
 import { PageHeader } from '@/components/shared/PageHeader';
 
@@ -54,7 +55,15 @@ export function SecurityDirectoryPage() {
       {isFetching ? (
         <p className="text-muted-foreground text-sm">Loading…</p>
       ) : !data || data.items.length === 0 ? (
-        <p className="text-muted-foreground text-sm">No active occupancies to show.</p>
+        <EmptyState
+          icon={<UserRound className="size-8" aria-hidden="true" />}
+          title="No active occupancies found"
+          description={
+            buildingId || flatId
+              ? 'No active residents match the selected building and flat filters.'
+              : 'No residents currently have an active occupancy in this property.'
+          }
+        />
       ) : (
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {data.items.map((item) => (
