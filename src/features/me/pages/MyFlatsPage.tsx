@@ -1,3 +1,4 @@
+import { Building2 } from 'lucide-react';
 import { Card, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -36,6 +37,7 @@ export function MyFlatsPage() {
             <ErrorState description={toUserMessage(error)} onRetry={refetch} />
           ) : !isFetching && (!data || data.length === 0) ? (
             <EmptyState
+              icon={<Building2 className="size-8" aria-hidden="true" />}
               title="No flats found"
               description="You don't currently hold an active ownership or occupancy relationship to any flat."
             />

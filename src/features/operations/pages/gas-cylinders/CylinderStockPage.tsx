@@ -24,7 +24,9 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { formatDate, formatDateTime } from '@/lib/helpers';
@@ -248,10 +250,16 @@ export function CylinderStockPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {(currentStock ?? []).length === 0 ? (
+              {stockFetching && !currentStock ? (
+                <TableSkeleton columns={2} />
+              ) : (currentStock ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={2} className="text-muted-foreground text-center">
-                    No stock recorded yet.
+                  <TableCell colSpan={2} className="p-0 text-center">
+                    <EmptyState
+                      icon={<Scale className="size-8" aria-hidden="true" />}
+                      title="No stock recorded"
+                      description="No cylinder stock has been recorded for this property yet."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

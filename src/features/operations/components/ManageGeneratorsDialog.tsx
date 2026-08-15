@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
-import { Pencil, Plus, Power, PowerOff } from 'lucide-react';
+import { Pencil, Plus, Power, PowerOff, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,6 +10,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/feedback/EmptyState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -124,15 +126,15 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
             </TableHeader>
             <TableBody>
               {isFetching ? (
-                <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground text-center">
-                    Loading…
-                  </TableCell>
-                </TableRow>
+                <TableSkeleton columns={6} />
               ) : (data?.items ?? []).length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-muted-foreground text-center">
-                    No generators yet.
+                  <TableCell colSpan={6} className="p-0 text-center">
+                    <EmptyState
+                      icon={<Zap className="size-8" aria-hidden="true" />}
+                      title="No generators found"
+                      description="No generators have been added yet."
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

@@ -32,6 +32,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { FacilitySelect } from '@/components/shared/FacilitySelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -202,7 +203,17 @@ export function BookingListPage() {
         table={table}
         recordCount={total}
         isLoading={isFetching}
-        emptyMessage="No bookings yet."
+        emptyMessage={
+          <EmptyState
+            icon={<CalendarDays className="size-8" aria-hidden="true" />}
+            title="No bookings found"
+            description={
+              filters.facilityId || filters.buildingId || debouncedEventType || filters.status || filters.paymentStatus
+                ? 'No bookings match the current filters.'
+                : 'No community hall bookings have been made yet.'
+            }
+          />
+        }
         tableLayout={{ cellBorder: true }}
       >
         <Card>

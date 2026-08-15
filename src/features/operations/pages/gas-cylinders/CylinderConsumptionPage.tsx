@@ -10,7 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
+import { Gauge } from 'lucide-react';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useCylinderConsumptionReport } from '../../api/reportsApi';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -90,10 +93,16 @@ export function CylinderConsumptionPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(data ?? []).length === 0 ? (
+                  {isFetching && !data ? (
+                    <TableSkeleton columns={5} />
+                  ) : (data ?? []).length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-muted-foreground text-center">
-                        No activity in this period.
+                      <TableCell colSpan={5} className="p-0 text-center">
+                        <EmptyState
+                          icon={<Gauge className="size-8" aria-hidden="true" />}
+                          title="No activity found"
+                          description="No cylinder activity was recorded in the selected period."
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (

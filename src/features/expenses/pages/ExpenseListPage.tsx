@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, Receipt } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -46,6 +46,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -161,7 +162,17 @@ export function ExpenseListPage() {
           table={table}
           recordCount={total}
           isLoading={isFetching}
-          emptyMessage="No expenses match these filters."
+          emptyMessage={
+            <EmptyState
+              icon={<Receipt className="size-8" aria-hidden="true" />}
+              title="No expenses found"
+              description={
+                filters.buildingId || filters.expenseTypeId !== 'all' || filters.status !== 'all'
+                  ? 'No expenses match the current filters.'
+                  : 'No expenses have been recorded yet.'
+              }
+            />
+          }
           tableLayout={{ cellBorder: true }}
         >
           <Card>

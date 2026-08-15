@@ -10,7 +10,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
+import { Truck } from 'lucide-react';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { useSupplierComparisonReport } from '../../api/reportsApi';
@@ -83,10 +86,16 @@ export function SupplierComparisonPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {(data ?? []).length === 0 ? (
+                  {isFetching && !data ? (
+                    <TableSkeleton columns={5} />
+                  ) : (data ?? []).length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-muted-foreground text-center">
-                        No purchases in this period.
+                      <TableCell colSpan={5} className="p-0 text-center">
+                        <EmptyState
+                          icon={<Truck className="size-8" aria-hidden="true" />}
+                          title="No purchases found"
+                          description="No supplier purchases were recorded in the selected period."
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (

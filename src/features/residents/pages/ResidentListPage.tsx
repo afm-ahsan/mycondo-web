@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Link2, PlusIcon } from 'lucide-react';
+import { Link2, PlusIcon, Users } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -41,6 +41,7 @@ import { FlatSelect } from '@/components/shared/FlatSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { UserSelect, type UserSelectValue } from '@/components/shared/UserSelect';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -170,7 +171,22 @@ export function ResidentListPage() {
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
       ) : (
-        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No residents match these filters.">
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage={
+            <EmptyState
+              icon={<Users className="size-8" aria-hidden="true" />}
+              title="No residents found"
+              description={
+                debouncedSearch
+                  ? 'No residents match the current search.'
+                  : 'No residents have been added yet.'
+              }
+            />
+          }
+        >
           <Card>
             <CardHeader>
               <CardHeading>

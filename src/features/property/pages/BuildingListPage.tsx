@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { Building2, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -33,6 +33,7 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
@@ -152,7 +153,20 @@ export function BuildingListPage() {
           <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
       ) : (
-        <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No buildings match these filters.">
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage={
+            <EmptyState
+              icon={<Building2 className="size-8" aria-hidden="true" />}
+              title="No buildings found"
+              description={
+                debouncedSearch ? 'No buildings match the current search.' : 'No buildings have been added yet.'
+              }
+            />
+          }
+        >
           <Card>
             <CardHeader>
               <CardHeading>
