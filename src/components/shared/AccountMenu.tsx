@@ -1,21 +1,14 @@
 import { ReactNode } from 'react';
-import { I18N_LANGUAGES } from '@/i18n/config';
-import { Language } from '@/i18n/types';
-import { Globe, Moon } from 'lucide-react';
+import { ChevronRight, Globe, Moon, UserRound } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { useLanguage } from '@/providers/i18n-provider';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Switch } from '@/components/ui/switch';
@@ -27,6 +20,9 @@ interface AccountMenuProps {
   avatarUrl: string;
   /** Small badge next to the name — e.g. "Platform" to indicate scope. Omit for the tenant menu. */
   contextLabel?: string;
+  /** Route to the caller's My Profile page. Identity header renders as a plain block (not a link)
+   * when omitted — Platform has no profile page of its own yet. */
+  profileHref?: string;
   onLogout: () => void;
   isLoggingOut?: boolean;
 }
@@ -42,15 +38,11 @@ export function AccountMenu({
   displayEmail,
   avatarUrl,
   contextLabel,
+  profileHref,
   onLogout,
   isLoggingOut,
 }: AccountMenuProps) {
-  const { currenLanguage, changeLanguage } = useLanguage();
   const { theme, setTheme } = useTheme();
-
-  const handleLanguage = (lang: Language) => {
-    changeLanguage(lang);
-  };
 
   const handleThemeToggle = (checked: boolean) => {
     setTheme(checked ? 'dark' : 'light');
@@ -60,9 +52,8 @@ export function AccountMenu({
     <DropdownMenu>
       <DropdownMenuTrigger asChild>{trigger}</DropdownMenuTrigger>
       <DropdownMenuContent className="w-64" side="bottom" align="end">
-        {/* Header — plain identity display, not a link: MyCondo has no profile page of its own yet
-            (see UX-6 UserDropdownMenu cleanup — the Metronic template's account/public-profile demo
-            pages have no real backing, so this deliberately doesn't link to them). */}
+        {/* Identity display — not a link itself; "My Profile" below is the dedicated affordance for
+            navigating there, so the header stays a plain summary block. */}
         <div className="flex items-center gap-2 p-3">
           <img className="size-9 rounded-full border-2 border-green-500" src={avatarUrl} alt="User avatar" />
           <div className="flex flex-col">
@@ -82,35 +73,28 @@ export function AccountMenu({
 
         <DropdownMenuSeparator />
 
-        {/* Language Submenu with Radio Group */}
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger className="flex items-center gap-2 [&_[data-slot=dropdown-menu-sub-trigger-indicator]]:hidden hover:[&_[data-slot=badge]]:border-input data-[state=open]:[&_[data-slot=badge]]:border-input">
-            <Globe />
-            <span className="flex items-center justify-between gap-2 grow relative">
-              Language
-              <Badge variant="outline" className="absolute end-0 top-1/2 -translate-y-1/2">
-                {currenLanguage.label}
-                <img src={currenLanguage.flag} className="w-3.5 h-3.5 rounded-full" alt={currenLanguage.label} />
-              </Badge>
-            </span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent className="w-48">
-            <DropdownMenuRadioGroup
-              value={currenLanguage.code}
-              onValueChange={(value) => {
-                const selectedLang = I18N_LANGUAGES.find((lang) => lang.code === value);
-                if (selectedLang) handleLanguage(selectedLang);
-              }}
-            >
-              {I18N_LANGUAGES.map((item) => (
-                <DropdownMenuRadioItem key={item.code} value={item.code} className="flex items-center gap-2">
-                  <img src={item.flag} className="w-4 h-4 rounded-full" alt={item.label} />
-                  <span>{item.label}</span>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
+        {profileHref && (
+          <>
+            <DropdownMenuItem asChild className="flex items-center gap-2">
+              <Link to={profileHref}>
+                <UserRound />
+                <span className="grow">My Profile</span>
+                <ChevronRight className="size-3.5 opacity-60" />
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        )}
+
+        {/* Language — fixed to English for MVP-1; no localization infrastructure exists yet, so this
+            is a static row, not an interactive control. */}
+        <div className="flex items-center gap-2 px-2 py-1.5 text-sm">
+          <Globe className="opacity-60 size-4 shrink-0" />
+          <span className="flex items-center justify-between gap-2 grow">
+            Language
+            <Badge variant="outline">English</Badge>
+          </span>
+        </div>
 
         <DropdownMenuSeparator />
 

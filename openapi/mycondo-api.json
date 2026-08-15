@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5219/"
+      "url": "https://localhost:7219/"
     }
   ],
   "paths": {
@@ -336,6 +336,97 @@
                 }
               }
             }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMyProfileCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me/avatar": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "required": [
+                  "file"
+                ],
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "$ref": "#/components/schemas/IFormFile"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserProfileDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
           }
         }
       }
@@ -10681,6 +10772,12 @@
             "items": {
               "$ref": "#/components/schemas/BuildingPermissionGrant"
             }
+          },
+          "avatarUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         },
         "description": "Permissions holds only tenant-wide grants (from role assignments with no\r\n        building scope) — this is exactly what the JWT's `perm` claim carries, so the two stay in sync.\r\n        Building-scoped grants live separately in BuildingPermissions (the JWT's\r\n        `bperm` claim) precisely so a permission held only for Building A can't be mistaken for a\r\n        tenant-wide grant that would also apply to Building B. See ADR-014."
@@ -14356,6 +14453,10 @@
             "type": "boolean"
           }
         }
+      },
+      "IFormFile": {
+        "type": "string",
+        "format": "binary"
       },
       "InspectBookingRequest": {
         "required": [
@@ -21311,6 +21412,24 @@
           }
         }
       },
+      "UpdateMyProfileCommand": {
+        "required": [
+          "fullName",
+          "phoneNumber"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "phoneNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "UpdateOccupancyRegistrationDraftRequest": {
         "required": [
           "primaryFullName",
@@ -21585,6 +21704,12 @@
             "items": {
               "type": "string"
             }
+          },
+          "avatarUrl": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
