@@ -17,7 +17,7 @@ export function Sidebar() {
           'dark',
       )}
     >
-      <SidebarHeader tenantName="Akter Residence Park" />
+      <SidebarHeader />
       <div className="overflow-hidden">
         <div className="w-(--sidebar-default-width)">
           <SidebarMenu />

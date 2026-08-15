@@ -5,13 +5,7 @@ import { cn } from '@/lib/utils';
 import { useSettings } from '@/providers/settings-provider';
 import { Button } from '@/components/ui/button';
 
-interface SidebarHeaderProps {
-  // Omitted in contexts that aren't scoped to one tenant (Platform Admin manages every
-  // organization at once) — showing a single tenant's name there would misrepresent the screen.
-  tenantName?: string;
-}
-
-export function SidebarHeader({ tenantName }: SidebarHeaderProps) {
+export function SidebarHeader() {
   const { settings, storeOption } = useSettings();
 
   const handleToggleClick = () => {
@@ -34,11 +28,9 @@ export function SidebarHeader({ tenantName }: SidebarHeaderProps) {
           className="small-logo h-8 w-auto max-w-none shrink-0"
           alt="CondoBD"
         />
-        {tenantName && (
-          <span className="default-logo text-primary truncate text-base font-semibold">
-            {tenantName}
-          </span>
-        )}
+        <span className="default-logo truncate bg-gradient-to-r from-pink-500 via-orange-400 to-blue-500 bg-clip-text text-base font-bold text-transparent">
+          CondoBD
+        </span>
       </Link>
       <Button
         onClick={handleToggleClick}

@@ -54,7 +54,7 @@ export function PlatformLayout() {
   return (
     <>
       <Helmet>
-        <title>Platform Administration</title>
+        <title>Platform Administration - CondoBD</title>
       </Helmet>
 
       {!isMobile && <PlatformSidebar />}
