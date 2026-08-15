@@ -219,7 +219,7 @@ export function GeneratorMaintenancePage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
           <Button size="sm" variant="outline" onClick={() => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId)}>
@@ -246,7 +246,7 @@ export function GeneratorMaintenancePage() {
     { id: 'resolution', header: 'Resolution', cell: ({ row }) => row.original.resolution ?? '—' },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) =>
         !row.original.downtimeEndUtc ? (
           <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>

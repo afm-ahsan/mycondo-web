@@ -153,7 +153,7 @@ export function PlatformOrganizationsListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => {
         const org = row.original;
         const hasAction = org.status === 'Active' || org.status === 'PendingActivation' || org.status === 'Suspended';

@@ -408,7 +408,7 @@ const SecurityLog = () => {
       },
       {
         id: 'actions',
-        header: () => '',
+        header: () => 'Action',
         cell: () => (
           <Button variant="ghost">
             <NotepadText />

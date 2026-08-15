@@ -112,7 +112,7 @@ export function ServiceProviderDirectoryPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
           Manage

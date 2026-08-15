@@ -1119,7 +1119,7 @@ const CurrentSessions = () => {
       },
       {
         id: 'actions',
-        header: '',
+        header: 'Action',
         cell: ({ row }) => <ActionsCell row={row} />,
         enableSorting: false,
         size: 60,

@@ -108,7 +108,7 @@ export function UsersPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => {
         const user = row.original;
         const target: DialogTarget = { userId: user.userId, fullName: user.fullName };

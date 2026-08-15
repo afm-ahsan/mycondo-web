@@ -154,7 +154,7 @@ export function AttendanceRegisterPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => {
         const record = row.original;
         return (

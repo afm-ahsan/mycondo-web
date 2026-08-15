@@ -145,7 +145,7 @@ export function FlatListPage() {
     { id: 'areaSqFt', header: 'Area (sq ft)', cell: ({ row }) => row.original.areaSqFt ?? '—' },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 justify-end">
           <RequirePermission permission="property.update" buildingId={row.original.buildingId}>

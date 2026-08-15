@@ -145,7 +145,7 @@ export function VehicleDirectoryPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.vehicle.blockManage}>
           {row.original.isBlocked ? (

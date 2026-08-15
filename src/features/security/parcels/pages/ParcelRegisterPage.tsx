@@ -110,7 +110,7 @@ export function ParcelRegisterPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" asChild>
           <Link to={`/security/parcels/${row.original.parcelId}`}>View</Link>

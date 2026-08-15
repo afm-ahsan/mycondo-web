@@ -78,7 +78,7 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <Button size="sm" variant="outline" asChild>

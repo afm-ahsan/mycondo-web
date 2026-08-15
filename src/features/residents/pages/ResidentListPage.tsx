@@ -114,7 +114,7 @@ export function ResidentListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

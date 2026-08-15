@@ -96,7 +96,7 @@ export function PaymentListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" asChild>
           <Link to={`/billing/payments/${row.original.paymentId}`}>View</Link>

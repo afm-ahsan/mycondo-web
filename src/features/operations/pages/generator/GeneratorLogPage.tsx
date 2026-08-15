@@ -127,7 +127,7 @@ export function GeneratorLogPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) =>
         row.original.status === 'Open' ? (
           <RequirePermission permission={PERMISSIONS.generator.operationManage}>
