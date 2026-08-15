@@ -57,11 +57,6 @@ export const MENU_SIDEBAR: MenuConfig = [
         permission: PERMISSIONS.occupancyRegistration.view,
       },
       {
-        title: 'New Tenant Registration',
-        path: '/leasing/tenant-registrations/new',
-        permission: PERMISSIONS.occupancyRegistration.create,
-      },
-      {
         title: 'Security Directory',
         path: '/leasing/security-directory',
         permission: PERMISSIONS.occupancyRegistration.securityView,
@@ -84,7 +79,6 @@ export const MENU_SIDEBAR: MenuConfig = [
         title: 'Visitor Management',
         children: [
           { title: 'Guest Register', path: '/security/guests', permission: PERMISSIONS.visitor.view },
-          { title: 'New Guest', path: '/security/guests/new', permission: PERMISSIONS.visitor.create },
           {
             title: 'Check In / Out',
             path: '/security/guests/checkin-out',
@@ -102,7 +96,6 @@ export const MENU_SIDEBAR: MenuConfig = [
         icon: Car,
         children: [
           { title: 'Vehicle Directory', path: '/security/vehicles', permission: PERMISSIONS.vehicle.view },
-          { title: 'Register Vehicle', path: '/security/vehicles/new', permission: PERMISSIONS.vehicle.create },
           {
             title: 'Check In / Out',
             path: '/security/vehicles/checkin-out',
@@ -123,11 +116,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Directory',
             path: '/security/domestic-workers',
             permission: PERMISSIONS.domesticWorker.view,
-          },
-          {
-            title: 'Register Worker',
-            path: '/security/domestic-workers/new',
-            permission: PERMISSIONS.domesticWorker.manage,
           },
           {
             title: 'Check In / Out',
@@ -151,11 +139,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.serviceProvider.view,
           },
           {
-            title: 'Register Provider',
-            path: '/security/service-providers/new',
-            permission: PERMISSIONS.serviceProvider.manage,
-          },
-          {
             title: 'Check In / Out',
             path: '/security/service-providers/checkin-out',
             permission: PERMISSIONS.serviceProvider.checkin,
@@ -177,11 +160,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.staffAttendance.view,
           },
           {
-            title: 'Register Staff Member',
-            path: '/security/staff-attendance/new',
-            permission: PERMISSIONS.staffAttendance.manage,
-          },
-          {
             title: 'Attendance Register',
             path: '/security/staff-attendance/records',
             permission: PERMISSIONS.staffAttendance.view,
@@ -200,7 +178,6 @@ export const MENU_SIDEBAR: MenuConfig = [
     icon: Package,
     children: [
       { title: 'Parcel Register', path: '/security/parcels', permission: PERMISSIONS.parcel.view },
-      { title: 'Receive Parcel', path: '/security/parcels/new', permission: PERMISSIONS.parcel.receive },
     ],
   },
   { heading: 'Finance' },
@@ -215,11 +192,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Rules',
             path: '/billing/service-charge-rules',
             permission: PERMISSIONS.billing.ruleView,
-          },
-          {
-            title: 'New Rule',
-            path: '/billing/service-charge-rules/new',
-            permission: PERMISSIONS.billing.ruleManage,
           },
           {
             title: 'Invoices',
@@ -245,7 +217,6 @@ export const MENU_SIDEBAR: MenuConfig = [
     icon: Wallet,
     children: [
       { title: 'Payments', path: '/billing/payments', permission: PERMISSIONS.payment.view },
-      { title: 'Record Payment', path: '/billing/payments/new', permission: PERMISSIONS.payment.record },
     ],
   },
   {
@@ -314,11 +285,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.facility.bookingView,
           },
           {
-            title: 'New Booking',
-            path: '/facilities/community-hall/bookings/new',
-            permission: PERMISSIONS.facility.bookingCreate,
-          },
-          {
             title: 'Halls / Settings',
             path: '/facilities/swimming-pool/settings',
             permission: PERMISSIONS.facility.manage,
@@ -385,11 +351,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.utility.readingView,
           },
           {
-            title: 'Record Reading',
-            path: '/utilities/electricity/readings/new',
-            permission: PERMISSIONS.utility.readingRecord,
-          },
-          {
             title: 'Rate Plans',
             path: '/utilities/electricity/rate-plans',
             permission: PERMISSIONS.utility.ratePlanView,
@@ -412,11 +373,6 @@ export const MENU_SIDEBAR: MenuConfig = [
         children: [
           { title: 'Meters', path: '/utilities/gas/meters', permission: PERMISSIONS.utility.meterView },
           { title: 'Readings', path: '/utilities/gas/readings', permission: PERMISSIONS.utility.readingView },
-          {
-            title: 'Record Reading',
-            path: '/utilities/gas/readings/new',
-            permission: PERMISSIONS.utility.readingRecord,
-          },
           {
             title: 'Rate Plans',
             path: '/utilities/gas/rate-plans',

@@ -63,7 +63,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
     const user = userEvent.setup();
     renderWithProviders(<SidebarMenu />, {
       auth: {
-        user: makeUser(['facility.booking.view', 'facility.booking.create', 'pool.checkin', 'pool.view', 'facility.manage']),
+        user: makeUser(['facility.booking.view', 'pool.checkin', 'pool.view', 'facility.manage']),
         isInitialized: true,
       },
     });
@@ -77,7 +77,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
     await expandGroup(user, 'Community Hall');
     expect(screen.getByText('Booking Calendar')).toBeInTheDocument();
     expect(screen.getByText('Booking List')).toBeInTheDocument();
-    expect(screen.getByText('New Booking')).toBeInTheDocument();
+    expect(screen.getByText('Halls / Settings')).toBeInTheDocument();
 
     await expandGroup(user, 'Swimming Pool');
     expect(screen.getByText('Pool Access')).toBeInTheDocument();
@@ -89,8 +89,8 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
   it('hides individual items the user lacks permission for, but keeps the group when siblings remain visible', async () => {
     const user = userEvent.setup();
     renderWithProviders(<SidebarMenu />, {
-      // Holds facility.booking.view (Booking Calendar + Booking List) but not facility.booking.create
-      // (New Booking) or anything pool-related.
+      // Holds facility.booking.view (Booking Calendar + Booking List) but not facility.manage
+      // (Halls / Settings) or anything pool-related.
       auth: { user: makeUser(['facility.booking.view']), isInitialized: true },
     });
 
@@ -103,7 +103,7 @@ describe('SidebarMenu — Facilities group (Slice G)', () => {
     await expandGroup(user, 'Community Hall');
     expect(screen.getByText('Booking Calendar')).toBeInTheDocument();
     expect(screen.getByText('Booking List')).toBeInTheDocument();
-    expect(screen.queryByText('New Booking')).not.toBeInTheDocument();
+    expect(screen.queryByText('Halls / Settings')).not.toBeInTheDocument();
   });
 
   it('hides the entire Facilities group (and its "Facilities" heading) when the user holds none of its permissions', () => {
