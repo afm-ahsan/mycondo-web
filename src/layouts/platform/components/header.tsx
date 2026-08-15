@@ -34,7 +34,7 @@ export function PlatformHeader() {
         headerSticky && 'border-b border-border',
       )}
     >
-      <Container className="flex justify-between items-stretch lg:gap-4">
+      <Container className="flex items-stretch lg:gap-4">
         <div className="flex gap-1 lg:hidden items-center gap-2.5">
           <Link to="/platform/dashboard" className="shrink-0">
             <img src={toAbsoluteUrl('/media/app/mini-logo.svg')} className="h-[25px] w-full" alt="mini-logo" />
@@ -56,7 +56,10 @@ export function PlatformHeader() {
           )}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        {/* ms-auto (not justify-between on the parent) pushes this to the end regardless of
+            whether the lg:hidden logo block above is visible — see the tenant header's identical
+            fix for why justify-between alone collapsed this to flex-start on desktop. */}
+        <div className="flex items-center gap-1.5 ms-auto">
           <PlatformGlobalSearch />
           <PlatformQuickLinksMenu />
           <div className="ms-1.5">
