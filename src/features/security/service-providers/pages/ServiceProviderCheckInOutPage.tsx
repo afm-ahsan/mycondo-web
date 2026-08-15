@@ -380,9 +380,9 @@ function CurrentlyInsideQuickList() {
       <CardHeader>
         <CardTitle>Currently Inside</CardTitle>
       </CardHeader>
-      <CardContent className="max-w-2xl">
+      <CardContent>
         {isLoading && (
-          <p className="text-sm text-muted-foreground flex items-center gap-2">
+          <p className="text-sm text-muted-foreground flex items-center gap-2 max-w-2xl">
             <InlineSpinner /> Loading…
           </p>
         )}
@@ -394,7 +394,7 @@ function CurrentlyInsideQuickList() {
           />
         )}
         {!isLoading && data && data.items.length > 0 && (
-          <ul className="divide-y divide-border">
+          <ul className="divide-y divide-border max-w-2xl">
             {data.items.map((session) => (
               <CheckOutRow
                 key={session.accessSessionId}
