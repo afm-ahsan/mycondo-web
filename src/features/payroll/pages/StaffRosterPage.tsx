@@ -101,7 +101,7 @@ export function StaffRosterPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <div className="flex justify-end gap-2">
           <RequirePermission permission={PERMISSIONS.staffAttendance.view}>

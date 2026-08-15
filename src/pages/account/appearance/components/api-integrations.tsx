@@ -287,7 +287,7 @@ const ApiIntegrations = () => {
       },
       {
         id: 'actions',
-        header: () => '',
+        header: () => 'Action',
         enableSorting: false,
         cell: () => (
           <Button variant="dim" mode="icon">

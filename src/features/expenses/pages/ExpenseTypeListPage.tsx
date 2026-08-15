@@ -105,7 +105,7 @@ export function ExpenseTypeListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <RequirePermission permission="expensetype.manage">
           <div className="flex items-center gap-2 justify-end">

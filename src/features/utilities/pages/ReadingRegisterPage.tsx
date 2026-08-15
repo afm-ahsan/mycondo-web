@@ -100,7 +100,7 @@ export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" asChild>
           <Link to={`/utilities/${utilityType.toLowerCase()}/readings/${row.original.readingId}`}>View</Link>

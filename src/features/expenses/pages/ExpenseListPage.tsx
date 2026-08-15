@@ -110,7 +110,7 @@ export function ExpenseListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) =>
         row.original.status === 'Recorded' ? (
           <RequirePermission permission="expense.manage">

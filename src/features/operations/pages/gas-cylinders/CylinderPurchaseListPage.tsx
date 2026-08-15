@@ -188,7 +188,7 @@ export function CylinderPurchaseListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => {
         const purchase = row.original;
         return (

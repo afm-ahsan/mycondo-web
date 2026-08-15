@@ -142,7 +142,7 @@ export function GuestDirectoryPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.visitor.blockManage}>
           {row.original.isBlocked ? (

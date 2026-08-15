@@ -98,7 +98,7 @@ export function CurrentlyPresentStaffPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
           <Button size="sm" variant="outline" onClick={() => setClockOutTarget(row.original)} disabled={isClockingOut}>

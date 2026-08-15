@@ -110,7 +110,7 @@ export function InvoiceListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <Button size="sm" variant="outline" asChild>
           <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>

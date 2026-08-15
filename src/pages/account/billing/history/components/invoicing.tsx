@@ -360,7 +360,7 @@ const Invoicing = () => {
       },
       {
         id: 'actions',
-        header: () => '',
+        header: () => 'Action',
         enableSorting: false,
         cell: () => {
           return (

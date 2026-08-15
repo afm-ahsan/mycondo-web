@@ -99,7 +99,7 @@ export function BuildingListPage() {
     { id: 'address', header: 'Address', cell: ({ row }) => row.original.address ?? '—' },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) => (
         <div className="flex items-center gap-2 justify-end">
           <RequirePermission permission="property.view" buildingId={row.original.buildingId}>

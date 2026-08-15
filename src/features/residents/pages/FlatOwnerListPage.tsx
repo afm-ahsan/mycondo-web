@@ -120,7 +120,7 @@ export function FlatOwnerListPage() {
     },
     {
       id: 'actions',
-      header: '',
+      header: 'Action',
       cell: ({ row }) =>
         row.original.status === 'Active' ? (
           <RequirePermission permission="ownership.manage">
