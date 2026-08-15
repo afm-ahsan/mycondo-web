@@ -61,7 +61,11 @@ export function PlatformDashboardPage() {
           )}
 
           {!isRecentError && !isRecentLoading && recentOrganizations.length === 0 && (
-            <EmptyState title="No organizations yet" description="Organizations you provision will appear here." />
+            <EmptyState
+              icon={<Building2 className="size-8" aria-hidden="true" />}
+              title="No organizations yet"
+              description="Organizations you provision will appear here."
+            />
           )}
 
           {!isRecentError &&

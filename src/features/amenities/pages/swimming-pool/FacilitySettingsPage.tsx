@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, Landmark, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
@@ -129,7 +129,11 @@ export function FacilitySettingsPage() {
         </CardHeader>
         <CardTable>
           {!isFetching && (!data || data.items.length === 0) ? (
-            <EmptyState title="No facilities configured yet" description="Create a Community Hall or Swimming Pool facility to get started." />
+            <EmptyState
+              icon={<Landmark className="size-8" aria-hidden="true" />}
+              title="No facilities configured yet"
+              description="Create a Community Hall or Swimming Pool facility to get started."
+            />
           ) : (
             <ScrollArea>
               <Table>

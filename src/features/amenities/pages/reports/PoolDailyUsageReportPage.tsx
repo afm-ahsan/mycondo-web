@@ -2,6 +2,7 @@ import { skipToken } from '@reduxjs/toolkit/query/react';
 import { Card, CardContent, CardHeader, CardHeading, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Waves } from 'lucide-react';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { FacilitySelect } from '@/components/shared/FacilitySelect';
@@ -67,7 +68,11 @@ export function PoolDailyUsageReportPage() {
 
       {!filters.facilityId ? (
         <Card>
-          <EmptyState title="No pool selected" description="Choose a pool above to see its daily usage summary." />
+          <EmptyState
+            icon={<Waves className="size-8" aria-hidden="true" />}
+            title="No pool selected"
+            description="Choose a pool above to see its daily usage summary."
+          />
         </Card>
       ) : isError ? (
         <Card>
