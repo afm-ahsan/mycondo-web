@@ -2,10 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { render } from '@testing-library/react';
+import { HeaderBreadcrumb } from './HeaderBreadcrumb';
 import { PageHeader } from './PageHeader';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 
+// PageHeader no longer renders the breadcrumb itself — it publishes `crumbs` to PageHeaderContext,
+// which the global app header's HeaderBreadcrumb consumes. Rendering both under one provider here
+// exercises that full path instead of PageHeader's internals in isolation.
 function renderWithRouter(ui: React.ReactElement) {
-  return render(<MemoryRouter>{ui}</MemoryRouter>);
+  return render(
+    <MemoryRouter>
+      <PageHeaderProvider>
+        <HeaderBreadcrumb />
+        {ui}
+      </PageHeaderProvider>
+    </MemoryRouter>,
+  );
 }
 
 describe('PageHeader', () => {
@@ -15,7 +27,7 @@ describe('PageHeader', () => {
     expect(screen.getByText('Everyone in this tenant.')).toBeInTheDocument();
   });
 
-  it('renders breadcrumb items as links except the last, which is the current page', () => {
+  it('publishes crumbs to the header, rendered as links except the last (the current page)', () => {
     renderWithRouter(
       <PageHeader
         title="New Booking"
@@ -51,7 +63,7 @@ describe('PageHeader', () => {
     expect(screen.getByRole('button', { name: 'New Guest' })).toBeInTheDocument();
   });
 
-  it('renders no breadcrumb and no action area when neither is given', () => {
+  it('publishes no breadcrumb and renders no action area when neither is given', () => {
     renderWithRouter(<PageHeader title="Dashboard" />);
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
     expect(screen.queryByRole('button')).not.toBeInTheDocument();

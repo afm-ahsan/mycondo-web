@@ -7,6 +7,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { ReadingDetailPage } from './ReadingDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -49,9 +50,11 @@ function renderDetailPage(initialReading: ReturnType<typeof reading>) {
   return render(
     <MemoryRouter initialEntries={['/utilities/electricity/readings/reading-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/utilities/electricity/readings/:id" element={<ReadingDetailPage utilityType="Electricity" />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/utilities/electricity/readings/:id" element={<ReadingDetailPage utilityType="Electricity" />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

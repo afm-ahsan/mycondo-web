@@ -1,18 +1,5 @@
-import { Fragment, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import {
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
-} from '@/components/ui/breadcrumb';
-
-interface PageHeaderCrumb {
-  label: string;
-  path?: string;
-}
+import { useLayoutEffect, type ReactNode } from 'react';
+import { usePageHeaderContext, type PageHeaderCrumb } from '@/providers/page-header-provider';
 
 interface PageHeaderProps {
   title: string;
@@ -25,7 +12,10 @@ interface PageHeaderProps {
 }
 
 /**
- * Standard page shell header: breadcrumb, title, optional description, and an action area.
+ * Standard page shell header: title, optional description, and an action area. The breadcrumb
+ * itself renders in the global app header (see HeaderBreadcrumb) — passing `crumbs` here publishes
+ * them to that shared context rather than rendering them in page content, so the trail and the
+ * header utility cluster share one row instead of the breadcrumb floating below the header.
  * Wrap an individual action in `RequirePermission` (`@/lib/auth/RequirePermission`) at the call
  * site to hide it for users who lack the permission — this component stays permission-agnostic.
  */
@@ -37,34 +27,16 @@ export function PageHeader({
   secondaryActions,
 }: PageHeaderProps) {
   const hasActions = Boolean(primaryAction || secondaryActions);
+  const { setCrumbs } = usePageHeaderContext();
+
+  useLayoutEffect(() => {
+    setCrumbs(crumbs ?? []);
+  }, [crumbs, setCrumbs]);
 
   return (
     <div className="flex flex-col gap-3 mb-4 sm:flex-row sm:items-start sm:justify-between">
       <div className="min-w-0">
-        {crumbs && crumbs.length > 0 && (
-          <Breadcrumb>
-            <BreadcrumbList>
-              {crumbs.map((crumb, index) => (
-                // BreadcrumbSeparator and BreadcrumbItem are both <li> — a Fragment (not a <span>)
-                // keeps them as direct children of the <ol> (BreadcrumbList); wrapping them in a
-                // real element here would make them invalid list content (axe: "list"/"listitem").
-                <Fragment key={crumb.label}>
-                  {index > 0 && <BreadcrumbSeparator />}
-                  <BreadcrumbItem>
-                    {crumb.path ? (
-                      <BreadcrumbLink asChild>
-                        <Link to={crumb.path}>{crumb.label}</Link>
-                      </BreadcrumbLink>
-                    ) : (
-                      <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
-                    )}
-                  </BreadcrumbItem>
-                </Fragment>
-              ))}
-            </BreadcrumbList>
-          </Breadcrumb>
-        )}
-        <h1 className="text-xl font-semibold mt-1 truncate">{title}</h1>
+        <h1 className="text-xl font-semibold truncate">{title}</h1>
         {description && (
           <p className="text-muted-foreground text-sm mt-1 max-w-2xl">{description}</p>
         )}

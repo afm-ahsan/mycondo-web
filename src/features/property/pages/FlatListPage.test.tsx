@@ -7,6 +7,7 @@ import { render, screen, waitFor, within } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { FlatListPage } from './FlatListPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -50,9 +51,11 @@ function renderFlatListPage(user: AuthUser) {
   return render(
     <MemoryRouter initialEntries={[`/admin/buildings/${BUILDING_ID}/flats`]}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/admin/buildings/:buildingId/flats" element={<FlatListPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/admin/buildings/:buildingId/flats" element={<FlatListPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );
@@ -63,9 +66,11 @@ function renderGlobalFlatsPage(user: AuthUser) {
   return render(
     <MemoryRouter initialEntries={['/admin/flats']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/admin/flats" element={<FlatListPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/admin/flats" element={<FlatListPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

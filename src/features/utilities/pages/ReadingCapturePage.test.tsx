@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { ReadingCapturePage } from './ReadingCapturePage';
 
 const API_BASE = 'https://localhost:7219';
@@ -27,9 +28,11 @@ function renderCapturePage() {
   return render(
     <MemoryRouter initialEntries={['/utilities/electricity/readings/new?meterId=meter-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/utilities/electricity/readings/new" element={<ReadingCapturePage utilityType="Electricity" />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/utilities/electricity/readings/new" element={<ReadingCapturePage utilityType="Electricity" />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

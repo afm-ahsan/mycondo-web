@@ -37,6 +37,7 @@ export function PlatformDashboardPage() {
       <PageHeader
         title="Platform Administration"
         description={`Signed in as ${user?.displayName} (${user?.email})`}
+        crumbs={[{ label: 'Dashboard' }]}
       />
 
       <div className="grid grid-cols-2 gap-4 mb-4 sm:grid-cols-4">

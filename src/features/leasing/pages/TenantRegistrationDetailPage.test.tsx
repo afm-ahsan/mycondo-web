@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { TenantRegistrationDetailPage } from './TenantRegistrationDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -60,9 +61,11 @@ function renderDetailPage(
   return render(
     <MemoryRouter initialEntries={['/leasing/tenant-registrations/reg-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/leasing/tenant-registrations/:id" element={<TenantRegistrationDetailPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/leasing/tenant-registrations/:id" element={<TenantRegistrationDetailPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );
