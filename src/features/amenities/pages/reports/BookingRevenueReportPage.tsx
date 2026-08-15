@@ -1,3 +1,4 @@
+import { CalendarOff } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -79,7 +80,11 @@ export function BookingRevenueReportPage() {
           </CardHeader>
           <CardTable>
             {!isFetching && (data ?? []).length === 0 ? (
-              <EmptyState title="No billable bookings in this period" description="Try widening the date range." />
+              <EmptyState
+                icon={<CalendarOff className="size-8" aria-hidden="true" />}
+                title="No billable bookings in this period"
+                description="Try widening the date range."
+              />
             ) : (
               <ScrollArea>
                 <Table>

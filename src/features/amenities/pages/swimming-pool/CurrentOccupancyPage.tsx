@@ -1,3 +1,4 @@
+import { Waves } from 'lucide-react';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Button } from '@/components/ui/button';
@@ -70,7 +71,11 @@ export function CurrentOccupancyPage() {
         )}
         <CardTable>
           {!isFetching && (!data || data.items.length === 0) ? (
-            <EmptyState title="No one is currently in the pool" description="Checked-in residents and guests will appear here." />
+            <EmptyState
+              icon={<Waves className="size-8" aria-hidden="true" />}
+              title="No one is currently in the pool"
+              description="Checked-in residents and guests will appear here."
+            />
           ) : (
             <ScrollArea>
               <Table>

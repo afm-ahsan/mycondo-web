@@ -3,7 +3,7 @@ import { toUserMessage } from '@/api/errors';
 import type { ServiceProviderProfileDto } from '@/api/generated/mycondoApi';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { skipToken } from '@reduxjs/toolkit/query/react';
-import { AlertTriangle, LogIn, LogOut, Search } from 'lucide-react';
+import { AlertTriangle, LogIn, LogOut, Search, Users } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import {
@@ -387,7 +387,11 @@ function CurrentlyInsideQuickList() {
           </p>
         )}
         {!isLoading && (!data || data.items.length === 0) && (
-          <EmptyState title="No service providers currently inside" />
+          <EmptyState
+            icon={<Users className="size-8" aria-hidden="true" />}
+            title="No service providers currently inside"
+            description="No service providers are currently checked in."
+          />
         )}
         {!isLoading && data && data.items.length > 0 && (
           <ul className="divide-y divide-border">

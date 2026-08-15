@@ -1,5 +1,6 @@
 import type { ApexOptions } from 'apexcharts';
 import ApexChart from 'react-apexcharts';
+import { CalendarOff } from 'lucide-react';
 import {
   Card,
   CardHeader,
@@ -133,7 +134,11 @@ export function FacilityUtilizationReportPage() {
             </CardHeader>
             <CardTable>
               {!isFetching && (data ?? []).length === 0 ? (
-                <EmptyState title="No bookings in this period" description="Try widening the date range or clearing the facility filter." />
+                <EmptyState
+                  icon={<CalendarOff className="size-8" aria-hidden="true" />}
+                  title="No bookings in this period"
+                  description="Try widening the date range or clearing the facility filter."
+                />
               ) : (
                 <ScrollArea>
                   <Table>

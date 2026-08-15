@@ -300,7 +300,11 @@ function IncidentsTab({
             ))}
           </div>
         ) : !data || data.items.length === 0 ? (
-          <EmptyState title="No incidents reported" description="Incidents reported by pool operators will appear here." />
+          <EmptyState
+            icon={<AlertTriangle className="size-8" aria-hidden="true" />}
+            title="No incidents reported"
+            description="Incidents reported by pool operators will appear here."
+          />
         ) : (
           <ul className="divide-y">
             {data.items.map((incident) => (
