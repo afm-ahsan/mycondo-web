@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ApiError, toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -80,7 +80,7 @@ export function LoginPage() {
       <form onSubmit={form.handleSubmit(onSubmit)} className="block w-full space-y-5">
         <div className="text-center space-y-1 pb-3">
           <h1 className="text-2xl font-semibold tracking-tight">Sign In</h1>
-          <p className="text-sm text-muted-foreground">Welcome back to MyCondo.</p>
+          <p className="text-sm text-muted-foreground">Welcome back to CondoBD.</p>
         </div>
 
         {error && (
@@ -166,10 +166,7 @@ export function LoginPage() {
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-primary hover:underline">
-            Create one
-          </Link>
+          Don&apos;t have an account? Contact your organization admin to get access.
         </p>
       </form>
     </Form>

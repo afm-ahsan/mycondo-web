@@ -59,7 +59,7 @@ export function Demo1Layout() {
   return (
     <>
       <Helmet>
-        <title>{item?.title}</title>
+        <title>{item?.title ? `${item.title} - CondoBD` : 'CondoBD'}</title>
       </Helmet>
 
       {!isMobile && <Sidebar />}
