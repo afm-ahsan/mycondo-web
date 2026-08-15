@@ -20,6 +20,10 @@ const DashboardPage = lazyPage(() => import('@/features/dashboard'), 'DashboardP
 // load the page (it may simply render empty for a user with no ownership/occupancy relationship).
 const MyFlatsPage = lazyPage(() => import('@/features/me'), 'MyFlatsPage');
 const MyInvoicesPage = lazyPage(() => import('@/features/me'), 'MyInvoicesPage');
+// My Profile is also self-scoped (GET/PUT /api/v1/auth/me + avatar/change-password), but unlike the
+// relationship queries above it needs no permission check at all — every field is the caller's own
+// account, not a resident/flat relationship that could be empty for a given role.
+const MyProfilePage = lazyPage(() => import('@/features/me'), 'MyProfilePage');
 
 // Auth
 const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'LoginPage');
@@ -229,6 +233,7 @@ export function AppRoutingSetup() {
           <Route path="/" element={<DashboardPage />} />
           <Route path="/me/flats" element={<MyFlatsPage />} />
           <Route path="/me/invoices" element={<MyInvoicesPage />} />
+          <Route path="/me/profile" element={<MyProfilePage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
           <Route
             path="/public-profile/profiles/default/"

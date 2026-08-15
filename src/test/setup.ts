@@ -37,6 +37,15 @@ if (!globalThis.ResizeObserver) {
   };
 }
 
+// jsdom doesn't implement URL.createObjectURL/revokeObjectURL either, and useAvatarUrl (My Profile's
+// avatar fetch/preview) calls both — same rationale as the polyfills above.
+if (!URL.createObjectURL) {
+  URL.createObjectURL = () => 'blob:mock-object-url';
+}
+if (!URL.revokeObjectURL) {
+  URL.revokeObjectURL = () => {};
+}
+
 // jsdom doesn't implement window.matchMedia either, and useIsMobile (used by the app shell's
 // Header/Sidebar) calls it on mount to detect the responsive breakpoint.
 if (!window.matchMedia) {

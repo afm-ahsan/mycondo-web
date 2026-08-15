@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { setAccessToken } from '@/api/baseApi';
 import { useLogout } from '@/features/auth/api/authApi';
 import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
+import { useAvatarUrl } from '@/features/me/hooks/useAvatarUrl';
 import { useNavigate } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -13,10 +14,11 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
   const [logoutMutation, { isLoading: isLoggingOut }] = useLogout();
+  const uploadedAvatarUrl = useAvatarUrl(Boolean(user?.avatarUrl));
 
   const displayName = user?.name || 'User';
   const displayEmail = user?.email || '';
-  const displayAvatar = toAbsoluteUrl('/media/avatars/300-2.png');
+  const displayAvatar = uploadedAvatarUrl ?? toAbsoluteUrl('/media/avatars/300-2.png');
 
   async function logout() {
     try {
@@ -35,6 +37,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
       displayName={displayName}
       displayEmail={displayEmail}
       avatarUrl={displayAvatar}
+      profileHref="/me/profile"
       onLogout={logout}
       isLoggingOut={isLoggingOut}
     />
