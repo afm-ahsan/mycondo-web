@@ -35,7 +35,15 @@ const cardVariants = cva('flex flex-col items-stretch text-card-foreground round
   },
 });
 
-const cardHeaderVariants = cva('flex items-center justify-between flex-wrap px-5 min-h-14 gap-2.5', {
+// py-4: CardHeader's content (title, search box, filter rows — see CardHeading/CardToolbar usages)
+// previously relied solely on min-h-14 + items-center for vertical space, so with box-sizing:
+// border-box, items-center centers children within the box *after* padding is subtracted — pb-4
+// alone (no pt) made that inner content-box start flush at the top, pushing the title against
+// CardHeader's own top edge instead of leaving room above it. py-4 keeps top and bottom symmetric.
+// Padding on the container itself — rather than margin on any one child — applies uniformly whether
+// CardHeader has one child (CardHeading alone) or several siblings (CardHeading + a filter
+// row/CardToolbar), so it can't misalign one child against another the way a child-level margin would.
+const cardHeaderVariants = cva('flex items-center justify-between flex-wrap px-5 min-h-14 py-4 gap-2.5', {
   variants: {
     variant: {
       default: 'border-b border-border',

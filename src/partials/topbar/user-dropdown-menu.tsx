@@ -2,7 +2,7 @@ import { ReactNode } from 'react';
 import { setAccessToken } from '@/api/baseApi';
 import { useLogout } from '@/features/auth/api/authApi';
 import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
-import { useNavigate } from 'react-router';
+import { useNavigate } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { sessionEnded } from '@/store/slices/authSlice';

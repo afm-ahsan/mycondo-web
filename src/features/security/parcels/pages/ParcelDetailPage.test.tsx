@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { ParcelDetailPage } from './ParcelDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -47,9 +48,11 @@ function renderDetailPage(user: AuthUser, initialParcel: ReturnType<typeof parce
   return render(
     <MemoryRouter initialEntries={['/security/parcels/parcel-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/security/parcels/:id" element={<ParcelDetailPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/security/parcels/:id" element={<ParcelDetailPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

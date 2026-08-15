@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { PaymentDetailPage } from './PaymentDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -39,9 +40,11 @@ function renderDetailPage(user: AuthUser, initialPayment: ReturnType<typeof paym
   return render(
     <MemoryRouter initialEntries={['/billing/payments/payment-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/billing/payments/:id" element={<PaymentDetailPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/billing/payments/:id" element={<PaymentDetailPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

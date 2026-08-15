@@ -6,6 +6,7 @@ import { Toaster } from '@/components/ui/sonner';
 import { useSessionBootstrap } from '@/features/auth/hooks/useSessionBootstrap';
 import { usePlatformSessionBootstrap } from '@/features/platform/hooks/usePlatformSessionBootstrap';
 import { I18nProvider } from './providers/i18n-provider';
+import { PageHeaderProvider } from './providers/page-header-provider';
 import { SettingsProvider } from './providers/settings-provider';
 import { ThemeProvider } from './providers/theme-provider';
 import { TooltipsProvider } from './providers/tooltips-provider';
@@ -26,12 +27,14 @@ export function App() {
         <I18nProvider>
           <HelmetProvider>
             <TooltipsProvider>
-              <LoadingBarContainer>
-                <BrowserRouter basename={BASE_URL}>
-                  <Toaster />
-                  <AppRouting />
-                </BrowserRouter>
-              </LoadingBarContainer>
+              <PageHeaderProvider>
+                <LoadingBarContainer>
+                  <BrowserRouter basename={BASE_URL}>
+                    <Toaster />
+                    <AppRouting />
+                  </BrowserRouter>
+                </LoadingBarContainer>
+              </PageHeaderProvider>
             </TooltipsProvider>
           </HelmetProvider>
         </I18nProvider>

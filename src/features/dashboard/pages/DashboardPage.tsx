@@ -80,6 +80,7 @@ export function DashboardPage() {
       <PageHeader
         title={`Welcome${user?.name ? `, ${user.name}` : ''}`}
         description="Jump into what you work with most."
+        crumbs={[{ label: 'Dashboard' }]}
       />
 
       <div className="space-y-4 mb-6">

@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { PlatformAuthUser } from '@/store/slices/platformAuthSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { PlatformOrganizationDetailPage } from './PlatformOrganizationDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -41,9 +42,11 @@ function renderDetailPage(initialDetail: ReturnType<typeof detail>) {
   return render(
     <MemoryRouter initialEntries={['/platform/organizations/tenant-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/platform/organizations/:id" element={<PlatformOrganizationDetailPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/platform/organizations/:id" element={<PlatformOrganizationDetailPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

@@ -7,6 +7,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { InvoiceDetailPage } from './InvoiceDetailPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -58,9 +59,11 @@ function renderDetailPage(user: AuthUser, detail: ReturnType<typeof invoiceDetai
   return render(
     <MemoryRouter initialEntries={['/billing/invoices/inv-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/billing/invoices/:id" element={<InvoiceDetailPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/billing/invoices/:id" element={<InvoiceDetailPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );

@@ -8,6 +8,7 @@ import { Provider } from 'react-redux';
 import { createStore } from '@/store/store';
 import { server } from '@/test/server';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import { BookingDetailsPage } from './BookingDetailsPage';
 
 const API_BASE = 'https://localhost:7219';
@@ -103,9 +104,11 @@ function renderDetailsPage(user: AuthUser, initialBooking: ReturnType<typeof boo
   return render(
     <MemoryRouter initialEntries={['/facilities/community-hall/bookings/booking-1']}>
       <Provider store={store}>
-        <Routes>
-          <Route path="/facilities/community-hall/bookings/:id" element={<BookingDetailsPage />} />
-        </Routes>
+        <PageHeaderProvider>
+          <Routes>
+            <Route path="/facilities/community-hall/bookings/:id" element={<BookingDetailsPage />} />
+          </Routes>
+        </PageHeaderProvider>
       </Provider>
     </MemoryRouter>,
   );
