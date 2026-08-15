@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
-import { sessionEnded } from '@/store/slices/authSlice';
+import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
+import type { AuthResponse } from './generated/mycondoApi';
 import { ApiError, type ProblemDetails } from './errors';
 
 const ACCESS_TOKEN_HEADER = 'Authorization';
@@ -60,7 +61,13 @@ export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, Fetc
         : { data: undefined };
 
       if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
-        setAccessToken((refresh.data as { accessToken: string }).accessToken);
+        const { accessToken: newAccessToken, user } = refresh.data as AuthResponse;
+        setAccessToken(newAccessToken);
+        // Without this, a tab left open across an access-token expiry keeps working (the token
+        // itself is fresh) but Redux's `auth.user.permissions` stays frozen at whatever it was at
+        // last login/reload — a role/permission grant change server-side (e.g. a newly-granted
+        // permission) would never reach the permission-gated UI until a hard reload or re-login.
+        api.dispatch(sessionRestored(toAuthUser(user)));
         result = await rawBaseQuery(args, api, extraOptions);
       } else {
         setAccessToken(null);
