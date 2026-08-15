@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,9 +21,14 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useRegisterDomesticWorker } from '../api/domesticWorkersApi';
 import { WORKER_TYPES } from '../lib/constants';
 import {
@@ -63,7 +72,9 @@ export function DomesticWorkerFormPage() {
         },
       }).unwrap();
 
-      toast.success(`"${worker.fullName}" added to the domestic staff directory.`);
+      toast.success(
+        `"${worker.fullName}" added to the domestic staff directory.`,
+      );
       navigate('/security/domestic-workers');
     } catch (err) {
       const apiError = toApiError(err);
@@ -78,12 +89,21 @@ export function DomesticWorkerFormPage() {
     <>
       <PageHeader
         title="Register Domestic Worker"
-        crumbs={[{ label: 'Security & Access' }, { label: 'Domestic Staff', path: '/security/domestic-workers' }, { label: 'Register' }]}
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Domestic Staff', path: '/security/domestic-workers' },
+          { label: 'Register' },
+        ]}
       />
-      <Card className="max-w-lg">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-lg pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>

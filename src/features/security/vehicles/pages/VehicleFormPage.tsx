@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,14 +21,22 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { PageHeader } from '@/components/shared/PageHeader';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { PageHeader } from '@/components/shared/PageHeader';
 import { useRegisterVehicle } from '../api/vehiclesApi';
 import { VEHICLE_OWNERSHIP_CATEGORIES, VEHICLE_TYPES } from '../lib/constants';
-import { registerVehicleSchema, type RegisterVehicleSchemaType } from '../schemas/registerVehicleSchema';
+import {
+  registerVehicleSchema,
+  type RegisterVehicleSchemaType,
+} from '../schemas/registerVehicleSchema';
 
 // Create-only: mycondo-api's Vehicle feature exposes no update endpoint, only register/block/unblock
 // — no "edit" mode here, matching GuestProfileFormPage's precedent for the same backend shape.
@@ -71,7 +83,9 @@ export function VehicleFormPage() {
       const apiError = toApiError(err);
       // No conflictMessage override — the backend's detail already names the exact duplicate
       // registration number, which is clearer than a generic replacement would be.
-      const handled = applyApiErrorToForm(form, apiError, { conflictField: 'registrationNumber' });
+      const handled = applyApiErrorToForm(form, apiError, {
+        conflictField: 'registrationNumber',
+      });
       if (!handled) {
         setError(toUserMessage(apiError ?? err));
       }
@@ -82,10 +96,14 @@ export function VehicleFormPage() {
     <>
       <PageHeader
         title="Register Vehicle"
-        crumbs={[{ label: 'Security & Access' }, { label: 'Vehicle Access', path: '/security/vehicles' }, { label: 'Register' }]}
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Vehicle Access', path: '/security/vehicles' },
+          { label: 'Register' },
+        ]}
       />
-      <Card className="max-w-lg">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-lg pt-6">
           {error && (
             <Alert
               variant="destructive"
@@ -109,7 +127,10 @@ export function VehicleFormPage() {
                   <FormItem>
                     <FormLabel>Registration number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. DHAKA-METRO-GA-1234" {...field} />
+                      <Input
+                        placeholder="e.g. DHAKA-METRO-GA-1234"
+                        {...field}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -211,7 +232,10 @@ export function VehicleFormPage() {
                   <FormItem>
                     <FormLabel>Building (optional)</FormLabel>
                     <FormControl>
-                      <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                      <BuildingSelect
+                        value={field.value}
+                        onValueChange={field.onChange}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

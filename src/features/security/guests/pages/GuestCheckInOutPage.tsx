@@ -1,10 +1,14 @@
 import { useState } from 'react';
-import { skipToken } from '@reduxjs/toolkit/query/react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { skipToken } from '@reduxjs/toolkit/query/react';
 import { AlertTriangle, LogIn, LogOut, Search } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,7 +26,6 @@ import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import {
   useCheckInGuest,
   useCheckOutGuest,
@@ -70,81 +73,91 @@ export function GuestCheckInOutPage() {
           { label: 'Check In / Out' },
         ]}
       />
-      <div className="space-y-4 max-w-xl">
-      <Card>
-        <CardHeader>
-          <CardTitle as="h2">Guest Check-in / Check-out</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-2">
-            <Input
-              placeholder="Search by mobile number"
-              value={phoneInput}
-              onChange={(e) => setPhoneInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-            />
-            <Button onClick={handleSearch} disabled={!phoneInput.trim()}>
-              <Search /> Search
-            </Button>
-          </div>
-
-          {isSearching && <p className="text-sm text-muted-foreground mt-3">Searching…</p>}
-
-          {searchedPhone && !isSearching && !guest && (
-            <Alert variant="warning" appearance="light" className="mt-3">
-              <AlertIcon>
-                <AlertTriangle />
-              </AlertIcon>
-              <AlertTitle>
-                {toApiError(searchError)
-                  ? toUserMessage(toApiError(searchError))
-                  : 'No guest found with that mobile number.'}
-              </AlertTitle>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {guest && (
+      <div className="space-y-4">
         <Card>
           <CardHeader>
-            <CardTitle as="h2" className="flex items-center gap-2">
-              {guest.fullName}
-              <StatusBadge status={guest.isBlocked ? 'Blocked' : 'Active'} toneMap={blockedToneMap} />
-            </CardTitle>
+            <CardTitle as="h2">Guest Check-in / Check-out</CardTitle>
           </CardHeader>
-          <CardContent>
-            {guest.isBlocked && (
-              <Alert variant="destructive" appearance="light" className="mb-4">
+          <CardContent className="max-w-xl">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Search by mobile number"
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <Button onClick={handleSearch} disabled={!phoneInput.trim()}>
+                <Search /> Search
+              </Button>
+            </div>
+
+            {isSearching && (
+              <p className="text-sm text-muted-foreground mt-3">Searching…</p>
+            )}
+
+            {searchedPhone && !isSearching && !guest && (
+              <Alert variant="warning" appearance="light" className="mt-3">
                 <AlertIcon>
                   <AlertTriangle />
                 </AlertIcon>
                 <AlertTitle>
-                  This guest is blocked{guest.blockReason ? `: ${guest.blockReason}` : '.'} Check-in
-                  may be rejected by the server.
+                  {toApiError(searchError)
+                    ? toUserMessage(toApiError(searchError))
+                    : 'No guest found with that mobile number.'}
                 </AlertTitle>
               </Alert>
             )}
-
-            {openVisit ? (
-              <CheckOutForm
-                key={openVisit.accessSessionId}
-                guestName={guest.fullName}
-                accessSessionId={openVisit.accessSessionId}
-                onCheckedOut={refetchVisits}
-              />
-            ) : (
-              // Keyed by guest so searching for a different guest resets the building/flat/gate
-              // selections instead of carrying over a previous guest's in-progress form state.
-              <CheckInForm
-                key={guest.guestProfileId}
-                guestProfileId={guest.guestProfileId}
-                onCheckedIn={refetchVisits}
-              />
-            )}
           </CardContent>
         </Card>
-      )}
+
+        {guest && (
+          <Card>
+            <CardHeader>
+              <CardTitle as="h2" className="flex items-center gap-2">
+                {guest.fullName}
+                <StatusBadge
+                  status={guest.isBlocked ? 'Blocked' : 'Active'}
+                  toneMap={blockedToneMap}
+                />
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="max-w-xl">
+              {guest.isBlocked && (
+                <Alert
+                  variant="destructive"
+                  appearance="light"
+                  className="mb-4"
+                >
+                  <AlertIcon>
+                    <AlertTriangle />
+                  </AlertIcon>
+                  <AlertTitle>
+                    This guest is blocked
+                    {guest.blockReason ? `: ${guest.blockReason}` : '.'}{' '}
+                    Check-in may be rejected by the server.
+                  </AlertTitle>
+                </Alert>
+              )}
+
+              {openVisit ? (
+                <CheckOutForm
+                  key={openVisit.accessSessionId}
+                  guestName={guest.fullName}
+                  accessSessionId={openVisit.accessSessionId}
+                  onCheckedOut={refetchVisits}
+                />
+              ) : (
+                // Keyed by guest so searching for a different guest resets the building/flat/gate
+                // selections instead of carrying over a previous guest's in-progress form state.
+                <CheckInForm
+                  key={guest.guestProfileId}
+                  guestProfileId={guest.guestProfileId}
+                  onCheckedIn={refetchVisits}
+                />
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );
@@ -191,7 +204,13 @@ function CheckInForm({
         },
       }).unwrap();
       toast.success('Guest checked in.');
-      form.reset({ ...form.getValues(), purposeOfVisit: '', passOrQrNumber: '', remarks: '', overrideReason: '' });
+      form.reset({
+        ...form.getValues(),
+        purposeOfVisit: '',
+        passOrQrNumber: '',
+        remarks: '',
+        overrideReason: '',
+      });
       // getApiV1GuestsByIdVisits (providesTags: ["Guests"]) isn't invalidated by this mutation
       // (invalidatesTags: ["AccessSessions"]) — a tag mismatch in the generated client, not
       // something to hand-edit in generated code. Force a refetch so the page immediately shows
@@ -210,7 +229,11 @@ function CheckInForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            onClose={() => setError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -225,7 +248,10 @@ function CheckInForm({
             <FormItem>
               <FormLabel>Building</FormLabel>
               <FormControl>
-                <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -238,7 +264,11 @@ function CheckInForm({
             <FormItem>
               <FormLabel>Host flat</FormLabel>
               <FormControl>
-                <FlatSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <FlatSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -251,7 +281,11 @@ function CheckInForm({
             <FormItem>
               <FormLabel>Entry gate</FormLabel>
               <FormControl>
-                <GateSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <GateSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -288,9 +322,14 @@ function CheckInForm({
           name="overrideReason"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Override reason (only if the server requires one)</FormLabel>
+              <FormLabel>
+                Override reason (only if the server requires one)
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Fill in only if check-in is rejected requesting an override" {...field} />
+                <Input
+                  placeholder="Fill in only if check-in is rejected requesting an override"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -345,7 +384,11 @@ function CheckOutForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         {error && (
-          <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <Alert
+            variant="destructive"
+            appearance="light"
+            onClose={() => setError(null)}
+          >
             <AlertIcon>
               <AlertTriangle />
             </AlertIcon>
@@ -359,7 +402,10 @@ function CheckOutForm({
             <FormItem>
               <FormLabel>Exit building</FormLabel>
               <FormControl>
-                <BuildingSelect value={field.value} onValueChange={field.onChange} />
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -372,7 +418,11 @@ function CheckOutForm({
             <FormItem>
               <FormLabel>Exit gate</FormLabel>
               <FormControl>
-                <GateSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+                <GateSelect
+                  buildingId={buildingId}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>

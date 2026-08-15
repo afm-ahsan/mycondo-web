@@ -1,10 +1,14 @@
 import { useState } from 'react';
+import { toUserMessage } from '@/api/errors';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { toUserMessage } from '@/api/errors';
+import {
+  applyApiErrorToForm,
+  toApiError,
+} from '@/lib/forms/applyApiErrorToForm';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -17,12 +21,20 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useRegisterStaffMember } from '../api/staffAttendanceApi';
 import { STAFF_ROLES } from '../lib/constants';
-import { registerStaffMemberSchema, type RegisterStaffMemberSchemaType } from '../schemas/registerStaffMemberSchema';
+import {
+  registerStaffMemberSchema,
+  type RegisterStaffMemberSchemaType,
+} from '../schemas/registerStaffMemberSchema';
 
 // Create-only: mycondo-api's StaffAttendance feature exposes no update endpoint for a staff member's
 // role/phone/active status (only registration, clock-in/out, and correction workflow) — do not invent one.
@@ -63,12 +75,21 @@ export function StaffMemberFormPage() {
     <>
       <PageHeader
         title="Register Staff Member"
-        crumbs={[{ label: 'Security & Access' }, { label: 'Staff Attendance', path: '/security/staff-attendance' }, { label: 'Register' }]}
+        crumbs={[
+          { label: 'Security & Access' },
+          { label: 'Staff Attendance', path: '/security/staff-attendance' },
+          { label: 'Register' },
+        ]}
       />
-      <Card className="max-w-lg">
-        <CardContent className="pt-6">
+      <Card>
+        <CardContent className="max-w-lg pt-6">
           {error && (
-            <Alert variant="destructive" appearance="light" className="mb-4" onClose={() => setError(null)}>
+            <Alert
+              variant="destructive"
+              appearance="light"
+              className="mb-4"
+              onClose={() => setError(null)}
+            >
               <AlertIcon>
                 <AlertCircle />
               </AlertIcon>
