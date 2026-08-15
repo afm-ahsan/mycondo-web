@@ -76,7 +76,7 @@ export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
     } else {
       return (
         <AccordionMenuItem key={index} value={item.path || ''} className="text-sm font-medium" asChild>
-          <Link to={item.path || '#'} className="flex items-center justify-between grow gap-2">
+          <Link to={item.path || '#'}>
             {item.icon && <item.icon data-slot="accordion-menu-icon" />}
             <span data-slot="accordion-menu-title">{item.title}</span>
           </Link>
