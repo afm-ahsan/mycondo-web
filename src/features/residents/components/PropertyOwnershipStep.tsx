@@ -23,51 +23,53 @@ export function PropertyOwnershipStep({ form, onNext }: PropertyOwnershipStepPro
 
   return (
     <div className="space-y-4">
-      <FormField
-        control={form.control}
-        name="buildingId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Building</FormLabel>
-            <FormControl>
-              <BuildingSelect
-                value={field.value}
-                onValueChange={(value) => {
-                  field.onChange(value);
-                  form.setValue('flatId', '');
-                }}
-              />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="flatId"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Flat</FormLabel>
-            <FormControl>
-              <FlatSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-      <FormField
-        control={form.control}
-        name="startDate"
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Ownership effective date</FormLabel>
-            <FormControl>
-              <Input type="date" {...field} />
-            </FormControl>
-            <FormMessage />
-          </FormItem>
-        )}
-      />
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <FormField
+          control={form.control}
+          name="buildingId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Building</FormLabel>
+              <FormControl>
+                <BuildingSelect
+                  value={field.value}
+                  onValueChange={(value) => {
+                    field.onChange(value);
+                    form.setValue('flatId', '');
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="flatId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Flat</FormLabel>
+              <FormControl>
+                <FlatSelect buildingId={buildingId} value={field.value} onValueChange={field.onChange} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="startDate"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Ownership effective date</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+      </div>
 
       <div className="flex gap-2 border-t pt-4">
         <Button type="button" onClick={handleNext}>

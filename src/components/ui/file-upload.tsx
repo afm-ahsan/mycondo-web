@@ -89,12 +89,13 @@ export function FileUpload({
 
 export interface FileUploadListItemProps {
   fileName: string;
-  status: 'uploading' | 'uploaded' | 'failed';
+  status: 'selected' | 'uploading' | 'uploaded' | 'failed';
   onRemove?: () => void;
+  onRetry?: () => void;
 }
 
-/** One row of an uploaded/uploading/failed document — pairs with `FileUpload` above. */
-export function FileUploadListItem({ fileName, status, onRemove }: FileUploadListItemProps) {
+/** One row of a selected/uploading/uploaded/failed document — pairs with `FileUpload` above. */
+export function FileUploadListItem({ fileName, status, onRemove, onRetry }: FileUploadListItemProps) {
   return (
     <div className="border-border flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
       <FileText className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
@@ -103,12 +104,20 @@ export function FileUploadListItem({ fileName, status, onRemove }: FileUploadLis
         className={cn(
           'text-xs',
           status === 'uploaded' && 'text-success',
-          status === 'uploading' && 'text-muted-foreground',
+          (status === 'uploading' || status === 'selected') && 'text-muted-foreground',
           status === 'failed' && 'text-destructive',
         )}
       >
-        {status === 'uploading' ? 'Uploading…' : status === 'uploaded' ? 'Uploaded' : 'Failed'}
+        {status === 'selected' && 'Selected'}
+        {status === 'uploading' && 'Uploading…'}
+        {status === 'uploaded' && 'Uploaded'}
+        {status === 'failed' && 'Failed'}
       </span>
+      {status === 'failed' && onRetry && (
+        <Button type="button" variant="ghost" size="sm" onClick={onRetry} aria-label={`Retry ${fileName}`}>
+          Retry
+        </Button>
+      )}
       {onRemove && (
         <Button
           type="button"
