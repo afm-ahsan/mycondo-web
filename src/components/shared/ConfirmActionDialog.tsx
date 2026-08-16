@@ -59,7 +59,7 @@ export function ConfirmActionDialog({
             <div>{description}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter>
+        <AlertDialogFooter className={icon ? 'justify-center sm:justify-center' : undefined}>
           <AlertDialogCancel disabled={isLoading}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             variant={confirmVariant}
