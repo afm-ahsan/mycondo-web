@@ -1,9 +1,10 @@
 import { z } from 'zod';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 
 // Mirrors CreateSupplierCommand / UpdateSupplierCommand.
 export const supplierSchema = z.object({
   name: z.string().min(1, { message: 'Name is required.' }).max(200),
-  contactPhone: z.string().max(30).optional(),
+  contactPhone: optionalBangladeshMobileSchema,
   contactEmail: z.string().email({ message: 'Enter a valid email.' }).max(200).optional().or(z.literal('')),
   address: z.string().max(500).optional(),
 });

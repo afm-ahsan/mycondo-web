@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
@@ -82,9 +83,9 @@ export function PersonalDetailsForm({ email, fullName, phoneNumber }: PersonalDe
           name="phoneNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Phone</FormLabel>
+              <FormLabel>Phone Number</FormLabel>
               <FormControl>
-                <Input placeholder="Your phone number" {...field} />
+                <BangladeshPhoneInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

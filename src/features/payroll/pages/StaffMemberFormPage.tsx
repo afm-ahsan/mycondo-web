@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useRegisterStaffMember } from '../api/staffAttendanceApi';
 import { STAFF_ROLES } from '../lib/constants';
@@ -143,7 +144,7 @@ export function StaffMemberFormPage() {
                   <FormItem>
                     <FormLabel>Mobile number (optional)</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. 01711000000" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

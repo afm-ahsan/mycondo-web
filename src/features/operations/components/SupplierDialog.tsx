@@ -17,6 +17,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { supplierSchema, type SupplierSchemaType } from '../schemas/gasCylinderSchema';
 
 interface SupplierDialogProps {
@@ -65,7 +66,7 @@ export function SupplierDialog({ open, onOpenChange, isSubmitting, onSubmit }: S
                 <FormItem>
                   <FormLabel>Contact phone (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <BangladeshPhoneInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

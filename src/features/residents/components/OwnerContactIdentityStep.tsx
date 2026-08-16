@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import type { FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegistrationSchema';
 
 const GENDERS = ['Male', 'Female', 'Other'] as const;
@@ -48,7 +49,7 @@ export function OwnerContactIdentityStep({ form, onNext, onBack }: OwnerContactI
             <FormItem>
               <FormLabel>Mobile number (optional)</FormLabel>
               <FormControl>
-                <Input placeholder="e.g. 01711000000" {...field} />
+                <BangladeshPhoneInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -61,7 +62,7 @@ export function OwnerContactIdentityStep({ form, onNext, onBack }: OwnerContactI
             <FormItem>
               <FormLabel>Alternate mobile (optional)</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <BangladeshPhoneInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

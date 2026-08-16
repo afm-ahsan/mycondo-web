@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import type { FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegistrationSchema';
 
 const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'] as const;
@@ -143,7 +144,7 @@ export function OwnerAdditionalInfoStep({ form, onNext, onBack }: OwnerAdditiona
             <FormItem>
               <FormLabel>Emergency contact phone (optional)</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <BangladeshPhoneInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

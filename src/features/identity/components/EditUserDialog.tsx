@@ -21,13 +21,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 import { useUpdateUser, useUser } from '../api/identityApi';
 
 const editUserSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
-  phoneNumber: z.string().max(40).optional().or(z.literal('')),
+  phoneNumber: optionalBangladeshMobileSchema,
 });
 type EditUserSchemaType = z.infer<typeof editUserSchema>;
 
@@ -111,7 +113,7 @@ export function EditUserDialog({ userId, open, onOpenChange }: EditUserDialogPro
                   <FormItem>
                     <FormLabel>Mobile (optional)</FormLabel>
                     <FormControl>
-                      <Input type="tel" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

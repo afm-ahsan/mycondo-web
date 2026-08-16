@@ -16,6 +16,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useAppDispatch } from '@/store/hooks';
 import { sessionStarted } from '@/store/slices/authSlice';
@@ -157,7 +158,7 @@ export function RegisterPage() {
             <FormItem>
               <FormLabel>Phone number (optional)</FormLabel>
               <FormControl>
-                <Input placeholder="Your phone number" {...field} />
+                <BangladeshPhoneInput {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

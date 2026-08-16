@@ -14,6 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { Input } from '@/components/ui/input';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
@@ -158,7 +159,7 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
               <FormItem>
                 <FormLabel>Mobile number (optional)</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <BangladeshPhoneInput {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
