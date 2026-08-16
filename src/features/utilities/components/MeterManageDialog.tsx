@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { FlatSelect } from '@/components/shared/FlatSelect';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import {
@@ -190,7 +191,9 @@ function AssignmentSection({ meter, buildingId }: { meter: MeterDto; buildingId:
         </Alert>
       )}
       {isLoading ? (
-        <p className="text-muted-foreground text-sm">Loading assignment history…</p>
+        <p className="text-muted-foreground text-sm flex items-center gap-2">
+          <InlineSpinner /> Loading assignment history…
+        </p>
       ) : currentAssignment ? (
         <p className="text-sm">
           Currently assigned to flat <span className="font-mono text-xs">{currentAssignment.flatId}</span> since{' '}

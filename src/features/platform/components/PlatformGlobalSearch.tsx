@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { hasPlatformPermission } from '@/lib/auth/platformPermissions';
 import { PLATFORM_PERMISSIONS } from '@/lib/auth/platformPermissionKeys';
@@ -56,7 +57,9 @@ export function PlatformGlobalSearch() {
               {debouncedSearch.length < 2 ? (
                 <CommandEmpty>Type at least 2 characters to search organizations.</CommandEmpty>
               ) : isFetching ? (
-                <CommandEmpty>Searching…</CommandEmpty>
+                <CommandEmpty className="flex items-center justify-center gap-2">
+                  <InlineSpinner /> Searching…
+                </CommandEmpty>
               ) : (
                 <CommandEmpty>No organizations found.</CommandEmpty>
               )}

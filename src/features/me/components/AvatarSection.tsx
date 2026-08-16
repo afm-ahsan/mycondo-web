@@ -1,8 +1,9 @@
 import { useRef, useState, type ChangeEvent } from 'react';
-import { Camera, Loader2, X } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Button } from '@/components/ui/button';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { toAbsoluteUrl } from '@/lib/helpers';
 import { useAppDispatch } from '@/store/hooks';
 import { profileUpdated } from '@/store/slices/authSlice';
@@ -74,7 +75,7 @@ export function AvatarSection({ avatarUrl }: AvatarSectionProps) {
       <div className="relative size-24">
         {isBusy && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-full bg-background/70">
-            <Loader2 className="size-6 animate-spin text-muted-foreground" aria-hidden="true" />
+            <InlineSpinner className="size-6 text-muted-foreground" />
           </div>
         )}
         <img
