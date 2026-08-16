@@ -1,10 +1,8 @@
 import { Suspense, useEffect } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import { Container } from '@/components/common/container';
 import { PageSkeleton } from '@/components/feedback/PageSkeleton';
-import { MENU_SIDEBAR } from '@/config/menu.config';
-import { useMenu } from '@/hooks/use-menu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useSettings } from '@/providers/settings-provider';
 import { Footer } from './components/footer';
@@ -13,9 +11,6 @@ import { Sidebar } from './components/sidebar';
 
 export function Demo1Layout() {
   const isMobile = useIsMobile();
-  const { pathname } = useLocation();
-  const { getCurrentItem } = useMenu(pathname);
-  const item = getCurrentItem(MENU_SIDEBAR);
   const { settings, setOption } = useSettings();
 
   useEffect(() => {
@@ -59,7 +54,7 @@ export function Demo1Layout() {
   return (
     <>
       <Helmet>
-        <title>{item?.title ? `${item.title} - CondoBD` : 'CondoBD'}</title>
+        <title>CondoBD</title>
       </Helmet>
 
       {!isMobile && <Sidebar />}
