@@ -44,6 +44,60 @@ const AccordionMenuContext = React.createContext<AccordionMenuContextValue>({
   setNestedStates: () => {},
 });
 
+/** Walks the (uninstantiated) menu tree looking for the node whose `value` the route owns — either
+ * an exact `selectedValue` match or `matchPath(value)` — and returns the chain of ancestor `value`s
+ * down to it, so callers can force that chain's accordion levels open. */
+function getActiveChain(
+  nodes: React.ReactNode,
+  matchPath: (href: string) => boolean,
+  selectedValue: string | undefined,
+  chain: string[] = [],
+): string[] {
+  let result: string[] = [];
+  React.Children.forEach(nodes, (node) => {
+    if (React.isValidElement(node)) {
+      const { value, children } = node.props as {
+        value?: string;
+        children?: React.ReactNode;
+      };
+      const newChain = value ? [...chain, value] : chain;
+      if (value && (value === selectedValue || matchPath(value))) {
+        result = newChain;
+      } else if (children) {
+        const childChain = getActiveChain(children, matchPath, selectedValue, newChain);
+        if (childChain.length > 0) {
+          result = childChain;
+        }
+      }
+    }
+  });
+  return result;
+}
+
+/** Builds the `nestedStates` entries that open every accordion level along the active chain — the
+ * `root` key for the top level, then `parentValue -> childValue` for each level below it. */
+function computeActiveNestedStates(
+  children: React.ReactNode,
+  matchPath: (href: string) => boolean,
+  selectedValue: string | undefined,
+  type: 'single' | 'multiple' | undefined,
+): Record<string, string | string[]> {
+  const chain = getActiveChain(children, matchPath, selectedValue);
+  const trimmedChain = chain.length > 1 ? chain.slice(0, chain.length - 1) : chain;
+  const mapping: Record<string, string | string[]> = {};
+  if (trimmedChain.length > 0) {
+    if (type === 'multiple') {
+      mapping['root'] = trimmedChain;
+    } else {
+      mapping['root'] = trimmedChain[0];
+      for (let i = 0; i < trimmedChain.length - 1; i++) {
+        mapping[trimmedChain[i]] = trimmedChain[i + 1];
+      }
+    }
+  }
+  return mapping;
+}
+
 function AccordionMenu({
   className,
   matchPath = () => false,
@@ -58,46 +112,31 @@ function AccordionMenu({
     setInternalSelectedValue(selectedValue);
   }, [selectedValue]);
 
-  const initialNestedStates = React.useMemo(() => {
-    const getActiveChain = (nodes: React.ReactNode, chain: string[] = []): string[] => {
-      let result: string[] = [];
-      React.Children.forEach(nodes, (node) => {
-        if (React.isValidElement(node)) {
-          const { value, children } = node.props as {
-            value?: string;
-            children?: React.ReactNode;
-          };
-          const newChain = value ? [...chain, value] : chain;
-          if (value && (value === selectedValue || matchPath(value))) {
-            result = newChain;
-          } else if (children) {
-            const childChain = getActiveChain(children, newChain);
-            if (childChain.length > 0) {
-              result = childChain;
-            }
-          }
-        }
-      });
-      return result;
-    };
+  const [nestedStates, setNestedStates] = React.useState<Record<string, string | string[]>>(() =>
+    computeActiveNestedStates(children, matchPath, selectedValue, props.type),
+  );
 
-    const chain = getActiveChain(children);
-    const trimmedChain = chain.length > 1 ? chain.slice(0, chain.length - 1) : chain;
-    const mapping: Record<string, string | string[]> = {};
-    if (trimmedChain.length > 0) {
-      if (props.type === 'multiple') {
-        mapping['root'] = trimmedChain;
-      } else {
-        mapping['root'] = trimmedChain[0];
-        for (let i = 0; i < trimmedChain.length - 1; i++) {
-          mapping[trimmedChain[i]] = trimmedChain[i + 1];
-        }
-      }
+  // Re-derives which accordion levels the active route owns and force-opens that chain whenever the
+  // route itself changes. The lazy useState above only ever runs once, on mount (e.g. a hard
+  // refresh) — the sidebar stays mounted across client-side navigations (sidebar clicks, Quick
+  // Links, Quick Actions), so without this, navigating into a currently-collapsed section left it
+  // collapsed and no leaf visible/active. Deliberately keyed only on `matchPath`/`selectedValue`
+  // (both stable unless the active route changes) rather than `children`: `children` is a brand-new
+  // JSX tree every render (the sidebar rebuilds it inline), which would fire this every render and
+  // fight any manual expand/collapse the user just made in an unrelated section — `children` and
+  // `props.type` are still read fresh via closure, just not listed as dependencies.
+  const isFirstRender = React.useRef(true);
+  React.useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
     }
-    return mapping;
-  }, [children, matchPath, selectedValue, props.type]);
-
-  const [nestedStates, setNestedStates] = React.useState<Record<string, string | string[]>>(initialNestedStates);
+    const mapping = computeActiveNestedStates(children, matchPath, selectedValue, props.type);
+    if (Object.keys(mapping).length > 0) {
+      setNestedStates((prev) => ({ ...prev, ...mapping }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [matchPath, selectedValue]);
   const multipleValue = (
     Array.isArray(nestedStates['root'])
       ? nestedStates['root']

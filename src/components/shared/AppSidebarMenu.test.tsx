@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { Link, MemoryRouter } from 'react-router-dom';
 import { AppSidebarMenu } from './AppSidebarMenu';
 import type { MenuConfig } from '@/config/types';
 
@@ -10,6 +10,7 @@ import type { MenuConfig } from '@/config/types';
 // leaf ('/residents/flat-owners'). This is exactly the shape that made both items show active
 // together before the fix.
 const MENU: MenuConfig = [
+  { title: 'Dashboard', path: '/' },
   {
     title: 'Residents',
     children: [
@@ -22,6 +23,18 @@ const MENU: MenuConfig = [
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>{<AppSidebarMenu menu={MENU} />}</MemoryRouter> as ReactNode,
+  );
+}
+
+// Stands in for a header Quick Link / dashboard Quick Action: a navigation trigger that lives
+// outside the sidebar entirely, so clicking it never touches sidebar click handlers or state — the
+// sidebar must react to the resulting route change alone.
+function renderWithExternalNavTrigger(initialPath: string, targetPath: string, label: string) {
+  return render(
+    <MemoryRouter initialEntries={[initialPath]}>
+      <Link to={targetPath}>{label}</Link>
+      <AppSidebarMenu menu={MENU} />
+    </MemoryRouter>,
   );
 }
 
@@ -72,5 +85,24 @@ describe('AppSidebarMenu — active state is route-driven and exclusive', () => 
 
     expect(screen.getByRole('link', { name: 'Resident Directory' })).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Flat Owners' })).not.toHaveAttribute('aria-current');
+  });
+
+  it('expands a currently-collapsed group and activates its leaf when navigation comes from outside the sidebar (Quick Links/Quick Actions), with no remount', async () => {
+    const user = userEvent.setup();
+    renderWithExternalNavTrigger('/', '/residents/flat-owners', 'Quick Link: New Tenant');
+
+    // Mounted at '/', so Residents owns nothing yet and starts collapsed — Radix Presence unmounts
+    // its children while closed.
+    expect(screen.queryByRole('link', { name: 'Flat Owners' })).not.toBeInTheDocument();
+
+    // The same AppSidebarMenu instance stays mounted; only the route changes underneath it — this
+    // is what a header Quick Link or dashboard Quick Action does, and is exactly the scenario the
+    // sidebar previously failed to react to (it only recomputed which group to expand on first
+    // mount, e.g. a hard refresh, not on a later in-app navigation).
+    await user.click(screen.getByRole('link', { name: 'Quick Link: New Tenant' }));
+
+    const flatOwners = await screen.findByRole('link', { name: 'Flat Owners' });
+    expect(flatOwners).toHaveAttribute('aria-current', 'page');
+    expect(screen.getByRole('link', { name: 'Resident Directory' })).not.toHaveAttribute('aria-current');
   });
 });
