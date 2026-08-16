@@ -25,7 +25,7 @@ export function MyFlatsPage() {
 
   return (
     <>
-      <PageHeader title="My Flat" crumbs={[{ label: 'My Flat' }]} />
+      <PageHeader title="My Flats" crumbs={[{ label: 'My Flats' }]} />
       <Card>
         <CardHeader>
           <CardHeading>
