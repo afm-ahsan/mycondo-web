@@ -28,9 +28,6 @@ export function SidebarHeader() {
           className="small-logo h-8 w-auto max-w-none shrink-0"
           alt="CondoBD"
         />
-        <span className="default-logo truncate bg-gradient-to-r from-pink-500 via-orange-400 to-blue-500 bg-clip-text text-base font-bold text-transparent">
-          CondoBD
-        </span>
       </Link>
       <Button
         onClick={handleToggleClick}
