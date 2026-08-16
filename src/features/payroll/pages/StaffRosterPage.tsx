@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { ClipboardList, LogIn, Plus, Users as UsersIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -31,6 +31,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ClockInDialog } from '../components/ClockInDialog';
+import { StaffMemberFormDialog } from '../components/StaffMemberFormDialog';
 import { useStaffMembers } from '../api/staffAttendanceApi';
 import type { StaffMemberDto } from '@/api/generated/mycondoApi';
 
@@ -42,6 +43,22 @@ const activeToneMap: StatusBadgeMap<'Active' | 'Inactive'> = {
 const ROSTER_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function StaffRosterPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(ROSTER_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -170,10 +187,8 @@ export function StaffRosterPage() {
                 </Link>
               </Button>
               <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-                <Button asChild>
-                  <Link to="/security/staff-attendance/new">
-                    <Plus /> Register Staff Member
-                  </Link>
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus /> Register Staff Member
                 </Button>
               </RequirePermission>
             </CardToolbar>
@@ -191,6 +206,7 @@ export function StaffRosterPage() {
       </DataGrid>
 
       <ClockInDialog staffMember={clockInTarget} onOpenChange={(open) => !open && setClockInTarget(null)} />
+      <StaffMemberFormDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

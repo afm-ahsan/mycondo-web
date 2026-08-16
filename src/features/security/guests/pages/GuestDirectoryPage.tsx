@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Button } from '@/components/ui/button';
@@ -41,6 +41,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { GuestFormDialog } from '../components/GuestFormDialog';
 import { useBlockGuest, useGuests, useUnblockGuest } from '../api/guestsApi';
 import type { GuestProfileDto } from '@/api/generated/mycondoApi';
 
@@ -52,6 +53,22 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Blocked'> = {
 const GUEST_DIRECTORY_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function GuestDirectoryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(GUEST_DIRECTORY_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -224,10 +241,8 @@ export function GuestDirectoryPage() {
                 </Link>
               </Button>
               <RequirePermission permission={PERMISSIONS.visitor.create}>
-                <Button asChild>
-                  <Link to="/security/guests/new">
-                    <Plus /> New Guest
-                  </Link>
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus /> New Guest
                 </Button>
               </RequirePermission>
             </CardToolbar>
@@ -272,6 +287,8 @@ export function GuestDirectoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <GuestFormDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

@@ -32,7 +32,7 @@ const QUICK_LINKS: QuickLink[] = [
     title: 'New Guest',
     description: 'Register visitor',
     icon: ShieldUser,
-    path: '/security/guests/new',
+    path: '/security/guests?create=1',
     permission: PERMISSIONS.visitor.create,
   },
   {
@@ -46,7 +46,7 @@ const QUICK_LINKS: QuickLink[] = [
     title: 'Record Payment',
     description: 'Add payment',
     icon: Wallet,
-    path: '/billing/payments/new',
+    path: '/billing/payments?create=1',
     permission: PERMISSIONS.payment.record,
   },
   {

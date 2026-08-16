@@ -9,8 +9,23 @@ import { RequirePlatformAuth } from '@/lib/auth/RequirePlatformAuth';
 import { ErrorRouting } from '@/errors/error-routing';
 import { Demo1Layout } from '@/layouts/demo1/layout';
 import { PlatformLayout } from '@/layouts/platform/layout';
-import { Navigate, Outlet, Route, Routes } from 'react-router';
+import { Navigate, Outlet, Route, Routes, useSearchParams } from 'react-router';
 import { lazyPage } from './lazyPage';
+
+// The old /billing/service-charge-rules/new route carried the target building as a ?buildingId=
+// query param (the create form has no other way to know which building's rule to create); preserve
+// it on redirect to the list page so the list page's own filter (and the create modal it now hosts)
+// opens pre-scoped to the same building instead of landing on an unscoped list.
+function RedirectToServiceChargeRules() {
+  const [params] = useSearchParams();
+  const buildingId = params.get('buildingId');
+  return (
+    <Navigate
+      to={buildingId ? `/billing/service-charge-rules?create=1&buildingId=${buildingId}` : '/billing/service-charge-rules'}
+      replace
+    />
+  );
+}
 
 // Dashboard
 const DashboardPage = lazyPage(() => import('@/features/dashboard'), 'DashboardPage');
@@ -58,19 +73,15 @@ const PlatformOrganizationsListPage = lazyPage(
 // Security
 const security = () => import('@/features/security');
 const GuestDirectoryPage = lazyPage(security, 'GuestDirectoryPage');
-const GuestProfileFormPage = lazyPage(security, 'GuestProfileFormPage');
 const GuestCheckInOutPage = lazyPage(security, 'GuestCheckInOutPage');
 const CurrentlyInsideGuestsPage = lazyPage(security, 'CurrentlyInsideGuestsPage');
 const VehicleDirectoryPage = lazyPage(security, 'VehicleDirectoryPage');
-const VehicleFormPage = lazyPage(security, 'VehicleFormPage');
 const VehicleCheckInOutPage = lazyPage(security, 'VehicleCheckInOutPage');
 const CurrentlyInsideVehiclesPage = lazyPage(security, 'CurrentlyInsideVehiclesPage');
 const DomesticWorkerDirectoryPage = lazyPage(security, 'DomesticWorkerDirectoryPage');
-const DomesticWorkerFormPage = lazyPage(security, 'DomesticWorkerFormPage');
 const DomesticWorkerCheckInOutPage = lazyPage(security, 'DomesticWorkerCheckInOutPage');
 const CurrentlyInsideDomesticWorkersPage = lazyPage(security, 'CurrentlyInsideDomesticWorkersPage');
 const ServiceProviderDirectoryPage = lazyPage(security, 'ServiceProviderDirectoryPage');
-const ServiceProviderFormPage = lazyPage(security, 'ServiceProviderFormPage');
 const ServiceProviderCheckInOutPage = lazyPage(security, 'ServiceProviderCheckInOutPage');
 const CurrentlyInsideServiceProvidersPage = lazyPage(security, 'CurrentlyInsideServiceProvidersPage');
 const ParcelRegisterPage = lazyPage(security, 'ParcelRegisterPage');
@@ -88,7 +99,6 @@ const SecurityDirectoryPage = lazyPage(leasing, 'SecurityDirectoryPage');
 // Billing & Payments
 const billing = () => import('@/features/billing');
 const ServiceChargeRuleDirectoryPage = lazyPage(billing, 'ServiceChargeRuleDirectoryPage');
-const ServiceChargeRuleFormPage = lazyPage(billing, 'ServiceChargeRuleFormPage');
 const InvoiceListPage = lazyPage(billing, 'InvoiceListPage');
 const InvoiceDetailPage = lazyPage(billing, 'InvoiceDetailPage');
 const BatchBillingPage = lazyPage(billing, 'BatchBillingPage');
@@ -96,7 +106,6 @@ const OutstandingInvoicesPage = lazyPage(billing, 'OutstandingInvoicesPage');
 
 const payments = () => import('@/features/payments');
 const PaymentListPage = lazyPage(payments, 'PaymentListPage');
-const RecordPaymentPage = lazyPage(payments, 'RecordPaymentPage');
 const PaymentDetailPage = lazyPage(payments, 'PaymentDetailPage');
 const ResidentLedgerPage = lazyPage(payments, 'ResidentLedgerPage');
 const FinancialSummaryReportPage = lazyPage(payments, 'FinancialSummaryReportPage');
@@ -142,7 +151,6 @@ const SupplierComparisonPage = lazyPage(operations, 'SupplierComparisonPage');
 // Payroll & Admin
 const payroll = () => import('@/features/payroll');
 const StaffRosterPage = lazyPage(payroll, 'StaffRosterPage');
-const StaffMemberFormPage = lazyPage(payroll, 'StaffMemberFormPage');
 const AttendanceRegisterPage = lazyPage(payroll, 'AttendanceRegisterPage');
 const CurrentlyPresentStaffPage = lazyPage(payroll, 'CurrentlyPresentStaffPage');
 
@@ -521,7 +529,7 @@ export function AppRoutingSetup() {
             path="/security/guests/new"
             element={
               <RequirePermission permission={PERMISSIONS.visitor.create} fallback={<AccessDeniedNotice />}>
-                <GuestProfileFormPage />
+                <Navigate to="/security/guests?create=1" replace />
               </RequirePermission>
             }
           />
@@ -553,7 +561,7 @@ export function AppRoutingSetup() {
             path="/security/vehicles/new"
             element={
               <RequirePermission permission={PERMISSIONS.vehicle.create} fallback={<AccessDeniedNotice />}>
-                <VehicleFormPage />
+                <Navigate to="/security/vehicles?create=1" replace />
               </RequirePermission>
             }
           />
@@ -585,7 +593,7 @@ export function AppRoutingSetup() {
             path="/security/domestic-workers/new"
             element={
               <RequirePermission permission={PERMISSIONS.domesticWorker.manage} fallback={<AccessDeniedNotice />}>
-                <DomesticWorkerFormPage />
+                <Navigate to="/security/domestic-workers?create=1" replace />
               </RequirePermission>
             }
           />
@@ -617,7 +625,7 @@ export function AppRoutingSetup() {
             path="/security/service-providers/new"
             element={
               <RequirePermission permission={PERMISSIONS.serviceProvider.manage} fallback={<AccessDeniedNotice />}>
-                <ServiceProviderFormPage />
+                <Navigate to="/security/service-providers?create=1" replace />
               </RequirePermission>
             }
           />
@@ -649,7 +657,7 @@ export function AppRoutingSetup() {
             path="/security/staff-attendance/new"
             element={
               <RequirePermission permission={PERMISSIONS.staffAttendance.manage} fallback={<AccessDeniedNotice />}>
-                <StaffMemberFormPage />
+                <Navigate to="/security/staff-attendance?create=1" replace />
               </RequirePermission>
             }
           />
@@ -705,7 +713,7 @@ export function AppRoutingSetup() {
             path="/billing/service-charge-rules/new"
             element={
               <RequirePermission permission={PERMISSIONS.billing.ruleManage} fallback={<AccessDeniedNotice />}>
-                <ServiceChargeRuleFormPage />
+                <RedirectToServiceChargeRules />
               </RequirePermission>
             }
           />
@@ -745,7 +753,7 @@ export function AppRoutingSetup() {
             path="/billing/payments/new"
             element={
               <RequirePermission permission={PERMISSIONS.payment.record} fallback={<AccessDeniedNotice />}>
-                <RecordPaymentPage />
+                <Navigate to="/billing/payments?create=1" replace />
               </RequirePermission>
             }
           />

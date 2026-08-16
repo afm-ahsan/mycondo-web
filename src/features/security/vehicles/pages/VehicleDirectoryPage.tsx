@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { Car, LogIn, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Button } from '@/components/ui/button';
@@ -43,6 +43,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { VehicleFormDialog } from '../components/VehicleFormDialog';
 import { useBlockVehicle, useUnblockVehicle, useVehicles } from '../api/vehiclesApi';
 import type { VehicleDto } from '@/api/generated/mycondoApi';
 
@@ -54,6 +55,22 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Blocked'> = {
 const VEHICLE_DIRECTORY_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function VehicleDirectoryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(VEHICLE_DIRECTORY_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -235,10 +252,8 @@ export function VehicleDirectoryPage() {
                   </Link>
                 </Button>
                 <RequirePermission permission={PERMISSIONS.vehicle.create}>
-                  <Button asChild>
-                    <Link to="/security/vehicles/new">
-                      <Plus /> Register Vehicle
-                    </Link>
+                  <Button onClick={() => setCreateOpen(true)}>
+                    <Plus /> Register Vehicle
                   </Button>
                 </RequirePermission>
               </CardToolbar>
@@ -284,6 +299,8 @@ export function VehicleDirectoryPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <VehicleFormDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

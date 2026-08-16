@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
-import { StaffMemberFormPage } from './StaffMemberFormPage';
+import { StaffMemberFormDialog } from './StaffMemberFormDialog';
 
 const API_BASE = 'https://localhost:7219';
 
@@ -27,7 +28,12 @@ async function chooseOption(user: ReturnType<typeof userEvent.setup>, placeholde
   await user.click(await screen.findByRole('option', { name: optionName }));
 }
 
-describe('StaffMemberFormPage', () => {
+function ControlledStaffMemberFormDialog() {
+  const [open, setOpen] = useState(true);
+  return <StaffMemberFormDialog open={open} onOpenChange={setOpen} />;
+}
+
+describe('StaffMemberFormDialog', () => {
   it('maps a backend validation error onto the matching form field', async () => {
     server.use(
       http.post(`${API_BASE}/api/v1/staff-members`, () =>
@@ -43,12 +49,38 @@ describe('StaffMemberFormPage', () => {
     );
 
     const user = userEvent.setup();
-    renderWithProviders(<StaffMemberFormPage />, { auth: { user: adminUser, isInitialized: true } });
+    renderWithProviders(<ControlledStaffMemberFormDialog />, { auth: { user: adminUser, isInitialized: true } });
 
     await user.type(screen.getByLabelText('Full name'), 'Md. Karim Sheikh');
     await chooseOption(user, 'Select role', 'Guard');
     await user.click(screen.getByRole('button', { name: /register staff member/i }));
 
     expect(await screen.findByText('Full name is required.')).toBeInTheDocument();
+  }, 15000);
+
+  it('closes the dialog once the staff member is registered', async () => {
+    server.use(
+      http.post(`${API_BASE}/api/v1/staff-members`, () =>
+        HttpResponse.json({
+          staffMemberId: 'staff-1',
+          fullName: 'Md. Karim Sheikh',
+          role: 'Guard',
+          phone: null,
+          isActive: true,
+        }),
+      ),
+    );
+
+    const user = userEvent.setup();
+    renderWithProviders(<ControlledStaffMemberFormDialog />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByRole('dialog');
+    await user.type(screen.getByLabelText('Full name'), 'Md. Karim Sheikh');
+    await chooseOption(user, 'Select role', 'Guard');
+    await user.click(screen.getByRole('button', { name: /register staff member/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   }, 15000);
 });

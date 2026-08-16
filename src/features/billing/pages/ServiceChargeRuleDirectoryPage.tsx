@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import {
   Card,
@@ -35,6 +35,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { FlatsMissingAreaNotice } from '../components/FlatsMissingAreaNotice';
+import { ServiceChargeRuleFormDialog } from '../components/ServiceChargeRuleFormDialog';
 import { ServiceChargeRuleManageDialog } from '../components/ServiceChargeRuleManageDialog';
 import { useServiceChargeRules } from '../api/serviceChargeRulesApi';
 import { ruleDisplayStatus } from '../lib/ruleStatus';
@@ -49,6 +50,22 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Ended' | 'Inactive'> = {
 const RULES_FILTER_DEFAULTS = { buildingId: '', category: '', page: '1', pageSize: '10' };
 
 export function ServiceChargeRuleDirectoryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(RULES_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -193,10 +210,8 @@ export function ServiceChargeRuleDirectoryPage() {
               </CardHeading>
               <CardToolbar>
                 <RequirePermission permission={PERMISSIONS.billing.ruleManage}>
-                  <Button asChild disabled={!filters.buildingId}>
-                    <Link to={filters.buildingId ? `/billing/service-charge-rules/new?buildingId=${filters.buildingId}` : '#'}>
-                      <Plus /> New Rule
-                    </Link>
+                  <Button disabled={!filters.buildingId} onClick={() => setCreateOpen(true)}>
+                    <Plus /> New Rule
                   </Button>
                 </RequirePermission>
               </CardToolbar>
@@ -215,6 +230,14 @@ export function ServiceChargeRuleDirectoryPage() {
       </div>
 
       <ServiceChargeRuleManageDialog rule={manageTarget} onOpenChange={(open) => !open && setManageTarget(null)} />
+      {filters.buildingId && (
+        <ServiceChargeRuleFormDialog
+          key={filters.buildingId}
+          buildingId={filters.buildingId}
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
+      )}
     </>
   );
 }

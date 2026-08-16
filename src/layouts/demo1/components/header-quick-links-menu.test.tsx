@@ -32,12 +32,12 @@ describe('HeaderQuickLinksMenu', () => {
 
     const newGuest = screen.getByRole('menuitem', { name: /New Guest/ });
     expect(newGuest.tagName).toBe('A');
-    expect(newGuest).toHaveAttribute('href', '/security/guests/new');
+    expect(newGuest).toHaveAttribute('href', '/security/guests?create=1');
     expect(newGuest).toHaveTextContent('Register visitor');
 
     expect(screen.getByRole('menuitem', { name: /Record Payment/ })).toHaveAttribute(
       'href',
-      '/billing/payments/new',
+      '/billing/payments?create=1',
     );
 
     expect(screen.queryByRole('menuitem', { name: /Receive Parcel/ })).not.toBeInTheDocument();
