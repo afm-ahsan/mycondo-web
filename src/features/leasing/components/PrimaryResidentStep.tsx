@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -122,7 +123,7 @@ export function PrimaryResidentStep({
                 <FormItem>
                   <FormLabel>Mobile number (optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="e.g. 01711000000" {...field} />
+                    <BangladeshPhoneInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -207,7 +208,7 @@ export function PrimaryResidentStep({
                 <FormItem>
                   <FormLabel>Emergency contact phone (optional)</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <BangladeshPhoneInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

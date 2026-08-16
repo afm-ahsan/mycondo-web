@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 
 // Step 3 of Flat Owner Registration — family/professional details and emergency contact. All
 // optional: only what the paper register commonly asks for, not every conceivable field.
@@ -10,7 +11,7 @@ export const ownerAdditionalInfoSchema = z.object({
   employer: z.string().max(200).optional().or(z.literal('')),
   officeAddress: z.string().max(400).optional().or(z.literal('')),
   emergencyContactName: z.string().max(200).optional().or(z.literal('')),
-  emergencyContactPhone: z.string().max(20).optional().or(z.literal('')),
+  emergencyContactPhone: optionalBangladeshMobileSchema,
 });
 
 export type OwnerAdditionalInfoSchemaType = z.infer<typeof ownerAdditionalInfoSchema>;

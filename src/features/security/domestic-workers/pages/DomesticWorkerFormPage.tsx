@@ -28,6 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useRegisterDomesticWorker } from '../api/domesticWorkersApi';
 import { WORKER_TYPES } from '../lib/constants';
@@ -133,7 +134,7 @@ export function DomesticWorkerFormPage() {
                   <FormItem>
                     <FormLabel>Mobile number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. 01711000000" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -212,7 +213,7 @@ export function DomesticWorkerFormPage() {
                     <FormItem>
                       <FormLabel>Emergency contact phone (optional)</FormLabel>
                       <FormControl>
-                        <Input {...field} />
+                        <BangladeshPhoneInput {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

@@ -36,6 +36,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -48,6 +49,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 import { useCreateResident, useDisableResident, useLinkResidentToUser, useResidents, useUpdateResident } from '../api/residentsApi';
 
 const RESIDENTS_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
@@ -225,7 +227,7 @@ const createResidentSchema = z.object({
   buildingId: z.string().min(1, { message: 'Building is required.' }),
   flatId: z.string().min(1, { message: 'Flat is required.' }),
   fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
-  phone: z.string().max(20).optional().or(z.literal('')),
+  phone: optionalBangladeshMobileSchema,
   email: z.string().max(256).email({ message: 'Enter a valid email address.' }).optional().or(z.literal('')),
   residentType: z.enum(['Owner', 'Occupant', 'FamilyMember']),
 });
@@ -338,7 +340,7 @@ function CreateResidentDialog({ open, onOpenChange }: { open: boolean; onOpenCha
                 <FormItem>
                   <FormLabel>Mobile (optional)</FormLabel>
                   <FormControl>
-                    <Input type="tel" {...field} />
+                    <BangladeshPhoneInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -371,7 +373,7 @@ function CreateResidentDialog({ open, onOpenChange }: { open: boolean; onOpenCha
 
 const editResidentSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
-  phone: z.string().max(20).optional().or(z.literal('')),
+  phone: optionalBangladeshMobileSchema,
   email: z.string().max(256).email({ message: 'Enter a valid email address.' }).optional().or(z.literal('')),
 });
 type EditResidentSchemaType = z.infer<typeof editResidentSchema>;
@@ -440,7 +442,7 @@ function EditResidentDialog({
                 <FormItem>
                   <FormLabel>Mobile</FormLabel>
                   <FormControl>
-                    <Input type="tel" {...field} />
+                    <BangladeshPhoneInput {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

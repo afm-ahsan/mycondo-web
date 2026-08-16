@@ -24,13 +24,15 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 import { useCreateUser } from '../api/identityApi';
 
 const createUserSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Enter a valid email address.' }),
-  phoneNumber: z.string().max(40).optional().or(z.literal('')),
+  phoneNumber: optionalBangladeshMobileSchema,
   initialPassword: z
     .string()
     .optional()
@@ -178,7 +180,7 @@ export function CreateUserDialog() {
                   <FormItem>
                     <FormLabel>Mobile (optional)</FormLabel>
                     <FormControl>
-                      <Input type="tel" placeholder="+8801XXXXXXXXX" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

@@ -29,6 +29,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useRegisterServiceProvider } from '../api/serviceProvidersApi';
 import { PROVIDER_TYPES } from '../lib/constants';
@@ -132,7 +133,7 @@ export function ServiceProviderFormPage() {
                   <FormItem>
                     <FormLabel>Mobile number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. 01711000000" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

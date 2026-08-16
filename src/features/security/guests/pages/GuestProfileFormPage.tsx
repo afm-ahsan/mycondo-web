@@ -21,6 +21,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { useCreateGuestProfile } from '../api/guestsApi';
 import {
@@ -121,7 +122,7 @@ export function GuestProfileFormPage() {
                   <FormItem>
                     <FormLabel>Mobile number</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. 01711000000" {...field} />
+                      <BangladeshPhoneInput {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

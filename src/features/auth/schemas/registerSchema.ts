@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
 
 // Mirrors mycondo-api's RegisterUserCommandValidator exactly, so client-side errors match what the
 // server would say — confirmPassword is a client-only field, never sent to the API.
@@ -16,7 +17,7 @@ export const registerSchema = z
       .string()
       .email({ message: 'Please enter a valid email address.' })
       .max(320, { message: 'Email is too long.' }),
-    phoneNumber: z.string().max(40, { message: 'Phone number is too long.' }).optional(),
+    phoneNumber: optionalBangladeshMobileSchema,
     password: z
       .string()
       .min(12, { message: 'Password must be at least 12 characters.' })
