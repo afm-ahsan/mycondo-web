@@ -1,4 +1,3 @@
-import { ReactNode } from 'react';
 import { setAccessToken } from '@/api/baseApi';
 import { useLogout } from '@/features/auth/api/authApi';
 import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
@@ -9,7 +8,14 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { sessionEnded } from '@/store/slices/authSlice';
 import { AccountMenu } from '@/components/shared/AccountMenu';
 
-export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
+const FALLBACK_AVATAR = toAbsoluteUrl('/media/avatars/blank.png');
+
+/**
+ * Renders its own trigger (rather than accepting one) so the small header avatar icon reads from
+ * the same auth-state/blob source as the identity block inside AccountMenu — previously Header hard
+ * coded a static demo image here, which is why it never picked up profile-photo changes.
+ */
+export function UserDropdownMenu() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const user = useAppSelector((s) => s.auth.user);
@@ -18,7 +24,7 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
   const displayName = user?.name || 'User';
   const displayEmail = user?.email || '';
-  const displayAvatar = uploadedAvatarUrl ?? toAbsoluteUrl('/media/avatars/300-2.png');
+  const displayAvatar = uploadedAvatarUrl ?? FALLBACK_AVATAR;
 
   async function logout() {
     try {
@@ -33,7 +39,13 @@ export function UserDropdownMenu({ trigger }: { trigger: ReactNode }) {
 
   return (
     <AccountMenu
-      trigger={trigger}
+      trigger={
+        <img
+          className="size-9 rounded-full border-2 border-green-500 shrink-0 cursor-pointer"
+          src={displayAvatar}
+          alt="User Avatar"
+        />
+      }
       displayName={displayName}
       displayEmail={displayEmail}
       avatarUrl={displayAvatar}
