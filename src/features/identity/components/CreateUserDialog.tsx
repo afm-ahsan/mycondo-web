@@ -25,22 +25,19 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
+import { PasswordInput } from '@/components/shared/PasswordInput';
+import { PasswordPolicyInfo } from '@/components/shared/PasswordPolicyInfo';
+import { PasswordRequirementsChecklist } from '@/components/shared/PasswordRequirementsChecklist';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { optionalBangladeshMobileSchema } from '@/lib/validation/bangladeshPhone';
+import { optionalPasswordSchema } from '@/lib/validation/password';
 import { useCreateUser } from '../api/identityApi';
 
 const createUserSchema = z.object({
   fullName: z.string().min(1, { message: 'Full name is required.' }).max(200),
   email: z.string().min(1, { message: 'Email is required.' }).email({ message: 'Enter a valid email address.' }),
   phoneNumber: optionalBangladeshMobileSchema,
-  initialPassword: z
-    .string()
-    .optional()
-    .or(z.literal(''))
-    .refine(
-      (value) => !value || (value.length >= 12 && /[A-Z]/.test(value) && /[a-z]/.test(value) && /\d/.test(value)),
-      { message: 'Password must be at least 12 characters and include an uppercase letter, a lowercase letter, and a digit.' },
-    ),
+  initialPassword: optionalPasswordSchema,
 });
 type CreateUserSchemaType = z.infer<typeof createUserSchema>;
 
@@ -56,6 +53,7 @@ export function CreateUserDialog() {
     resolver: zodResolver(createUserSchema),
     defaultValues: { fullName: '', email: '', phoneNumber: '', initialPassword: '' },
   });
+  const initialPassword = form.watch('initialPassword');
 
   async function onSubmit(values: CreateUserSchemaType) {
     try {
@@ -189,33 +187,22 @@ export function CreateUserDialog() {
               <FormField
                 control={form.control}
                 name="initialPassword"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
-                    <FormLabel>Initial password (optional)</FormLabel>
-                    <div className="relative">
-                      <FormControl>
-                        <Input
-                          type={passwordVisible ? 'text' : 'password'}
-                          placeholder="Leave blank to generate one automatically"
-                          {...field}
-                        />
-                      </FormControl>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        mode="icon"
-                        onClick={() => setPasswordVisible(!passwordVisible)}
-                        aria-label={passwordVisible ? 'Hide password' : 'Show password'}
-                        aria-pressed={passwordVisible}
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      >
-                        {passwordVisible ? (
-                          <EyeOff className="text-muted-foreground" />
-                        ) : (
-                          <Eye className="text-muted-foreground" />
-                        )}
-                      </Button>
+                    <div className="flex items-center gap-1.5">
+                      <FormLabel>Initial password (optional)</FormLabel>
+                      <PasswordPolicyInfo />
                     </div>
+                    <FormControl>
+                      <PasswordInput
+                        placeholder="Leave blank to generate one automatically"
+                        label="initial password"
+                        {...field}
+                      />
+                    </FormControl>
+                    {fieldState.isDirty && initialPassword && (
+                      <PasswordRequirementsChecklist value={initialPassword} />
+                    )}
                     <FormDescription>
                       If left blank, a temporary password is generated and shown once so you can
                       relay it to the user.

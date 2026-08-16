@@ -1,6 +1,4 @@
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -8,8 +6,10 @@ import { toUserMessage } from '@/api/errors';
 import { setAccessToken } from '@/api/baseApi';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
+import { PasswordInput } from '@/components/shared/PasswordInput';
+import { PasswordPolicyInfo } from '@/components/shared/PasswordPolicyInfo';
+import { PasswordRequirementsChecklist } from '@/components/shared/PasswordRequirementsChecklist';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useAppDispatch } from '@/store/hooks';
 import { sessionEnded } from '@/store/slices/authSlice';
@@ -25,17 +25,13 @@ const FIELDS: { name: keyof ChangePasswordSchemaType; label: string; placeholder
 export function ChangePasswordSection() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [visibleFields, setVisibleFields] = useState<Record<string, boolean>>({});
   const [changePassword, { isLoading }] = useChangePassword();
 
   const form = useForm<ChangePasswordSchemaType>({
     resolver: zodResolver(changePasswordSchema),
     defaultValues: { currentPassword: '', newPassword: '', confirmNewPassword: '' },
   });
-
-  function toggleVisibility(field: string) {
-    setVisibleFields((prev) => ({ ...prev, [field]: !prev[field] }));
-  }
+  const newPassword = form.watch('newPassword');
 
   async function onSubmit(values: ChangePasswordSchemaType) {
     try {
@@ -74,29 +70,22 @@ export function ChangePasswordSection() {
             key={name}
             control={form.control}
             name={name}
-            render={({ field }) => (
+            render={({ field, fieldState }) => (
               <FormItem>
-                <FormLabel>{label}</FormLabel>
-                <div className="relative">
-                  <FormControl>
-                    <Input placeholder={placeholder} type={visibleFields[name] ? 'text' : 'password'} {...field} />
-                  </FormControl>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    mode="icon"
-                    onClick={() => toggleVisibility(name)}
-                    aria-label={visibleFields[name] ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
-                    aria-pressed={Boolean(visibleFields[name])}
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  >
-                    {visibleFields[name] ? (
-                      <EyeOff className="text-muted-foreground" />
-                    ) : (
-                      <Eye className="text-muted-foreground" />
-                    )}
-                  </Button>
-                </div>
+                {name === 'newPassword' ? (
+                  <div className="flex items-center gap-1.5">
+                    <FormLabel>{label}</FormLabel>
+                    <PasswordPolicyInfo />
+                  </div>
+                ) : (
+                  <FormLabel>{label}</FormLabel>
+                )}
+                <FormControl>
+                  <PasswordInput placeholder={placeholder} label={label.toLowerCase()} {...field} />
+                </FormControl>
+                {name === 'newPassword' && fieldState.isDirty && (
+                  <PasswordRequirementsChecklist value={newPassword} />
+                )}
                 <FormMessage />
               </FormItem>
             )}

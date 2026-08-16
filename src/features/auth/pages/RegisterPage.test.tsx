@@ -49,7 +49,7 @@ describe('RegisterPage', () => {
       await user.type(screen.getByLabelText(/full name/i), 'New Owner');
       await user.type(screen.getByLabelText(/^email$/i), 'new.owner@example.com');
       await user.type(screen.getByLabelText(/^password$/i), 'Correct-Horse-Battery-9');
-      await user.type(screen.getByLabelText(/confirm password/i), 'Correct-Horse-Battery-9');
+      await user.type(screen.getByLabelText(/^confirm password$/i), 'Correct-Horse-Battery-9');
 
       await user.click(screen.getByRole('button', { name: /create account/i }));
 
@@ -88,7 +88,7 @@ describe('RegisterPage', () => {
     await user.type(screen.getByLabelText(/full name/i), 'New Owner');
     await user.type(screen.getByLabelText(/^email$/i), 'taken@example.com');
     await user.type(screen.getByLabelText(/^password$/i), 'Correct-Horse-Battery-9');
-    await user.type(screen.getByLabelText(/confirm password/i), 'Correct-Horse-Battery-9');
+    await user.type(screen.getByLabelText(/^confirm password$/i), 'Correct-Horse-Battery-9');
 
     await user.click(screen.getByRole('button', { name: /create account/i }));
 
