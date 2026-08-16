@@ -30,10 +30,12 @@ import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { toUserMessage } from '@/api/errors';
 import { FlatsMissingAreaNotice } from '../components/FlatsMissingAreaNotice';
 import { ServiceChargeRuleFormDialog } from '../components/ServiceChargeRuleFormDialog';
 import { ServiceChargeRuleManageDialog } from '../components/ServiceChargeRuleManageDialog';
@@ -91,7 +93,7 @@ export function ServiceChargeRuleDirectoryPage() {
 
   const [manageTarget, setManageTarget] = useState<ServiceChargeRuleDto | null>(null);
 
-  const { data, isFetching } = useServiceChargeRules(
+  const { data, isFetching, isError, error, refetch } = useServiceChargeRules(
     filters.buildingId
       ? {
           buildingId: filters.buildingId,
@@ -189,44 +191,50 @@ export function ServiceChargeRuleDirectoryPage() {
 
         {filters.buildingId && <FlatsMissingAreaNotice buildingId={filters.buildingId} />}
 
-        <DataGrid
-          table={table}
-          recordCount={total}
-          isLoading={isFetching}
-          emptyMessage={filters.buildingId ? 'No service charge rules for this building yet.' : 'Select a building to view its rules.'}
-          tableLayout={{ cellBorder: true }}
-        >
+        {isError ? (
           <Card>
-            <CardHeader>
-              <CardHeading>
-                <CardTitle>Rules</CardTitle>
-                <SearchInput
-                  value={category}
-                  onChange={setCategory}
-                  placeholder="Search by category…"
-                  isSearching={isSearchPending}
-                  className="w-64"
-                />
-              </CardHeading>
-              <CardToolbar>
-                <RequirePermission permission={PERMISSIONS.billing.ruleManage}>
-                  <Button disabled={!filters.buildingId} onClick={() => setCreateOpen(true)}>
-                    <Plus /> New Rule
-                  </Button>
-                </RequirePermission>
-              </CardToolbar>
-            </CardHeader>
-            <CardTable>
-              <ScrollArea>
-                <DataGridTable />
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </CardTable>
-            <CardFooter>
-              <DataGridPagination />
-            </CardFooter>
+            <ErrorState description={toUserMessage(error)} onRetry={refetch} />
           </Card>
-        </DataGrid>
+        ) : (
+          <DataGrid
+            table={table}
+            recordCount={total}
+            isLoading={isFetching}
+            emptyMessage={filters.buildingId ? 'No service charge rules for this building yet.' : 'Select a building to view its rules.'}
+            tableLayout={{ cellBorder: true }}
+          >
+            <Card>
+              <CardHeader>
+                <CardHeading>
+                  <CardTitle>Rules</CardTitle>
+                  <SearchInput
+                    value={category}
+                    onChange={setCategory}
+                    placeholder="Search by category…"
+                    isSearching={isSearchPending}
+                    className="w-64"
+                  />
+                </CardHeading>
+                <CardToolbar>
+                  <RequirePermission permission={PERMISSIONS.billing.ruleManage}>
+                    <Button disabled={!filters.buildingId} onClick={() => setCreateOpen(true)}>
+                      <Plus /> New Rule
+                    </Button>
+                  </RequirePermission>
+                </CardToolbar>
+              </CardHeader>
+              <CardTable>
+                <ScrollArea>
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardTable>
+              <CardFooter>
+                <DataGridPagination />
+              </CardFooter>
+            </Card>
+          </DataGrid>
+        )}
       </div>
 
       <ServiceChargeRuleManageDialog rule={manageTarget} onOpenChange={(open) => !open && setManageTarget(null)} />

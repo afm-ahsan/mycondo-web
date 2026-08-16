@@ -36,6 +36,7 @@ import {
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import {
   useAssignRoleToUser,
@@ -57,7 +58,7 @@ const createRoleSchema = z.object({
 type CreateRoleSchemaType = z.infer<typeof createRoleSchema>;
 
 export function RolePermissionMatrixPage() {
-  const { data: roles, isLoading: isLoadingRoles } = useRoles();
+  const { data: roles, isLoading: isLoadingRoles, isError: isRolesError, error: rolesError, refetch: refetchRoles } = useRoles();
   const [selectedRoleId, setSelectedRoleId] = useState<string | null>(null);
 
   const selectedRole = roles?.find((r) => r.roleId === selectedRoleId) ?? null;
@@ -78,12 +79,13 @@ export function RolePermissionMatrixPage() {
           </RequirePermission>
         </CardHeader>
         <CardContent className="space-y-1">
-          {isLoadingRoles && (
+          {isRolesError && <ErrorState description={toUserMessage(rolesError)} onRetry={refetchRoles} />}
+          {!isRolesError && isLoadingRoles && (
             <div className="flex items-center gap-2 text-muted-foreground py-4">
               <InlineSpinner /> Loading roles...
             </div>
           )}
-          {roles?.map((role) => (
+          {!isRolesError && roles?.map((role) => (
             <button
               key={role.roleId}
               type="button"
@@ -213,8 +215,20 @@ function CreateRoleDialog({ onCreated }: { onCreated: (roleId: string) => void }
 }
 
 function RolePermissionsPanel({ roleId, roleName }: { roleId: string; roleName: string }) {
-  const { data: catalogue, isLoading: isLoadingCatalogue } = usePermissions();
-  const { data: granted, isLoading: isLoadingGranted } = useRolePermissions({ id: roleId });
+  const {
+    data: catalogue,
+    isLoading: isLoadingCatalogue,
+    isError: isCatalogueError,
+    error: catalogueError,
+    refetch: refetchCatalogue,
+  } = usePermissions();
+  const {
+    data: granted,
+    isLoading: isLoadingGranted,
+    isError: isGrantedError,
+    error: grantedError,
+    refetch: refetchGranted,
+  } = useRolePermissions({ id: roleId });
   const [grantPermission] = useGrantPermissionToRole();
   const [removePermission] = useRemovePermissionFromRole();
   const [pendingPermissionId, setPendingPermissionId] = useState<string | null>(null);
@@ -250,6 +264,12 @@ function RolePermissionsPanel({ roleId, roleName }: { roleId: string; roleName: 
   }
 
   const isLoading = isLoadingCatalogue || isLoadingGranted;
+  const isError = isCatalogueError || isGrantedError;
+  const error = catalogueError ?? grantedError;
+  function refetch() {
+    refetchCatalogue();
+    refetchGranted();
+  }
 
   return (
     <Card>
@@ -257,12 +277,13 @@ function RolePermissionsPanel({ roleId, roleName }: { roleId: string; roleName: 
         <CardTitle>Permissions — {roleName}</CardTitle>
       </CardHeader>
       <CardContent>
-        {isLoading && (
+        {isError && <ErrorState description={toUserMessage(error)} onRetry={refetch} />}
+        {!isError && isLoading && (
           <div className="flex items-center gap-2 text-muted-foreground py-4">
             <InlineSpinner /> Loading permissions...
           </div>
         )}
-        {!isLoading && (
+        {!isError && !isLoading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 max-h-96 overflow-y-auto">
             {Array.from(byModule.entries()).map(([module, permissions]) => (
               <div key={module}>
@@ -312,7 +333,13 @@ function RoleAssignmentsPanel({
    * pre-Phase-2 role's behavior (custom roles, legacy tenant SuperAdmin). */
   requiresBuildingScope: boolean | null;
 }) {
-  const { data: assignments, isLoading: isLoadingAssignments } = useRoleAssignments({ id: roleId });
+  const {
+    data: assignments,
+    isLoading: isLoadingAssignments,
+    isError: isAssignmentsError,
+    error: assignmentsError,
+    refetch: refetchAssignments,
+  } = useRoleAssignments({ id: roleId });
   // pageSize 200 — this dropdown needs every active tenant user, not one page of them; tenant scale
   // here (a single condominium's staff/owners) makes that a reasonable ceiling. See UsersPage for the
   // paginated register-style view of the same data.
@@ -358,13 +385,17 @@ function RoleAssignmentsPanel({
         <CardTitle>Assignments — {roleName}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {isLoadingAssignments && (
+        {isAssignmentsError && (
+          <ErrorState description={toUserMessage(assignmentsError)} onRetry={refetchAssignments} />
+        )}
+
+        {!isAssignmentsError && isLoadingAssignments && (
           <div className="flex items-center gap-2 text-muted-foreground py-2">
             <InlineSpinner /> Loading assignments...
           </div>
         )}
 
-        {!isLoadingAssignments && assignments?.length === 0 && (
+        {!isAssignmentsError && !isLoadingAssignments && assignments?.length === 0 && (
           <p className="text-sm text-muted-foreground">No one holds this role yet.</p>
         )}
 

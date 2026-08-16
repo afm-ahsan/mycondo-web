@@ -21,9 +21,11 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { toUserMessage } from '@/api/errors';
 import { InstallMeterDialog } from '../components/InstallMeterDialog';
 import { MeterManageDialog } from '../components/MeterManageDialog';
 import { useMeters } from '../api/metersApi';
@@ -54,7 +56,7 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
   const [manageTarget, setManageTarget] = useState<MeterDto | null>(null);
   const [installOpen, setInstallOpen] = useState(false);
 
-  const { data, isFetching } = useMeters(
+  const { data, isFetching, isError, error, refetch } = useMeters(
     filters.buildingId
       ? { buildingId: filters.buildingId, utilityType, page: pagination.pageIndex + 1, pageSize: pagination.pageSize }
       : skipToken,
@@ -123,37 +125,43 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
           />
         </div>
 
-        <DataGrid
-          table={table}
-          recordCount={total}
-          isLoading={isFetching}
-          emptyMessage={filters.buildingId ? `No ${utilityType.toLowerCase()} meters for this building yet.` : 'Select a building to view its meters.'}
-          tableLayout={{ cellBorder: true }}
-        >
+        {isError ? (
           <Card>
-            <CardHeader>
-              <CardHeading>
-                <CardTitle>Meters</CardTitle>
-              </CardHeading>
-              <CardToolbar>
-                <RequirePermission permission={PERMISSIONS.utility.meterManage}>
-                  <Button disabled={!filters.buildingId} onClick={() => setInstallOpen(true)}>
-                    <Plus /> Install Meter
-                  </Button>
-                </RequirePermission>
-              </CardToolbar>
-            </CardHeader>
-            <CardTable>
-              <ScrollArea>
-                <DataGridTable />
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </CardTable>
-            <CardFooter>
-              <DataGridPagination />
-            </CardFooter>
+            <ErrorState description={toUserMessage(error)} onRetry={refetch} />
           </Card>
-        </DataGrid>
+        ) : (
+          <DataGrid
+            table={table}
+            recordCount={total}
+            isLoading={isFetching}
+            emptyMessage={filters.buildingId ? `No ${utilityType.toLowerCase()} meters for this building yet.` : 'Select a building to view its meters.'}
+            tableLayout={{ cellBorder: true }}
+          >
+            <Card>
+              <CardHeader>
+                <CardHeading>
+                  <CardTitle>Meters</CardTitle>
+                </CardHeading>
+                <CardToolbar>
+                  <RequirePermission permission={PERMISSIONS.utility.meterManage}>
+                    <Button disabled={!filters.buildingId} onClick={() => setInstallOpen(true)}>
+                      <Plus /> Install Meter
+                    </Button>
+                  </RequirePermission>
+                </CardToolbar>
+              </CardHeader>
+              <CardTable>
+                <ScrollArea>
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardTable>
+              <CardFooter>
+                <DataGridPagination />
+              </CardFooter>
+            </Card>
+          </DataGrid>
+        )}
       </div>
 
       <MeterManageDialog

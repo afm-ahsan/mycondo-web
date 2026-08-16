@@ -18,6 +18,7 @@ import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { formatDate } from '@/lib/helpers';
 import { useReceivablesAgeingReport } from '../api/reportsApi';
@@ -142,7 +143,9 @@ export function ReceivablesAgeingReportPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {(data?.buckets ?? []).map((bucket) => (
+                    {isFetching && !data ? (
+                      <TableSkeleton columns={3} />
+                    ) : (data?.buckets ?? []).map((bucket) => (
                       <TableRow key={bucket.bucketLabel}>
                         <TableCell>{bucket.bucketLabel}</TableCell>
                         <TableCell>{bucket.invoiceCount}</TableCell>

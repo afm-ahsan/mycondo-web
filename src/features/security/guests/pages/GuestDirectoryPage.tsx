@@ -35,6 +35,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -97,7 +98,7 @@ export function GuestDirectoryPage() {
   const [blockTarget, setBlockTarget] = useState<GuestProfileDto | null>(null);
   const [blockReason, setBlockReason] = useState('');
 
-  const { data, isFetching } = useGuests({
+  const { data, isFetching, isError, error, refetch } = useGuests({
     search: debouncedSearch || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
@@ -210,54 +211,60 @@ export function GuestDirectoryPage() {
           { label: 'Guest Register' },
         ]}
       />
-      <DataGrid
-        table={table}
-        recordCount={total}
-        isLoading={isFetching}
-        emptyMessage="No guests yet."
-        tableLayout={{ cellBorder: true }}
-      >
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle as="h2">Guest Register</CardTitle>
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search by name or mobile…"
-                isSearching={isSearchPending}
-                className="w-64"
-              />
-            </CardHeading>
-            <CardToolbar>
-              <Button variant="outline" asChild>
-                <Link to="/security/guests/currently-inside">
-                  <UsersIcon /> Currently inside
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/security/guests/checkin-out">
-                  <LogIn /> Check in / out
-                </Link>
-              </Button>
-              <RequirePermission permission={PERMISSIONS.visitor.create}>
-                <Button onClick={() => setCreateOpen(true)}>
-                  <Plus /> New Guest
-                </Button>
-              </RequirePermission>
-            </CardToolbar>
-          </CardHeader>
-          <CardTable>
-            <ScrollArea>
-              <DataGridTable />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No guests yet."
+          tableLayout={{ cellBorder: true }}
+        >
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle as="h2">Guest Register</CardTitle>
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search by name or mobile…"
+                  isSearching={isSearchPending}
+                  className="w-64"
+                />
+              </CardHeading>
+              <CardToolbar>
+                <Button variant="outline" asChild>
+                  <Link to="/security/guests/currently-inside">
+                    <UsersIcon /> Currently inside
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/security/guests/checkin-out">
+                    <LogIn /> Check in / out
+                  </Link>
+                </Button>
+                <RequirePermission permission={PERMISSIONS.visitor.create}>
+                  <Button onClick={() => setCreateOpen(true)}>
+                    <Plus /> New Guest
+                  </Button>
+                </RequirePermission>
+              </CardToolbar>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <Dialog open={blockTarget !== null} onOpenChange={(open) => !open && setBlockTarget(null)}>
         <DialogContent>
