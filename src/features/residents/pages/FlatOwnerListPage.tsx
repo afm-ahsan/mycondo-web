@@ -243,6 +243,7 @@ function FlatOwnerDetailDialog({
   const [isAddingFlatOpen, setIsAddingFlatOpen] = useState(false);
   const [addFlatBuildingId, setAddFlatBuildingId] = useState('');
   const [addFlatFlatId, setAddFlatFlatId] = useState('');
+  const alreadyOwnsSelectedFlat = ownerships?.some((o) => o.flatId === addFlatFlatId && o.status === 'Active') ?? false;
 
   const form = useForm<OwnerProfileSchemaType>({
     resolver: zodResolver(ownerProfileSchema),
@@ -367,6 +368,7 @@ function FlatOwnerDetailDialog({
             </Form>
           ) : (
             <>
+              <p className="text-muted-foreground text-xs font-medium uppercase">Owner information</p>
               <dl className="grid grid-cols-3 gap-y-2">
                 <dt className="text-muted-foreground">Email</dt>
                 <dd className="col-span-2">{owner.ownerEmail ?? '—'}</dd>
@@ -374,16 +376,21 @@ function FlatOwnerDetailDialog({
                 <dd className="col-span-2">{owner.ownerPhone ?? '—'}</dd>
               </dl>
               <RequirePermission permission="ownership.manage">
-                <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-                  Edit profile
-                </Button>
+                <div className="flex gap-2">
+                  <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                    Edit profile
+                  </Button>
+                  <Button type="button" variant="outline" size="sm" asChild>
+                    <Link to={`/residents/flat-owners/${owner.residentId}/edit`}>Edit full profile</Link>
+                  </Button>
+                </div>
               </RequirePermission>
             </>
           )}
 
           <div className="border-t pt-4">
             <div className="mb-1.5 flex items-center justify-between">
-              <p className="text-muted-foreground">Flats owned</p>
+              <p className="text-muted-foreground text-xs font-medium uppercase">Flats owned</p>
               <RequirePermission permission="ownership.manage">
                 <Button type="button" variant="ghost" size="sm" onClick={() => setIsAddingFlatOpen((v) => !v)}>
                   {isAddingFlatOpen ? 'Cancel' : '+ Add flat'}
@@ -401,9 +408,13 @@ function FlatOwnerDetailDialog({
                   }}
                 />
                 <FlatSelect buildingId={addFlatBuildingId} value={addFlatFlatId} onValueChange={setAddFlatFlatId} />
-                <Button type="button" size="sm" onClick={handleAddFlat} disabled={!addFlatFlatId || isAddingFlat}>
-                  {isAddingFlat ? 'Granting…' : 'Grant ownership'}
-                </Button>
+                {alreadyOwnsSelectedFlat ? (
+                  <p className="text-muted-foreground text-xs">This owner already has active ownership of this flat.</p>
+                ) : (
+                  <Button type="button" size="sm" onClick={handleAddFlat} disabled={!addFlatFlatId || isAddingFlat}>
+                    {isAddingFlat ? 'Granting…' : 'Grant ownership'}
+                  </Button>
+                )}
               </div>
             )}
 

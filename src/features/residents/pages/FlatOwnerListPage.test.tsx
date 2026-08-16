@@ -107,6 +107,55 @@ describe('FlatOwnerListPage', () => {
     });
   });
 
+  it('links Edit full profile to the wizard in edit mode', async () => {
+    setUpMocks();
+    const user = userEvent.setup();
+    renderWithProviders(<FlatOwnerListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Jane Owner');
+    await user.click(screen.getByText('Jane Owner'));
+
+    const dialog = await screen.findByRole('dialog');
+    const editFullProfileLink = await within(dialog).findByRole('link', { name: /edit full profile/i });
+    expect(editFullProfileLink).toHaveAttribute('href', '/residents/flat-owners/resident-1/edit');
+  });
+
+  it('disables Grant ownership and explains why when the selected flat is already actively owned', async () => {
+    setUpMocks();
+    server.use(
+      http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
+        HttpResponse.json({ items: [{ buildingId: 'b-1', name: 'Tower A', code: 'TA' }], page: 1, pageSize: 100, total: 1 }),
+      ),
+      http.get(`${API_BASE}/api/v1/properties/buildings/b-1/flats`, () =>
+        HttpResponse.json({
+          items: [{ flatId: 'flat-1', buildingId: 'b-1', flatNumber: 'A-101', floorNumber: 1, flatType: 'Residential', areaSqFt: null }],
+          page: 1,
+          pageSize: 100,
+          total: 1,
+        }),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<FlatOwnerListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Jane Owner');
+    await user.click(screen.getByText('Jane Owner'));
+
+    const dialog = await screen.findByRole('dialog');
+    await within(dialog).findByText(/A-101 — Tower A/);
+    await user.click(within(dialog).getByRole('button', { name: /add flat/i }));
+
+    await user.click((await within(dialog).findByText('Select a building')).closest('button')!);
+    await user.click(await screen.findByRole('option', { name: 'Tower A (TA)' }));
+    await user.click((await within(dialog).findByText('Select a flat')).closest('button')!);
+    await user.click(await screen.findByRole('option', { name: 'A-101' }));
+
+    expect(
+      await within(dialog).findByText('This owner already has active ownership of this flat.'),
+    ).toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: /grant ownership/i })).not.toBeInTheDocument();
+  });
+
   it('ends an active ownership with a confirmation and an end date', async () => {
     setUpMocks();
     const user = userEvent.setup();

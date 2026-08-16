@@ -12,7 +12,7 @@ import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
 import { GenderSelect } from '@/components/shared/GenderSelect';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useSaveOwnerResidentProfile } from '../api/residentsApi';
+import { useSaveOwnerResidentProfile, useUpdateFlatOwnerProfile } from '../api/residentsApi';
 import {
   OWNER_CONTACT_IDENTITY_FIELDS,
   type FlatOwnerRegistrationSchemaType,
@@ -22,26 +22,68 @@ const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'] as const;
 
 interface OwnerContactIdentityStepProps {
   form: UseFormReturn<FlatOwnerRegistrationSchemaType>;
+  /** Present in edit mode — the Resident already exists, so "Save & Continue" updates it
+   * (UpdateFlatOwnerProfileCommand) instead of the create-mode find-or-create. */
+  residentId?: string;
   onSaved: (residentId: string) => void;
   onBack: () => void;
 }
 
 /** Step 2 — contact, identity, and family/professional details. National ID/passport are sensitive
  * fields — collected here, but read back masked everywhere after this point (mycondo-api's
- * IdentityMasking). "Save & Continue" persists the shared Resident record (SaveOwnerResidentProfile)
- * without granting FlatOwnership yet, so Household and Documents can attach to a real Resident id
- * before Review & Submit finalizes the ownership grant. */
-export function OwnerContactIdentityStep({ form, onSaved, onBack }: OwnerContactIdentityStepProps) {
-  const [saveProfile, { isLoading }] = useSaveOwnerResidentProfile();
+ * IdentityMasking). In create mode, "Save & Continue" persists the shared Resident record
+ * (SaveOwnerResidentProfile) without granting FlatOwnership yet, so Household and Documents can attach
+ * to a real Resident id before Review & Submit finalizes the ownership grant. In edit mode it updates
+ * the existing Resident by id instead (UpdateFlatOwnerProfile) — National ID/passport are left blank
+ * and skipped from validation, matching OwnerHouseholdStep's "leave blank to keep existing" masked-field
+ * convention. */
+export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: OwnerContactIdentityStepProps) {
+  const [saveProfile, { isLoading: isSaving }] = useSaveOwnerResidentProfile();
+  const [updateProfile, { isLoading: isUpdating }] = useUpdateFlatOwnerProfile();
+  const isLoading = isSaving || isUpdating;
   const [error, setError] = useState<string | null>(null);
+  const fieldsToValidate = residentId
+    ? OWNER_CONTACT_IDENTITY_FIELDS.filter((field) => field !== 'nationalIdNumber')
+    : OWNER_CONTACT_IDENTITY_FIELDS;
 
   async function handleNext() {
     setError(null);
-    const valid = await form.trigger(OWNER_CONTACT_IDENTITY_FIELDS);
+    const valid = await form.trigger(fieldsToValidate);
     if (!valid) return;
 
     const values = form.getValues();
     try {
+      if (residentId) {
+        await updateProfile({
+          residentId,
+          updateFlatOwnerProfileRequest: {
+            fullName: values.fullName,
+            phone: values.phone || null,
+            email: values.email || null,
+            alternatePhone: values.alternatePhone || null,
+            nationalIdNumber: values.nationalIdNumber || null,
+            passportNumber: values.passportNumber || null,
+            dateOfBirth: values.dateOfBirth,
+            gender: values.gender,
+            presentAddress: values.presentAddress || null,
+            permanentAddress: values.permanentAddress || null,
+            fatherName: values.fatherName || null,
+            motherName: values.motherName || null,
+            maritalStatus: values.maritalStatus || null,
+            profession: values.profession || null,
+            employer: values.employer || null,
+            officeAddress: values.officeAddress || null,
+            emergencyContactName: values.emergencyContactName || null,
+            emergencyContactPhone: values.emergencyContactPhone || null,
+            bloodGroup: values.bloodGroup || null,
+            religion: values.religion || null,
+            nationality: values.nationality || null,
+          },
+        }).unwrap();
+        onSaved(residentId);
+        return;
+      }
+
       const result = await saveProfile({
         saveOwnerResidentProfileCommand: {
           flatId: values.flatId,
@@ -151,9 +193,9 @@ export function OwnerContactIdentityStep({ form, onSaved, onBack }: OwnerContact
           name="nationalIdNumber"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>National ID</FormLabel>
+              <FormLabel>National ID{residentId ? ' (optional)' : ''}</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input {...field} placeholder={residentId ? 'Leave blank to keep existing' : undefined} />
               </FormControl>
               <FormMessage />
             </FormItem>
