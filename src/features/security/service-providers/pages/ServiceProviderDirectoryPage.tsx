@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -31,6 +31,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ProviderManageDialog } from '../components/ProviderManageDialog';
+import { ServiceProviderFormDialog } from '../components/ServiceProviderFormDialog';
 import { useServiceProviders } from '../api/serviceProvidersApi';
 import type { ServiceProviderProfileDto } from '@/api/generated/mycondoApi';
 
@@ -43,6 +44,22 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Suspended' | 'Blocked'> = {
 const DIRECTORY_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function ServiceProviderDirectoryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(DIRECTORY_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -170,10 +187,8 @@ export function ServiceProviderDirectoryPage() {
                 </Link>
               </Button>
               <RequirePermission permission={PERMISSIONS.serviceProvider.manage}>
-                <Button asChild>
-                  <Link to="/security/service-providers/new">
-                    <Plus /> Register Provider
-                  </Link>
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus /> Register Provider
                 </Button>
               </RequirePermission>
             </CardToolbar>
@@ -191,6 +206,7 @@ export function ServiceProviderDirectoryPage() {
       </DataGrid>
 
       <ProviderManageDialog provider={manageTarget} onOpenChange={(open) => !open && setManageTarget(null)} />
+      <ServiceProviderFormDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

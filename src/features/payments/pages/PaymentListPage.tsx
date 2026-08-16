@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -27,6 +28,7 @@ import { toUserMessage } from '@/api/errors';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { RecordPaymentDialog } from '../components/RecordPaymentDialog';
 import { usePayments } from '../api/paymentsApi';
 import { PAYMENT_METHODS } from '../lib/constants';
 import { PAYMENT_STATUSES, paymentStatusToneMap, type PaymentStatus } from '../lib/paymentStatus';
@@ -42,6 +44,22 @@ const PAYMENT_LIST_FILTER_DEFAULTS = {
 };
 
 export function PaymentListPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(PAYMENT_LIST_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -208,10 +226,8 @@ export function PaymentListPage() {
               </div>
               <CardToolbar>
                 <RequirePermission permission={PERMISSIONS.payment.record}>
-                  <Button asChild>
-                    <Link to="/billing/payments/new">
-                      <Plus /> Record Payment
-                    </Link>
+                  <Button onClick={() => setCreateOpen(true)}>
+                    <Plus /> Record Payment
                   </Button>
                 </RequirePermission>
               </CardToolbar>
@@ -228,6 +244,8 @@ export function PaymentListPage() {
           </Card>
         </DataGrid>
       )}
+
+      <RecordPaymentDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

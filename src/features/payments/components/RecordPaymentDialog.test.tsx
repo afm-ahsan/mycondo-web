@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
@@ -5,7 +6,7 @@ import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
-import { RecordPaymentPage } from './RecordPaymentPage';
+import { RecordPaymentDialog } from './RecordPaymentDialog';
 
 const API_BASE = 'https://localhost:7219';
 
@@ -27,8 +28,13 @@ async function chooseOption(user: ReturnType<typeof userEvent.setup>, placeholde
   await user.click(await screen.findByRole('option', { name: optionName }));
 }
 
-describe('RecordPaymentPage', () => {
-  it('records a payment, sends an idempotency key, and displays the server-returned allocation breakdown', async () => {
+function ControlledRecordPaymentDialog() {
+  const [open, setOpen] = useState(true);
+  return <RecordPaymentDialog open={open} onOpenChange={setOpen} />;
+}
+
+describe('RecordPaymentDialog', () => {
+  it('records a payment, sends an idempotency key, and closes the dialog on success', async () => {
     let receivedKey: string | null = null;
     let receivedBody: unknown = null;
 
@@ -65,8 +71,9 @@ describe('RecordPaymentPage', () => {
     );
 
     const user = userEvent.setup();
-    renderWithProviders(<RecordPaymentPage />, { auth: { user: frontDeskUser, isInitialized: true } });
+    renderWithProviders(<ControlledRecordPaymentDialog />, { auth: { user: frontDeskUser, isInitialized: true } });
 
+    await screen.findByRole('dialog');
     const residentTrigger = screen.getByText(/search by resident name or mobile/i).closest('[role="combobox"]') as HTMLElement;
     await user.click(residentTrigger);
     await user.type(screen.getByPlaceholderText(/search by name or mobile/i), 'Karim');
@@ -81,7 +88,8 @@ describe('RecordPaymentPage', () => {
     expect(receivedBody).toMatchObject({ flatId: 'flat-1', amount: 3000, paymentMethod: 'Cash' });
     expect(receivedKey).not.toBeNull();
 
-    // Allocation breakdown shown is exactly what the server returned — nothing recalculated.
-    expect(await screen.findByText('INV-A-2026-000001')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   }, 15000);
 });

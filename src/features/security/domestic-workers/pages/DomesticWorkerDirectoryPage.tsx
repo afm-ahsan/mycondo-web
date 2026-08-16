@@ -7,7 +7,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -30,6 +30,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { DomesticWorkerFormDialog } from '../components/DomesticWorkerFormDialog';
 import { WorkerManageDialog } from '../components/WorkerManageDialog';
 import { useDomesticWorkers } from '../api/domesticWorkersApi';
 import type { DomesticWorkerProfileDto } from '@/api/generated/mycondoApi';
@@ -43,6 +44,22 @@ const statusToneMap: StatusBadgeMap<'Active' | 'Suspended' | 'Blocked'> = {
 const DIRECTORY_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function DomesticWorkerDirectoryPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [createOpen, setCreateOpen] = useState(false);
+  useEffect(() => {
+    if (searchParams.get('create') === '1') {
+      setCreateOpen(true);
+      setSearchParams(
+        (params) => {
+          params.delete('create');
+          return params;
+        },
+        { replace: true },
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run only once on mount to consume the deep-link flag
+  }, []);
+
   const [filters, setFilters] = useUrlFilters(DIRECTORY_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -165,10 +182,8 @@ export function DomesticWorkerDirectoryPage() {
                 </Link>
               </Button>
               <RequirePermission permission={PERMISSIONS.domesticWorker.manage}>
-                <Button asChild>
-                  <Link to="/security/domestic-workers/new">
-                    <Plus /> Register Worker
-                  </Link>
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus /> Register Worker
                 </Button>
               </RequirePermission>
             </CardToolbar>
@@ -186,6 +201,7 @@ export function DomesticWorkerDirectoryPage() {
       </DataGrid>
 
       <WorkerManageDialog worker={manageTarget} onOpenChange={(open) => !open && setManageTarget(null)} />
+      <DomesticWorkerFormDialog open={createOpen} onOpenChange={setCreateOpen} />
     </>
   );
 }

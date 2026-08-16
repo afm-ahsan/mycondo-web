@@ -1,11 +1,12 @@
+import { useState } from 'react';
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
-import { ServiceChargeRuleFormPage } from './ServiceChargeRuleFormPage';
+import { ServiceChargeRuleFormDialog } from './ServiceChargeRuleFormDialog';
 
 const API_BASE = 'https://localhost:7219';
 
@@ -20,19 +21,6 @@ const adminUser: AuthUser = {
   buildingPermissions: [],
 };
 
-function mockBuildings() {
-  server.use(
-    http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
-      HttpResponse.json({
-        items: [{ buildingId: 'bld-1', name: 'Tower A', code: 'A', address: null }],
-        page: 1,
-        pageSize: 100,
-        total: 1,
-      }),
-    ),
-  );
-}
-
 async function chooseOption(user: ReturnType<typeof userEvent.setup>, placeholder: string, optionName: string) {
   const placeholderNode = await screen.findByText(placeholder);
   const trigger = placeholderNode.closest('[role="combobox"]') as HTMLElement;
@@ -40,9 +28,13 @@ async function chooseOption(user: ReturnType<typeof userEvent.setup>, placeholde
   await user.click(await screen.findByRole('option', { name: optionName }));
 }
 
-describe('ServiceChargeRuleFormPage', () => {
-  it('creates a rule and submits the exact command shape', async () => {
-    mockBuildings();
+function ControlledServiceChargeRuleFormDialog() {
+  const [open, setOpen] = useState(true);
+  return <ServiceChargeRuleFormDialog buildingId="bld-1" open={open} onOpenChange={setOpen} />;
+}
+
+describe('ServiceChargeRuleFormDialog', () => {
+  it('creates a rule scoped to the given building and submits the exact command shape', async () => {
     let receivedBody: unknown = null;
 
     server.use(
@@ -65,9 +57,8 @@ describe('ServiceChargeRuleFormPage', () => {
     );
 
     const user = userEvent.setup();
-    renderWithProviders(<ServiceChargeRuleFormPage />, { auth: { user: adminUser, isInitialized: true } });
+    renderWithProviders(<ControlledServiceChargeRuleFormDialog />, { auth: { user: adminUser, isInitialized: true } });
 
-    await chooseOption(user, 'Select a building', 'Tower A (A)');
     await user.type(screen.getByLabelText('Name'), 'Monthly Maintenance');
     await user.type(screen.getByLabelText('Category'), 'Maintenance');
     await chooseOption(user, 'Select method', 'Fixed Amount');
@@ -76,6 +67,7 @@ describe('ServiceChargeRuleFormPage', () => {
     await chooseOption(user, 'Select frequency', 'Monthly');
     await user.click(screen.getByRole('button', { name: /create rule/i }));
 
+    await waitFor(() => expect(receivedBody).not.toBeNull());
     expect(receivedBody).toMatchObject({
       buildingId: 'bld-1',
       name: 'Monthly Maintenance',
@@ -88,7 +80,6 @@ describe('ServiceChargeRuleFormPage', () => {
   }, 15000);
 
   it('maps a backend validation error onto the matching form field', async () => {
-    mockBuildings();
     server.use(
       http.post(`${API_BASE}/api/v1/service-charge-rules`, () =>
         HttpResponse.json(
@@ -103,9 +94,8 @@ describe('ServiceChargeRuleFormPage', () => {
     );
 
     const user = userEvent.setup();
-    renderWithProviders(<ServiceChargeRuleFormPage />, { auth: { user: adminUser, isInitialized: true } });
+    renderWithProviders(<ControlledServiceChargeRuleFormDialog />, { auth: { user: adminUser, isInitialized: true } });
 
-    await chooseOption(user, 'Select a building', 'Tower A (A)');
     await user.type(screen.getByLabelText('Name'), 'Monthly Maintenance');
     await user.type(screen.getByLabelText('Category'), 'Maintenance');
     await chooseOption(user, 'Select method', 'Fixed Amount');
