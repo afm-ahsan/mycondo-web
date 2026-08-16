@@ -13,6 +13,9 @@ import {
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { LoadingSpinner } from '@/components/feedback/LoadingSpinner';
+import { toUserMessage } from '@/api/errors';
 import { useOccupancySecurityView, useOccupancySecurityViews } from '../api/leasingApi';
 import { PageHeader } from '@/components/shared/PageHeader';
 
@@ -29,7 +32,7 @@ export function SecurityDirectoryPage() {
   const [flatId, setFlatId] = useState<string | undefined>();
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, isFetching } = useOccupancySecurityViews({ flatId, page: 1, pageSize: 50 });
+  const { data, isFetching, isError, error, refetch } = useOccupancySecurityViews({ flatId, page: 1, pageSize: 50 });
   const { data: detail } = useOccupancySecurityView(selectedId ? { id: selectedId } : skipToken);
 
   return (
@@ -52,8 +55,10 @@ export function SecurityDirectoryPage() {
         </div>
       </div>
 
-      {isFetching ? (
-        <p className="text-muted-foreground text-sm">Loading…</p>
+      {isError ? (
+        <ErrorState description={toUserMessage(error)} onRetry={refetch} />
+      ) : isFetching && !data ? (
+        <LoadingSpinner />
       ) : !data || data.items.length === 0 ? (
         <EmptyState
           icon={<UserRound className="size-8" aria-hidden="true" />}

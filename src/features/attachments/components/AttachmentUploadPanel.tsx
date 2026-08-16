@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 import { toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { FileUpload, FileUploadListItem } from '@/components/ui/file-upload';
+import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { useAttachmentsForOwner, useDeleteAttachment, useUploadAttachmentMutation } from '../api/attachmentsApi';
 
@@ -102,7 +103,9 @@ export function AttachmentUploadPanel({
 
         <div className="space-y-2">
           {isLoadingDocs ? (
-            <p className="text-muted-foreground text-sm">Loading documents…</p>
+            <p className="text-muted-foreground text-sm flex items-center gap-2">
+              <InlineSpinner /> Loading documents…
+            </p>
           ) : (
             existingDocuments?.map((doc) => (
               <FileUploadListItem

@@ -33,6 +33,7 @@ import {
 } from '@/components/ui/select';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { EmptyState } from '@/components/feedback/EmptyState';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { FacilitySelect } from '@/components/shared/FacilitySelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { SearchInput } from '@/components/shared/SearchInput';
@@ -92,7 +93,7 @@ export function BookingListPage() {
     setFilters({ page: String(next.pageIndex + 1), pageSize: String(next.pageSize) });
   }
 
-  const { data, isFetching, isError } = useBookings({
+  const { data, isFetching, isError, refetch } = useBookings({
     facilityId: filters.facilityId || undefined,
     buildingId: filters.buildingId || undefined,
     eventType: debouncedEventType || undefined,
@@ -195,10 +196,11 @@ export function BookingListPage() {
         }
       />
 
-      {isError && (
-        <p className="text-destructive text-sm mb-2">Failed to load bookings. Please try again.</p>
-      )}
-
+      {isError ? (
+        <Card>
+          <ErrorState description="Failed to load bookings. Please try again." onRetry={refetch} />
+        </Card>
+      ) : (
       <DataGrid
         table={table}
         recordCount={total}
@@ -285,6 +287,7 @@ export function BookingListPage() {
           </CardFooter>
         </Card>
       </DataGrid>
+      )}
     </>
   );
 }

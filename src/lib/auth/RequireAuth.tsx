@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { ScreenLoader } from '@/components/common/screen-loader';
 import { useAppSelector } from '@/store/hooks';
 
 interface RequireAuthProps {
@@ -12,7 +13,7 @@ export function RequireAuth({ children, fallbackPath = '/login' }: RequireAuthPr
   const { user, isInitialized } = useAppSelector((s) => s.auth);
 
   if (!isInitialized) {
-    return null; // splash/skeleton handled by parent shell
+    return <ScreenLoader />;
   }
 
   if (!user) {

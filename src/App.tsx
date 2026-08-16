@@ -1,7 +1,6 @@
 import { AppRouting } from '@/routing/app-routing';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
-import { LoadingBarContainer } from 'react-top-loading-bar';
 import { Toaster } from '@/components/ui/sonner';
 import { useSessionBootstrap } from '@/features/auth/hooks/useSessionBootstrap';
 import { usePlatformSessionBootstrap } from '@/features/platform/hooks/usePlatformSessionBootstrap';
@@ -28,12 +27,10 @@ export function App() {
           <HelmetProvider>
             <TooltipsProvider>
               <PageHeaderProvider>
-                <LoadingBarContainer>
-                  <BrowserRouter basename={BASE_URL}>
-                    <Toaster />
-                    <AppRouting />
-                  </BrowserRouter>
-                </LoadingBarContainer>
+                <BrowserRouter basename={BASE_URL}>
+                  <Toaster />
+                  <AppRouting />
+                </BrowserRouter>
               </PageHeaderProvider>
             </TooltipsProvider>
           </HelmetProvider>

@@ -13,6 +13,7 @@ import {
   DataGridTableHeadRow,
   DataGridTableHeadRowCell,
   DataGridTableHeadRowCellResize,
+  DataGridTableLoader,
   DataGridTableRowSpacer,
 } from '@/components/ui/data-grid-table';
 import {
@@ -78,6 +79,11 @@ function DataGridTableDndRows<TData>({
 }) {
   const { table, isLoading, props } = useDataGrid();
   const pagination = table.getState().pagination;
+  const rows = table.getRowModel().rows;
+  // Only replace the body with skeleton rows when there's nothing to show yet — see the identical
+  // fix in data-grid-table.tsx's DataGridTable for the reasoning.
+  const showSkeleton = props.loadingMode === 'skeleton' && isLoading && rows.length === 0 && pagination?.pageSize;
+  const showRefetchOverlay = isLoading && rows.length > 0;
 
   const sensors = useSensors(useSensor(MouseSensor, {}), useSensor(TouchSensor, {}), useSensor(KeyboardSensor, {}));
 
@@ -89,7 +95,7 @@ function DataGridTableDndRows<TData>({
       onDragEnd={handleDragEnd}
       sensors={sensors}
     >
-      <div className="relative">
+      <div className="relative" aria-busy={isLoading || undefined}>
         <DataGridTableBase>
           <DataGridTableHead>
             {table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
@@ -115,7 +121,7 @@ function DataGridTableDndRows<TData>({
           {(props.tableLayout?.stripped || !props.tableLayout?.rowBorder) && <DataGridTableRowSpacer />}
 
           <DataGridTableBody>
-            {props.loadingMode === 'skeleton' && isLoading && pagination?.pageSize ? (
+            {showSkeleton ? (
               Array.from({ length: pagination.pageSize }).map((_, rowIndex) => (
                 <DataGridTableBodyRowSkeleton key={rowIndex}>
                   {table.getVisibleFlatColumns().map((column, colIndex) => {
@@ -127,9 +133,9 @@ function DataGridTableDndRows<TData>({
                   })}
                 </DataGridTableBodyRowSkeleton>
               ))
-            ) : table.getRowModel().rows.length ? (
+            ) : rows.length ? (
               <SortableContext items={dataIds} strategy={verticalListSortingStrategy}>
-                {table.getRowModel().rows.map((row: Row<TData>) => {
+                {rows.map((row: Row<TData>) => {
                   return <DataGridTableDndRow row={row} key={row.id} />;
                 })}
               </SortableContext>
@@ -138,6 +144,7 @@ function DataGridTableDndRows<TData>({
             )}
           </DataGridTableBody>
         </DataGridTableBase>
+        {showRefetchOverlay && <DataGridTableLoader />}
       </div>
     </DndContext>
   );

@@ -26,10 +26,12 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { SearchInput } from '@/components/shared/SearchInput';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { toUserMessage } from '@/api/errors';
 import { ClockInDialog } from '../components/ClockInDialog';
 import { StaffMemberFormDialog } from '../components/StaffMemberFormDialog';
 import { useStaffMembers } from '../api/staffAttendanceApi';
@@ -84,7 +86,7 @@ export function StaffRosterPage() {
 
   const [clockInTarget, setClockInTarget] = useState<StaffMemberDto | null>(null);
 
-  const { data, isFetching } = useStaffMembers({
+  const { data, isFetching, isError, error, refetch } = useStaffMembers({
     search: debouncedSearch || undefined,
     page: pagination.pageIndex + 1,
     pageSize: pagination.pageSize,
@@ -156,54 +158,60 @@ export function StaffRosterPage() {
         title="Staff Roster"
         crumbs={[{ label: 'Security & Access' }, { label: 'Staff Attendance' }, { label: 'Roster' }]}
       />
-      <DataGrid
-        table={table}
-        recordCount={total}
-        isLoading={isFetching}
-        emptyMessage="No staff members registered yet."
-        tableLayout={{ cellBorder: true }}
-      >
+      {isError ? (
         <Card>
-          <CardHeader>
-            <CardHeading>
-              <CardTitle>Staff Members</CardTitle>
-              <SearchInput
-                value={search}
-                onChange={setSearch}
-                placeholder="Search by name…"
-                isSearching={isSearchPending}
-                className="w-64"
-              />
-            </CardHeading>
-            <CardToolbar>
-              <Button variant="outline" asChild>
-                <Link to="/security/staff-attendance/currently-present">
-                  <UsersIcon /> Currently present
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link to="/security/staff-attendance/records">
-                  <ClipboardList /> Attendance register
-                </Link>
-              </Button>
-              <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-                <Button onClick={() => setCreateOpen(true)}>
-                  <Plus /> Register Staff Member
-                </Button>
-              </RequirePermission>
-            </CardToolbar>
-          </CardHeader>
-          <CardTable>
-            <ScrollArea>
-              <DataGridTable />
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </CardTable>
-          <CardFooter>
-            <DataGridPagination />
-          </CardFooter>
+          <ErrorState description={toUserMessage(error)} onRetry={refetch} />
         </Card>
-      </DataGrid>
+      ) : (
+        <DataGrid
+          table={table}
+          recordCount={total}
+          isLoading={isFetching}
+          emptyMessage="No staff members registered yet."
+          tableLayout={{ cellBorder: true }}
+        >
+          <Card>
+            <CardHeader>
+              <CardHeading>
+                <CardTitle>Staff Members</CardTitle>
+                <SearchInput
+                  value={search}
+                  onChange={setSearch}
+                  placeholder="Search by name…"
+                  isSearching={isSearchPending}
+                  className="w-64"
+                />
+              </CardHeading>
+              <CardToolbar>
+                <Button variant="outline" asChild>
+                  <Link to="/security/staff-attendance/currently-present">
+                    <UsersIcon /> Currently present
+                  </Link>
+                </Button>
+                <Button variant="outline" asChild>
+                  <Link to="/security/staff-attendance/records">
+                    <ClipboardList /> Attendance register
+                  </Link>
+                </Button>
+                <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
+                  <Button onClick={() => setCreateOpen(true)}>
+                    <Plus /> Register Staff Member
+                  </Button>
+                </RequirePermission>
+              </CardToolbar>
+            </CardHeader>
+            <CardTable>
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
+            </CardTable>
+            <CardFooter>
+              <DataGridPagination />
+            </CardFooter>
+          </Card>
+        </DataGrid>
+      )}
 
       <ClockInDialog staffMember={clockInTarget} onOpenChange={(open) => !open && setClockInTarget(null)} />
       <StaffMemberFormDialog open={createOpen} onOpenChange={setCreateOpen} />

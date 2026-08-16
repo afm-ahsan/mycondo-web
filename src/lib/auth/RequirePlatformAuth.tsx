@@ -1,5 +1,6 @@
 import { type ReactNode } from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { ScreenLoader } from '@/components/common/screen-loader';
 import { useAppSelector } from '@/store/hooks';
 
 // Platform-scope analogue of RequireAuth — reads platformAuth, not auth. Deliberately not a
@@ -15,7 +16,7 @@ export function RequirePlatformAuth({ children, fallbackPath = '/platform/login'
   const { user, isInitialized } = useAppSelector((s) => s.platformAuth);
 
   if (!isInitialized) {
-    return null;
+    return <ScreenLoader />;
   }
 
   if (!user) {

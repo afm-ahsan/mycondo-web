@@ -22,9 +22,11 @@ import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { toUserMessage } from '@/api/errors';
 import { RatePlanManageDialog } from '../components/RatePlanManageDialog';
 import { useRatePlans } from '../api/ratePlansApi';
 import type { UtilityType } from '../lib/constants';
@@ -55,7 +57,7 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
 
   const [manageTarget, setManageTarget] = useState<RatePlanDto | null>(null);
 
-  const { data, isFetching } = useRatePlans(
+  const { data, isFetching, isError, error, refetch } = useRatePlans(
     filters.buildingId
       ? { buildingId: filters.buildingId, utilityType, page: pagination.pageIndex + 1, pageSize: pagination.pageSize }
       : skipToken,
@@ -132,39 +134,45 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
           />
         </div>
 
-        <DataGrid
-          table={table}
-          recordCount={total}
-          isLoading={isFetching}
-          emptyMessage={filters.buildingId ? 'No rate plans for this building yet.' : 'Select a building to view its rate plans.'}
-          tableLayout={{ cellBorder: true }}
-        >
+        {isError ? (
           <Card>
-            <CardHeader>
-              <CardHeading>
-                <CardTitle>Rate Plans</CardTitle>
-              </CardHeading>
-              <CardToolbar>
-                <RequirePermission permission={PERMISSIONS.utility.ratePlanManage}>
-                  <Button asChild disabled={!filters.buildingId}>
-                    <Link to={filters.buildingId ? `/utilities/${utilityType.toLowerCase()}/rate-plans/new?buildingId=${filters.buildingId}` : '#'}>
-                      <Plus /> New Rate Plan
-                    </Link>
-                  </Button>
-                </RequirePermission>
-              </CardToolbar>
-            </CardHeader>
-            <CardTable>
-              <ScrollArea>
-                <DataGridTable />
-                <ScrollBar orientation="horizontal" />
-              </ScrollArea>
-            </CardTable>
-            <CardFooter>
-              <DataGridPagination />
-            </CardFooter>
+            <ErrorState description={toUserMessage(error)} onRetry={refetch} />
           </Card>
-        </DataGrid>
+        ) : (
+          <DataGrid
+            table={table}
+            recordCount={total}
+            isLoading={isFetching}
+            emptyMessage={filters.buildingId ? 'No rate plans for this building yet.' : 'Select a building to view its rate plans.'}
+            tableLayout={{ cellBorder: true }}
+          >
+            <Card>
+              <CardHeader>
+                <CardHeading>
+                  <CardTitle>Rate Plans</CardTitle>
+                </CardHeading>
+                <CardToolbar>
+                  <RequirePermission permission={PERMISSIONS.utility.ratePlanManage}>
+                    <Button asChild disabled={!filters.buildingId}>
+                      <Link to={filters.buildingId ? `/utilities/${utilityType.toLowerCase()}/rate-plans/new?buildingId=${filters.buildingId}` : '#'}>
+                        <Plus /> New Rate Plan
+                      </Link>
+                    </Button>
+                  </RequirePermission>
+                </CardToolbar>
+              </CardHeader>
+              <CardTable>
+                <ScrollArea>
+                  <DataGridTable />
+                  <ScrollBar orientation="horizontal" />
+                </ScrollArea>
+              </CardTable>
+              <CardFooter>
+                <DataGridPagination />
+              </CardFooter>
+            </Card>
+          </DataGrid>
+        )}
       </div>
 
       <RatePlanManageDialog ratePlan={manageTarget} onOpenChange={(open) => !open && setManageTarget(null)} />
