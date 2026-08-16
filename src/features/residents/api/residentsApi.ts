@@ -15,6 +15,7 @@ import {
   usePutApiV1PropertiesFlatOwnershipsOwnersByResidentIdProfileMutation,
   usePutApiV1ResidentsByIdMutation,
   usePutApiV1ResidentsHouseholdMembersByIdMutation,
+  usePutApiV1ResidentsHouseholdMembersByIdPrimaryPhotoMutation,
   useDeleteApiV1PropertiesFlatOwnershipsByIdMutation,
 } from '@/api/generated/mycondoApi';
 
@@ -41,3 +42,4 @@ export const useOwnerHouseholdMembers = useGetApiV1ResidentsByIdHouseholdMembers
 export const useAddOwnerHouseholdMember = usePostApiV1ResidentsByIdHouseholdMembersMutation;
 export const useUpdateOwnerHouseholdMember = usePutApiV1ResidentsHouseholdMembersByIdMutation;
 export const useDeactivateOwnerHouseholdMember = usePostApiV1ResidentsHouseholdMembersByIdDeactivateMutation;
+export const useSetOwnerHouseholdMemberPrimaryPhoto = usePutApiV1ResidentsHouseholdMembersByIdPrimaryPhotoMutation;
