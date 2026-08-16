@@ -1,5 +1,4 @@
 import {
-  useGetApiV1AttachmentsQuery,
   useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery,
   useGetApiV1OccupancyRegistrationsByIdQuery,
   useGetApiV1OccupancyRegistrationsByIdStatusHistoryQuery,
@@ -8,7 +7,6 @@ import {
   useGetApiV1OccupancyRegistrationsQuery,
   useGetApiV1OccupancyRegistrationsSecurityByIdQuery,
   useGetApiV1OccupancyRegistrationsSecurityQuery,
-  usePostApiV1AttachmentsMutation,
   usePostApiV1HouseholdMembersByIdDeactivateMutation,
   usePostApiV1OccupancyRegistrationsByIdActivateMutation,
   usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation,
@@ -53,8 +51,6 @@ export const useTenantRegistrationStatusHistory = useGetApiV1OccupancyRegistrati
 export const useHouseholdMembers = useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery;
 export const useAddHouseholdMember = usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation;
 export const useDeactivateHouseholdMember = usePostApiV1HouseholdMembersByIdDeactivateMutation;
-export const useTenantRegistrationDocuments = useGetApiV1AttachmentsQuery;
-export const useRecordTenantRegistrationDocument = usePostApiV1AttachmentsMutation;
 export const useWorkerAssignments = useGetApiV1OccupancyRegistrationsByIdWorkerAssignmentsQuery;
 export const useAssignWorker = usePostApiV1OccupancyRegistrationsByIdWorkerAssignmentsMutation;
 export const useEndWorkerAssignment = usePostApiV1WorkerAssignmentsByIdEndMutation;

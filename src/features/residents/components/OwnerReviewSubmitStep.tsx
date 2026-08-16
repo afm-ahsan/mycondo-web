@@ -70,7 +70,7 @@ export function OwnerReviewSubmitStep({ form, onBack, onRegistered }: OwnerRevie
         </Alert>
       )}
 
-      <dl className="grid gap-3 sm:grid-cols-2">
+      <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         <ReviewField label="Building / Flat">
           <PropertyPreview buildingId={values.buildingId} flatId={values.flatId} />
         </ReviewField>

@@ -2803,9 +2803,41 @@
         ],
         "requestBody": {
           "content": {
-            "application/json": {
+            "multipart/form-data": {
               "schema": {
-                "$ref": "#/components/schemas/RecordAttachmentCommand"
+                "required": [
+                  "file",
+                  "ownerType",
+                  "ownerId"
+                ],
+                "type": "object",
+                "allOf": [
+                  {
+                    "type": "object",
+                    "properties": {
+                      "file": {
+                        "$ref": "#/components/schemas/IFormFile"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ownerType": {
+                        "type": "string"
+                      }
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "ownerId": {
+                        "type": "string",
+                        "format": "uuid"
+                      }
+                    }
+                  }
+                ]
               }
             }
           },
@@ -2860,6 +2892,52 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/attachments/{attachmentId}/content": {
+      "get": {
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "name": "attachmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/attachments/{attachmentId}": {
+      "delete": {
+        "tags": [
+          "Attachments"
+        ],
+        "parameters": [
+          {
+            "name": "attachmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -19195,44 +19273,6 @@
             ]
           }
         }
-      },
-      "RecordAttachmentCommand": {
-        "required": [
-          "ownerType",
-          "ownerId",
-          "storageKey",
-          "fileName",
-          "contentType",
-          "sizeBytes"
-        ],
-        "type": "object",
-        "properties": {
-          "ownerType": {
-            "type": "string"
-          },
-          "ownerId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "storageKey": {
-            "type": "string"
-          },
-          "fileName": {
-            "type": "string"
-          },
-          "contentType": {
-            "type": "string"
-          },
-          "sizeBytes": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int64"
-          }
-        },
-        "description": "Records metadata for a file the caller has already placed in object storage — this slice does not\r\nwire an actual upload/pre-signed-URL endpoint (see `Attachment`'s doc comment). `StorageKey`\r\nis trusted as given; validating that it actually points at a real, tenant-owned object is a\r\nfollow-up once real storage integration lands."
       },
       "RecordBreakdownCommand": {
         "required": [

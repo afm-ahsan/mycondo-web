@@ -1,9 +1,11 @@
 import { useState } from 'react';
-import { Image } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { toUserMessage } from '@/api/errors';
-import { useGetApiV1AttachmentsQuery, usePostApiV1AttachmentsMutation } from '@/api/generated/mycondoApi';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
-import { FileUpload, FileUploadListItem } from '@/components/ui/file-upload';
+import { Button } from '@/components/ui/button';
+import { FileUpload } from '@/components/ui/file-upload';
+import { useAttachmentsForOwner, useUploadAttachmentMutation } from '@/features/attachments/api/attachmentsApi';
+import { useAttachmentContentUrl } from '@/features/attachments/hooks/useAttachmentContentUrl';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 
 interface BuildingFlatImageFieldProps {
@@ -13,21 +15,15 @@ interface BuildingFlatImageFieldProps {
   onSetPrimaryPhoto: (attachmentId: string | null) => Promise<unknown>;
 }
 
-/**
- * Primary-image field shared by the Building and Flat edit dialogs. mycondo-api's Attachments
- * feature is metadata-only today (no real object-storage upload path exists yet — see `Attachment`'s
- * doc comment); this records file metadata against a synthetic storage key and says so plainly,
- * the same disclosed-gap pattern `DocumentsStep` uses for tenant-registration documents, rather than
- * pretending a real image preview is available.
- */
+/** Primary-image field shared by the Building and Flat edit dialogs. */
 export function BuildingFlatImageField({
   ownerType,
   ownerId,
   primaryPhotoAttachmentId,
   onSetPrimaryPhoto,
 }: BuildingFlatImageFieldProps) {
-  const { data: attachments } = useGetApiV1AttachmentsQuery({ ownerType, ownerId });
-  const [recordAttachment] = usePostApiV1AttachmentsMutation();
+  const { data: attachments } = useAttachmentsForOwner({ ownerType, ownerId });
+  const [uploadAttachment] = useUploadAttachmentMutation();
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // The caller's `primaryPhotoAttachmentId` is a snapshot taken when the dialog opened and won't
@@ -37,6 +33,7 @@ export function BuildingFlatImageField({
   const currentAttachmentId = localAttachmentId !== undefined ? localAttachmentId : primaryPhotoAttachmentId;
 
   const currentAttachment = attachments?.find((a) => a.attachmentId === currentAttachmentId);
+  const previewUrl = useAttachmentContentUrl(currentAttachment?.attachmentId);
 
   async function handleFiles(files: File[]) {
     const file = files[0];
@@ -45,18 +42,9 @@ export function BuildingFlatImageField({
     setError(null);
     setIsUploading(true);
     try {
-      const recorded = await recordAttachment({
-        recordAttachmentCommand: {
-          ownerType,
-          ownerId,
-          storageKey: `local/${ownerId}/${crypto.randomUUID()}-${file.name}`,
-          fileName: file.name,
-          contentType: file.type || 'application/octet-stream',
-          sizeBytes: file.size,
-        },
-      }).unwrap();
-      await onSetPrimaryPhoto(recorded.attachmentId);
-      setLocalAttachmentId(recorded.attachmentId);
+      const uploaded = await uploadAttachment({ file, ownerType, ownerId }).unwrap();
+      await onSetPrimaryPhoto(uploaded.attachmentId);
+      setLocalAttachmentId(uploaded.attachmentId);
     } catch (err) {
       setError(toUserMessage(toApiError(err) ?? err));
     } finally {
@@ -77,34 +65,40 @@ export function BuildingFlatImageField({
   return (
     <div className="space-y-2 border-t pt-4">
       <p className="text-sm font-medium">Image</p>
-      <Alert appearance="light">
-        <AlertIcon>
-          <Image />
-        </AlertIcon>
-        <AlertTitle>
-          Image storage isn't connected yet — the file name is recorded, but the file itself isn't
-          uploaded anywhere, so no visual preview is available.
-        </AlertTitle>
-      </Alert>
 
       {error && (
         <Alert variant="destructive" appearance="light" onClose={() => setError(null)}>
+          <AlertIcon>
+            <AlertCircle />
+          </AlertIcon>
           <AlertTitle>{error}</AlertTitle>
         </Alert>
+      )}
+
+      {currentAttachment && (
+        <div className="flex items-center gap-3">
+          {previewUrl && (
+            <img
+              src={previewUrl}
+              alt={currentAttachment.fileName}
+              className="border-border size-20 rounded-md border object-cover"
+            />
+          )}
+          <div className="flex-1 truncate text-sm">{currentAttachment.fileName}</div>
+          <Button type="button" variant="outline" size="sm" onClick={handleRemove}>
+            Remove
+          </Button>
+        </div>
       )}
 
       <FileUpload
         onFilesSelected={handleFiles}
         multiple={false}
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp"
         disabled={isUploading}
         label={isUploading ? 'Uploading…' : currentAttachment ? 'Click to replace the image' : 'Click to upload an image'}
-        hint="JPG or PNG"
+        hint="JPG, PNG, or WebP · Maximum 10 MB"
       />
-
-      {currentAttachment && (
-        <FileUploadListItem fileName={currentAttachment.fileName} status="uploaded" onRemove={handleRemove} />
-      )}
     </div>
   );
 }
