@@ -13,3 +13,4 @@ export { ServiceProviderDirectoryPage } from './service-providers/pages/ServiceP
 export { ParcelDetailPage } from './parcels/pages/ParcelDetailPage';
 export { ParcelRegisterPage } from './parcels/pages/ParcelRegisterPage';
 export { ReceiveParcelPage } from './parcels/pages/ReceiveParcelPage';
+export { EntryGateListPage } from './gates/pages/EntryGateListPage';

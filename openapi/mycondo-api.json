@@ -1873,6 +1873,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "activeOnly",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "boolean"
+            }
           }
         ],
         "responses": {
@@ -1888,6 +1896,119 @@
                 }
               }
             }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/buildings/{buildingId}/gates/{gateId}": {
+      "put": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "gateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateGateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GateDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/properties/buildings/{buildingId}/gates/{gateId}/activate": {
+      "post": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "gateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/properties/buildings/{buildingId}/gates/{gateId}/deactivate": {
+      "post": {
+        "tags": [
+          "Property"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "gateId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
           }
         }
       }
@@ -12264,12 +12385,40 @@
       },
       "CreateGateRequest": {
         "required": [
-          "name"
+          "name",
+          "code",
+          "description",
+          "isEntryAllowed",
+          "isExitAllowed",
+          "displayOrder"
         ],
         "type": "object",
         "properties": {
           "name": {
             "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isEntryAllowed": {
+            "type": "boolean"
+          },
+          "isExitAllowed": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -13848,7 +13997,13 @@
         "required": [
           "gateId",
           "buildingId",
-          "name"
+          "name",
+          "code",
+          "description",
+          "isActive",
+          "isEntryAllowed",
+          "isExitAllowed",
+          "displayOrder"
         ],
         "type": "object",
         "properties": {
@@ -13862,6 +14017,32 @@
           },
           "name": {
             "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "isEntryAllowed": {
+            "type": "boolean"
+          },
+          "isExitAllowed": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },
@@ -21389,6 +21570,45 @@
           },
           "flatType": {
             "type": "string"
+          }
+        }
+      },
+      "UpdateGateRequest": {
+        "required": [
+          "name",
+          "code",
+          "description",
+          "isEntryAllowed",
+          "isExitAllowed",
+          "displayOrder"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isEntryAllowed": {
+            "type": "boolean"
+          },
+          "isExitAllowed": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
           }
         }
       },

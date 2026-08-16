@@ -54,7 +54,19 @@ function mockPropertyLookups() {
       }),
     ),
     http.get(`${API_BASE}/api/v1/properties/buildings/bld-1/gates`, () =>
-      HttpResponse.json([{ gateId: 'gate-1', buildingId: 'bld-1', name: 'Main Gate' }]),
+      HttpResponse.json([
+        {
+          gateId: 'gate-1',
+          buildingId: 'bld-1',
+          name: 'Main Gate',
+          code: 'MAIN',
+          description: null,
+          isActive: true,
+          isEntryAllowed: true,
+          isExitAllowed: true,
+          displayOrder: 0,
+        },
+      ]),
     ),
   );
 }

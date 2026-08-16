@@ -87,6 +87,7 @@ const CurrentlyInsideServiceProvidersPage = lazyPage(security, 'CurrentlyInsideS
 const ParcelRegisterPage = lazyPage(security, 'ParcelRegisterPage');
 const ReceiveParcelPage = lazyPage(security, 'ReceiveParcelPage');
 const ParcelDetailPage = lazyPage(security, 'ParcelDetailPage');
+const EntryGateListPage = lazyPage(security, 'EntryGateListPage');
 
 // Leasing
 const leasing = () => import('@/features/leasing');
@@ -698,6 +699,14 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.parcel.view} fallback={<AccessDeniedNotice />}>
                 <ParcelDetailPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/security/entry-gates"
+            element={
+              <RequirePermission permission={PERMISSIONS.gate.view} fallback={<AccessDeniedNotice />}>
+                <EntryGateListPage />
               </RequirePermission>
             }
           />
