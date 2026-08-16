@@ -7,6 +7,11 @@
  * `user.view`/`tenant.manage`/etc. elsewhere in the app.
  */
 export const PERMISSIONS = {
+  // mycondo-api's PermissionCatalogue — Entry Gates (Property module, building-scoped).
+  gate: {
+    view: 'gate.view',
+    manage: 'gate.manage',
+  },
   visitor: {
     create: 'visitor.create',
     view: 'visitor.view',

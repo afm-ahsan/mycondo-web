@@ -5,6 +5,7 @@ import {
   Building2,
   Car,
   Clock,
+  DoorOpen,
   FileText,
   Flame,
   Fuel,
@@ -37,10 +38,10 @@ export const MENU_SIDEBAR: MenuConfig = [
   // internally (Phase 3, mycondo-docs ADR-021). A user with no ownership/occupancy relationship
   // simply sees an empty list, same as every other resident-facing self-service view.
   {
-    title: 'My Flat',
+    title: 'My Flats',
     icon: Home,
     children: [
-      { title: 'My Flat', path: '/me/flats' },
+      { title: 'My Flats', path: '/me/flats' },
       { title: 'My Invoices', path: '/me/invoices' },
     ],
   },
@@ -170,6 +171,12 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.staffAttendance.view,
           },
         ],
+      },
+      {
+        title: 'Entry Gates',
+        icon: DoorOpen,
+        path: '/security/entry-gates',
+        permission: PERMISSIONS.gate.manage,
       },
     ],
   },

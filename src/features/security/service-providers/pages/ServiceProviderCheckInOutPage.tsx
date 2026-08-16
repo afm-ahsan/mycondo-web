@@ -29,6 +29,7 @@ import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { EntryGateEmptyNotice } from '@/features/security/gates/components/EntryGateEmptyNotice';
 import {
   useCheckInProvider,
   useCheckOutProvider,
@@ -312,6 +313,7 @@ function CheckInForm({
             </FormItem>
           )}
         />
+        <EntryGateEmptyNotice buildingId={buildingId} capability="entry" />
         <FormField
           control={form.control}
           name="entryGateId"
@@ -323,6 +325,7 @@ function CheckInForm({
                   buildingId={buildingId}
                   value={field.value}
                   onValueChange={field.onChange}
+                  capability="entry"
                 />
               </FormControl>
               <FormMessage />
@@ -481,6 +484,7 @@ function CheckOutInlineForm({
           buildingId={buildingId}
           value={form.watch('exitGateId')}
           onValueChange={(v) => form.setValue('exitGateId', v)}
+          capability="exit"
         />
       </div>
       <Button
