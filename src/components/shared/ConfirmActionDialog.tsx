@@ -24,6 +24,8 @@ interface ConfirmActionDialogProps {
    * still most common use (Deactivate/Delete); pass `primary` for reversible confirmations like
    * re-enabling something. */
   confirmVariant?: VariantProps<typeof buttonVariants>['variant'];
+  /** Optional icon rendered above the title, centered (e.g. a warning glyph in a soft-colored circle). */
+  icon?: React.ReactNode;
 }
 
 /**
@@ -45,11 +47,13 @@ export function ConfirmActionDialog({
   isLoading,
   onConfirm,
   confirmVariant = 'destructive',
+  icon,
 }: ConfirmActionDialogProps) {
   return (
     <AlertDialog open={open} onOpenChange={(next) => !isLoading && onOpenChange(next)}>
       <AlertDialogContent>
         <AlertDialogHeader>
+          {icon && <div className="mx-auto">{icon}</div>}
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div>{description}</div>

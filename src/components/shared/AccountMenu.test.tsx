@@ -54,14 +54,42 @@ describe('AccountMenu', () => {
 
   it('still renders Dark Mode toggle and Logout', async () => {
     const user = userEvent.setup();
-    const onLogout = vi.fn();
-    renderMenu({ onLogout });
+    renderMenu();
 
     await user.click(screen.getByRole('button', { name: 'Open menu' }));
 
     expect(await screen.findByText('Dark Mode')).toBeInTheDocument();
-    const logoutButton = screen.getByRole('button', { name: 'Logout' });
-    await user.click(logoutButton);
+    expect(screen.getByRole('button', { name: 'Logout' })).toBeInTheDocument();
+  });
+
+  it('asks for confirmation before logging out, and only calls onLogout after confirming', async () => {
+    const user = userEvent.setup();
+    const onLogout = vi.fn();
+    renderMenu({ onLogout });
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    await user.click(screen.getByRole('button', { name: 'Logout' }));
+
+    expect(onLogout).not.toHaveBeenCalled();
+    const dialog = await screen.findByRole('alertdialog');
+    expect(dialog).toHaveTextContent('Are you sure you want to log out?');
+
+    await user.click(screen.getByRole('button', { name: 'Yes, Log Out' }));
     expect(onLogout).toHaveBeenCalledTimes(1);
+  });
+
+  it('closing the confirmation via Cancel does not log out', async () => {
+    const user = userEvent.setup();
+    const onLogout = vi.fn();
+    renderMenu({ onLogout });
+
+    await user.click(screen.getByRole('button', { name: 'Open menu' }));
+    await user.click(screen.getByRole('button', { name: 'Logout' }));
+    await screen.findByRole('alertdialog');
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }));
+
+    expect(onLogout).not.toHaveBeenCalled();
+    expect(screen.queryByRole('alertdialog')).not.toBeInTheDocument();
   });
 });
