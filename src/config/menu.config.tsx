@@ -49,13 +49,13 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Residents',
     icon: Users,
     children: [
-      { title: 'Resident Directory', path: '/residents', permission: 'resident.view' },
       { title: 'Flat Owners', path: '/residents/flat-owners', permission: 'ownership.manage' },
       {
         title: 'Tenant Registrations',
         path: '/leasing/tenant-registrations',
         permission: PERMISSIONS.occupancyRegistration.view,
       },
+      { title: 'Resident Directory', path: '/residents', permission: 'resident.view' },
       {
         title: 'Security Directory',
         path: '/leasing/security-directory',
