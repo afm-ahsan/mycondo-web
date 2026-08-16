@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { Car, ShieldCheck, UserRound } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardHeading, CardTitle, CardToolbar } from '@/components/ui/card';
 import {
   Sheet,
   SheetBody,
@@ -39,64 +39,72 @@ export function SecurityDirectoryPage() {
     <>
       <PageHeader title="Security Directory" crumbs={[{ label: 'Security Directory' }]} />
 
-      <div className="mb-4 flex flex-wrap gap-2">
-        <div className="w-48">
-          <BuildingSelect
-            value={buildingId}
-            onValueChange={(id) => {
-              setBuildingId(id);
-              setFlatId(undefined);
-            }}
-            placeholder="All buildings"
-          />
-        </div>
-        <div className="w-48">
-          <FlatSelect buildingId={buildingId} value={flatId} onValueChange={setFlatId} placeholder="All flats" />
-        </div>
-      </div>
-
-      {isError ? (
-        <ErrorState description={toUserMessage(error)} onRetry={refetch} />
-      ) : isFetching && !data ? (
-        <LoadingSpinner />
-      ) : !data || data.items.length === 0 ? (
-        <EmptyState
-          icon={<UserRound className="size-8" aria-hidden="true" />}
-          title="No active occupancies found"
-          description={
-            buildingId || flatId
-              ? 'No active residents match the selected building and flat filters.'
-              : 'No residents currently have an active occupancy in this property.'
-          }
-        />
-      ) : (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {data.items.map((item) => (
-            <Card
-              key={item.occupancyRegistrationId}
-              className="hover:border-primary cursor-pointer transition-colors"
-              onClick={() => setSelectedId(item.occupancyRegistrationId)}
-            >
-              <CardContent className="flex items-center gap-3 py-4">
-                <div className="bg-accent flex size-10 items-center justify-center rounded-full">
-                  <UserRound className="text-muted-foreground size-5" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{item.primaryFullName}</p>
-                  <p className="text-muted-foreground text-xs">
-                    {item.buildingName} · {item.flatNumber}
-                  </p>
-                </div>
-                {item.accessEligible && (
-                  <Badge variant="success" appearance="light">
-                    <ShieldCheck className="size-3" /> Access
-                  </Badge>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+      <Card>
+        <CardHeader>
+          <CardHeading>
+            <CardTitle>Security directory</CardTitle>
+          </CardHeading>
+          <CardToolbar>
+            <div className="w-48">
+              <BuildingSelect
+                value={buildingId}
+                onValueChange={(id) => {
+                  setBuildingId(id);
+                  setFlatId(undefined);
+                }}
+                placeholder="All buildings"
+              />
+            </div>
+            <div className="w-48">
+              <FlatSelect buildingId={buildingId} value={flatId} onValueChange={setFlatId} placeholder="All flats" />
+            </div>
+          </CardToolbar>
+        </CardHeader>
+        <CardContent>
+          {isError ? (
+            <ErrorState description={toUserMessage(error)} onRetry={refetch} />
+          ) : isFetching && !data ? (
+            <LoadingSpinner />
+          ) : !data || data.items.length === 0 ? (
+            <EmptyState
+              icon={<UserRound className="size-8" aria-hidden="true" />}
+              title="No active occupancies found"
+              description={
+                buildingId || flatId
+                  ? 'No active residents match the selected building and flat filters.'
+                  : 'No residents currently have an active occupancy in this property.'
+              }
+            />
+          ) : (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {data.items.map((item) => (
+                <Card
+                  key={item.occupancyRegistrationId}
+                  className="hover:border-primary cursor-pointer transition-colors"
+                  onClick={() => setSelectedId(item.occupancyRegistrationId)}
+                >
+                  <CardContent className="flex items-center gap-3 py-4">
+                    <div className="bg-accent flex size-10 items-center justify-center rounded-full">
+                      <UserRound className="text-muted-foreground size-5" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{item.primaryFullName}</p>
+                      <p className="text-muted-foreground text-xs">
+                        {item.buildingName} · {item.flatNumber}
+                      </p>
+                    </div>
+                    {item.accessEligible && (
+                      <Badge variant="success" appearance="light">
+                        <ShieldCheck className="size-3" /> Access
+                      </Badge>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Sheet open={selectedId !== null} onOpenChange={(open) => !open && setSelectedId(null)}>
         <SheetContent className="w-full sm:max-w-md">
