@@ -140,22 +140,29 @@ function AssignmentsSection({ provider }: { provider: ServiceProviderProfileDto 
   const [approveAssignment] = useApproveProviderAssignment();
   const [deactivateAssignment] = useDeactivateProviderAssignment();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [pendingAssignmentId, setPendingAssignmentId] = useState<string | null>(null);
 
   async function handleApprove(assignmentId: string) {
+    setPendingAssignmentId(assignmentId);
     try {
       await approveAssignment({ assignmentId }).unwrap();
       toast.success('Assignment approved.');
     } catch (err) {
       toast.error(toUserMessage(err));
+    } finally {
+      setPendingAssignmentId(null);
     }
   }
 
   async function handleEnd(assignmentId: string) {
+    setPendingAssignmentId(assignmentId);
     try {
       await deactivateAssignment({ assignmentId }).unwrap();
       toast.success('Assignment ended.');
     } catch (err) {
       toast.error(toUserMessage(err));
+    } finally {
+      setPendingAssignmentId(null);
     }
   }
 
@@ -224,7 +231,12 @@ function AssignmentsSection({ provider }: { provider: ServiceProviderProfileDto 
                   <div className="flex gap-2 shrink-0">
                     {!assignment.approvedByResident && (
                       <RequirePermission permission={PERMISSIONS.serviceProvider.assignmentManage}>
-                        <Button size="sm" variant="outline" onClick={() => handleApprove(assignment.serviceProviderAssignmentId)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={pendingAssignmentId === assignment.serviceProviderAssignmentId}
+                          onClick={() => handleApprove(assignment.serviceProviderAssignmentId)}
+                        >
                           <Check /> Approve
                         </Button>
                       </RequirePermission>
@@ -233,6 +245,7 @@ function AssignmentsSection({ provider }: { provider: ServiceProviderProfileDto 
                       <Button
                         size="sm"
                         variant="destructive"
+                        disabled={pendingAssignmentId === assignment.serviceProviderAssignmentId}
                         onClick={() => handleEnd(assignment.serviceProviderAssignmentId)}
                       >
                         <X /> End

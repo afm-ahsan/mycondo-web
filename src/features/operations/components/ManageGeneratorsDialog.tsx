@@ -44,6 +44,7 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
   const [updateGenerator, { isLoading: isUpdating }] = useUpdateGenerator();
   const [deactivateGenerator] = useDeactivateGenerator();
   const [reactivateGenerator] = useReactivateGenerator();
+  const [pendingToggleId, setPendingToggleId] = useState<string | null>(null);
 
   async function handleSubmit(values: GeneratorSchemaType) {
     setErrorMessage(null);
@@ -78,6 +79,7 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
 
   async function handleToggleActive(generator: GeneratorDto) {
     setErrorMessage(null);
+    setPendingToggleId(generator.generatorId);
     try {
       if (generator.isActive) {
         await deactivateGenerator({ id: generator.generatorId }).unwrap();
@@ -86,6 +88,8 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
       }
     } catch (err) {
       setErrorMessage(toUserMessage(toApiError(err) ?? err));
+    } finally {
+      setPendingToggleId(null);
     }
   }
 
@@ -167,6 +171,7 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
                             size="icon"
                             variant="outline"
                             aria-label={generator.isActive ? 'Deactivate generator' : 'Reactivate generator'}
+                            disabled={pendingToggleId === generator.generatorId}
                             onClick={() => handleToggleActive(generator)}
                           >
                             {generator.isActive ? <PowerOff /> : <Power />}
