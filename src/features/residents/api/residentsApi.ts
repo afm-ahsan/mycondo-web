@@ -1,15 +1,20 @@
 import {
   useGetApiV1PropertiesFlatOwnershipsQuery,
   useGetApiV1PropertiesOwnersByResidentIdOwnershipsQuery,
+  useGetApiV1ResidentsByIdHouseholdMembersQuery,
   useGetApiV1ResidentsByIdQuery,
   useGetApiV1ResidentsQuery,
   usePostApiV1PropertiesFlatOwnershipsMutation,
+  usePostApiV1PropertiesFlatOwnershipsOwnerResidentProfileMutation,
   usePostApiV1PropertiesFlatOwnershipsRegisterMutation,
   usePostApiV1ResidentsByIdDisableMutation,
+  usePostApiV1ResidentsByIdHouseholdMembersMutation,
   usePostApiV1ResidentsByIdLinkUserMutation,
+  usePostApiV1ResidentsHouseholdMembersByIdDeactivateMutation,
   usePostApiV1ResidentsMutation,
   usePutApiV1PropertiesFlatOwnershipsOwnersByResidentIdProfileMutation,
   usePutApiV1ResidentsByIdMutation,
+  usePutApiV1ResidentsHouseholdMembersByIdMutation,
   useDeleteApiV1PropertiesFlatOwnershipsByIdMutation,
 } from '@/api/generated/mycondoApi';
 
@@ -28,5 +33,11 @@ export const useFlatOwners = useGetApiV1PropertiesFlatOwnershipsQuery;
 export const useFlatOwnershipsForOwner = useGetApiV1PropertiesOwnersByResidentIdOwnershipsQuery;
 export const useCreateFlatOwnership = usePostApiV1PropertiesFlatOwnershipsMutation;
 export const useRegisterFlatOwner = usePostApiV1PropertiesFlatOwnershipsRegisterMutation;
+export const useSaveOwnerResidentProfile = usePostApiV1PropertiesFlatOwnershipsOwnerResidentProfileMutation;
 export const useUpdateFlatOwnerProfile = usePutApiV1PropertiesFlatOwnershipsOwnersByResidentIdProfileMutation;
 export const useEndFlatOwnership = useDeleteApiV1PropertiesFlatOwnershipsByIdMutation;
+
+export const useOwnerHouseholdMembers = useGetApiV1ResidentsByIdHouseholdMembersQuery;
+export const useAddOwnerHouseholdMember = usePostApiV1ResidentsByIdHouseholdMembersMutation;
+export const useUpdateOwnerHouseholdMember = usePutApiV1ResidentsHouseholdMembersByIdMutation;
+export const useDeactivateOwnerHouseholdMember = usePostApiV1ResidentsHouseholdMembersByIdDeactivateMutation;

@@ -6,8 +6,8 @@ interface OwnerDocumentsStepProps {
   onFinish: () => void;
 }
 
-/** Step 5 — owner documents (ownership/deed, NID/passport copy, photograph), recorded against the
- * Resident created in Step 4. */
+/** Step 4 — owner documents (ownership/deed, NID/passport copy, photograph), recorded against the
+ * Resident created in Step 2. */
 export function OwnerDocumentsStep({ residentId, onFinish }: OwnerDocumentsStepProps) {
   return (
     <div className="space-y-4">
@@ -22,7 +22,7 @@ export function OwnerDocumentsStep({ residentId, onFinish }: OwnerDocumentsStepP
 
       <div className="flex gap-2 border-t pt-4">
         <Button type="button" onClick={onFinish}>
-          Finish
+          Continue
         </Button>
       </div>
     </div>

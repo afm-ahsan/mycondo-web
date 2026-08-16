@@ -15,9 +15,9 @@ import {
   StepperTrigger,
 } from '@/components/ui/stepper';
 import { PageHeader } from '@/components/shared/PageHeader';
-import { OwnerAdditionalInfoStep } from '../components/OwnerAdditionalInfoStep';
 import { OwnerContactIdentityStep } from '../components/OwnerContactIdentityStep';
 import { OwnerDocumentsStep } from '../components/OwnerDocumentsStep';
+import { OwnerHouseholdStep } from '../components/OwnerHouseholdStep';
 import { OwnerReviewSubmitStep } from '../components/OwnerReviewSubmitStep';
 import { PropertyOwnershipStep } from '../components/PropertyOwnershipStep';
 import {
@@ -28,18 +28,20 @@ import {
 const STEPS = [
   { step: 1, title: 'Property & Ownership' },
   { step: 2, title: 'Contact & Identity' },
-  { step: 3, title: 'Additional Info' },
-  { step: 4, title: 'Review & Submit' },
-  { step: 5, title: 'Documents' },
+  { step: 3, title: 'Household' },
+  { step: 4, title: 'Documents' },
+  { step: 5, title: 'Review & Submit' },
 ];
 
 /**
- * Guided Flat Owner Registration wizard. Unlike Tenant Registration, there is no Draft/Submitted
- * approval lifecycle here — ownership registration has no concrete approval requirement (see the task
- * brief's "do not introduce approval workflow without a concrete requirement"), so this wizard holds
- * every step's data in one local form instance and only calls the backend once, atomically, at Review
- * & Submit (RegisterFlatOwnerCommand). Documents move to the last step, after that call, because an
- * attachment needs a real Resident id to record against.
+ * Guided Flat Owner Registration wizard, matching Tenant Registration's 5-step shape: Property &
+ * Ownership / Contact & Identity / Household / Documents / Review & Submit. Unlike Tenant
+ * Registration, there is still no Draft/Submitted approval lifecycle — ownership registration has no
+ * concrete approval requirement — but Steps 2 onward now persist incrementally: Step 2's "Save &
+ * Continue" creates/updates the shared Resident (SaveOwnerResidentProfileCommand) without granting
+ * FlatOwnership yet, which is what lets Household (Step 3) and Documents (Step 4) attach to a real
+ * Resident id before Review & Submit (Step 5) grants the actual FlatOwnership
+ * (CreateFlatOwnershipCommand) — the one truly atomic, business-meaningful commitment.
  */
 export function FlatOwnerRegistrationWizardPage() {
   const navigate = useNavigate();
@@ -62,6 +64,9 @@ export function FlatOwnerRegistrationWizardPage() {
       gender: '',
       presentAddress: '',
       permanentAddress: '',
+      bloodGroup: '',
+      religion: '',
+      nationality: '',
       fatherName: '',
       motherName: '',
       maritalStatus: '',
@@ -75,10 +80,9 @@ export function FlatOwnerRegistrationWizardPage() {
 
   useUnsavedChangesGuard(form.formState.isDirty && !residentId);
 
-  // Step components call this after their own validation passes, so forward moves triggered by
-  // "Save & Continue" are always allowed. The Stepper nav's own `disabled` prop below is what stops a
-  // user from jumping ahead by clicking a future step directly — steps 1-4 are all local (no backend
-  // draft to resume), so skipping ahead would show fields that were never validated.
+  // Step components call this after their own validation/save passes, so forward moves are always
+  // allowed. The Stepper nav's own `disabled` prop below is what stops a user from jumping ahead by
+  // clicking a future step directly — steps 3-5 all need a real Resident id (created in Step 2).
   function goToStep(step: number) {
     setActiveStep(step);
   }
@@ -104,7 +108,7 @@ export function FlatOwnerRegistrationWizardPage() {
                 <StepperItem
                   key={step}
                   step={step}
-                  disabled={step > activeStep && !(step === 5 && residentId)}
+                  disabled={step > activeStep && !(step >= 3 && residentId)}
                 >
                   <StepperTrigger>
                     <StepperIndicator>{step}</StepperIndicator>
@@ -125,33 +129,33 @@ export function FlatOwnerRegistrationWizardPage() {
             {activeStep === 2 && (
               <OwnerContactIdentityStep
                 form={form}
-                onNext={() => goToStep(3)}
-                onBack={() => goToStep(1)}
-              />
-            )}
-            {activeStep === 3 && (
-              <OwnerAdditionalInfoStep
-                form={form}
-                onNext={() => goToStep(4)}
-                onBack={() => goToStep(2)}
-              />
-            )}
-            {activeStep === 4 && (
-              <OwnerReviewSubmitStep
-                form={form}
-                onBack={() => goToStep(3)}
-                onRegistered={(id) => {
+                onSaved={(id) => {
                   setResidentId(id);
-                  setActiveStep(5);
+                  goToStep(3);
                 }}
+                onBack={() => goToStep(1)}
               />
             )}
           </Form>
 
-          {activeStep === 5 && residentId && (
-            <OwnerDocumentsStep
+          {activeStep === 3 && residentId && (
+            <OwnerHouseholdStep
               residentId={residentId}
-              onFinish={() => navigate('/residents/flat-owners')}
+              onContinue={() => goToStep(4)}
+              onBack={() => goToStep(2)}
+            />
+          )}
+
+          {activeStep === 4 && residentId && (
+            <OwnerDocumentsStep residentId={residentId} onFinish={() => goToStep(5)} />
+          )}
+
+          {activeStep === 5 && residentId && (
+            <OwnerReviewSubmitStep
+              form={form}
+              residentId={residentId}
+              onBack={() => goToStep(4)}
+              onRegistered={() => navigate('/residents/flat-owners')}
             />
           )}
         </CardContent>

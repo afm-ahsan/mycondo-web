@@ -63,7 +63,12 @@ export function ReviewSubmitStep({ registrationId, onBack }: ReviewSubmitStepPro
         <ReviewField label="Phone">{registration.primaryPhone ?? '—'}</ReviewField>
         <ReviewField label="Email">{registration.primaryEmail ?? '—'}</ReviewField>
         <ReviewField label="National ID">{registration.primaryNationalIdNumberMasked ?? '—'}</ReviewField>
+        <ReviewField label="Gender">{registration.primaryGender ?? '—'}</ReviewField>
         <ReviewField label="Date of birth">{registration.primaryDateOfBirth ?? '—'}</ReviewField>
+        <ReviewField label="Blood group">{registration.primaryBloodGroup ?? '—'}</ReviewField>
+        <ReviewField label="Religion">{registration.primaryReligion ?? '—'}</ReviewField>
+        <ReviewField label="Nationality">{registration.primaryNationality ?? '—'}</ReviewField>
+        <ReviewField label="Profession">{registration.primaryProfession ?? '—'}</ReviewField>
         <ReviewField label="Permanent address">{registration.primaryPermanentAddress ?? '—'}</ReviewField>
         <ReviewField label="Emergency contact">
           {registration.emergencyContactName
@@ -71,10 +76,23 @@ export function ReviewSubmitStep({ registrationId, onBack }: ReviewSubmitStepPro
             : '—'}
         </ReviewField>
         <ReviewField label="Expected move-in">{registration.moveInExpectedDate ?? '—'}</ReviewField>
-        <ReviewField label="Household members">
-          {activeMembers.length === 0 ? 'None' : activeMembers.map((m) => m.fullName).join(', ')}
-        </ReviewField>
       </dl>
+
+      <div className="border-t pt-4">
+        <h4 className="mb-2 text-sm font-medium">Household</h4>
+        {activeMembers.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No household members added.</p>
+        ) : (
+          <ul className="space-y-1 text-sm">
+            {activeMembers.map((m) => (
+              <li key={m.householdMemberId}>
+                {m.relationshipToPrimary} — {m.fullName}
+                {m.gender ? ` (${m.gender}${m.dateOfBirth ? `, DOB ${m.dateOfBirth}` : ''})` : ''}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="flex gap-2 border-t pt-4">
         <Button type="button" variant="outline" onClick={onBack}>

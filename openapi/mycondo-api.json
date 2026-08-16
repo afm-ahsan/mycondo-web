@@ -98,6 +98,116 @@
         }
       }
     },
+    "/api/v1/residents/household-members/{id}": {
+      "put": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOwnerHouseholdMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/residents/household-members/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household-members/{id}": {
+      "put": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHouseholdMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/household-members/{id}/deactivate": {
       "post": {
         "tags": [
@@ -2190,6 +2300,35 @@
         }
       }
     },
+    "/api/v1/properties/flat-ownerships/owner-resident-profile": {
+      "post": {
+        "tags": [
+          "Property"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveOwnerResidentProfileCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/properties/flat-ownerships/owners/{residentId}/profile": {
       "put": {
         "tags": [
@@ -2463,6 +2602,77 @@
         "responses": {
           "204": {
             "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/residents/{id}/household-members": {
+      "get": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddOwnerHouseholdMemberRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                }
+              }
+            }
           }
         }
       }
@@ -10516,7 +10726,13 @@
           "relationshipToPrimary",
           "dateOfBirth",
           "phone",
-          "nationalIdNumber"
+          "nationalIdNumber",
+          "gender",
+          "birthCertificateNumber",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation"
         ],
         "type": "object",
         "properties": {
@@ -10540,6 +10756,108 @@
             ]
           },
           "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "AddOwnerHouseholdMemberRequest": {
+        "required": [
+          "fullName",
+          "relationshipType",
+          "gender",
+          "dateOfBirth",
+          "nationalIdNumber",
+          "birthCertificateNumber",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
             "type": [
               "null",
               "string"
@@ -12553,6 +12871,11 @@
           "primaryEmail",
           "primaryNationalIdNumber",
           "primaryDateOfBirth",
+          "primaryGender",
+          "primaryBloodGroup",
+          "primaryReligion",
+          "primaryNationality",
+          "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
           "emergencyContactPhone",
@@ -12594,6 +12917,36 @@
               "string"
             ],
             "format": "date"
+          },
+          "primaryGender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryBloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryReligion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryProfession": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "primaryPermanentAddress": {
             "type": [
@@ -14671,6 +15024,12 @@
           "dateOfBirth",
           "phone",
           "nationalIdNumberMasked",
+          "gender",
+          "birthCertificateNumberMasked",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation",
           "isActive"
         ],
         "type": "object",
@@ -14703,6 +15062,42 @@
             ]
           },
           "nationalIdNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
             "type": [
               "null",
               "string"
@@ -15363,6 +15758,11 @@
           "primaryEmail",
           "primaryNationalIdNumberMasked",
           "primaryDateOfBirth",
+          "primaryGender",
+          "primaryBloodGroup",
+          "primaryReligion",
+          "primaryNationality",
+          "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
           "emergencyContactPhone",
@@ -15422,6 +15822,36 @@
               "string"
             ],
             "format": "date"
+          },
+          "primaryGender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryBloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryReligion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryProfession": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "primaryPermanentAddress": {
             "type": [
@@ -19875,7 +20305,10 @@
           "employer",
           "officeAddress",
           "emergencyContactName",
-          "emergencyContactPhone"
+          "emergencyContactPhone",
+          "bloodGroup",
+          "religion",
+          "nationality"
         ],
         "type": "object",
         "properties": {
@@ -19988,6 +20421,24 @@
             ]
           },
           "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
             "type": [
               "null",
               "string"
@@ -20381,7 +20832,10 @@
           "employer",
           "officeAddress",
           "emergencyContactName",
-          "emergencyContactPhone"
+          "emergencyContactPhone",
+          "bloodGroup",
+          "religion",
+          "nationality"
         ],
         "type": "object",
         "properties": {
@@ -20501,6 +20955,104 @@
               "null",
               "string"
             ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "ResidentHouseholdMemberDto": {
+        "required": [
+          "residentHouseholdMemberId",
+          "residentId",
+          "fullName",
+          "relationshipType",
+          "gender",
+          "dateOfBirth",
+          "nationalIdNumberMasked",
+          "birthCertificateNumberMasked",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "residentHouseholdMemberId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "residentId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationalIdNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumberMasked": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -20606,6 +21158,164 @@
             ]
           }
         }
+      },
+      "SaveOwnerResidentProfileCommand": {
+        "required": [
+          "flatId",
+          "fullName",
+          "phone",
+          "email",
+          "alternatePhone",
+          "nationalIdNumber",
+          "passportNumber",
+          "dateOfBirth",
+          "gender",
+          "presentAddress",
+          "permanentAddress",
+          "fatherName",
+          "motherName",
+          "maritalStatus",
+          "profession",
+          "employer",
+          "officeAddress",
+          "emergencyContactName",
+          "emergencyContactPhone",
+          "bloodGroup",
+          "religion",
+          "nationality"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fullName": {
+            "type": "string"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "email": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "alternatePhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "passportNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "presentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "permanentAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "motherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "maritalStatus": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "profession": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "employer": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "officeAddress": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "emergencyContactPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        },
+        "description": "Finds-or-creates the shared `Resident` party record for a prospective Flat Owner and sets their\r\nextended owner-profile fields — deliberately does NOT grant a `FlatOwnership` (see\r\n`CreateFlatOwnershipCommand` for that). Split out from `RegisterFlatOwnerCommand` so the\r\nFlat Owner Registration wizard can persist identity/contact/household/document data incrementally\r\n(Household and Documents steps need a real ResidentId before the final Review/Submit step) while the actual\r\nownership grant — the business-meaningful commitment — still happens atomically at the end, exactly\r\nlike today. A Resident created here with no FlatOwnership ever granted is an accepted, inert\r\nabandoned-draft outcome, the same class of limitation Tenant Registration's Draft\r\nOccupancyRegistration already has."
       },
       "SebaVisitDto": {
         "required": [
@@ -21436,7 +22146,10 @@
           "employer",
           "officeAddress",
           "emergencyContactName",
-          "emergencyContactPhone"
+          "emergencyContactPhone",
+          "bloodGroup",
+          "religion",
+          "nationality"
         ],
         "type": "object",
         "properties": {
@@ -21545,6 +22258,24 @@
               "null",
               "string"
             ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -21647,6 +22378,85 @@
           }
         }
       },
+      "UpdateHouseholdMemberRequest": {
+        "required": [
+          "fullName",
+          "relationshipToPrimary",
+          "dateOfBirth",
+          "phone",
+          "nationalIdNumber",
+          "gender",
+          "birthCertificateNumber",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipToPrimary": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "phone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "gender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "UpdateMaintenanceScheduleRequest": {
         "required": [
           "nextDueDate",
@@ -21697,6 +22507,11 @@
           "primaryEmail",
           "primaryNationalIdNumber",
           "primaryDateOfBirth",
+          "primaryGender",
+          "primaryBloodGroup",
+          "primaryReligion",
+          "primaryNationality",
+          "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
           "emergencyContactPhone",
@@ -21731,6 +22546,36 @@
               "string"
             ],
             "format": "date"
+          },
+          "primaryGender": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryBloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryReligion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryProfession": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "primaryPermanentAddress": {
             "type": [
@@ -21770,6 +22615,72 @@
             "type": "string"
           },
           "code": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "UpdateOwnerHouseholdMemberRequest": {
+        "required": [
+          "fullName",
+          "relationshipType",
+          "gender",
+          "dateOfBirth",
+          "nationalIdNumber",
+          "birthCertificateNumber",
+          "bloodGroup",
+          "religion",
+          "nationality",
+          "occupation"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "relationshipType": {
+            "type": "string"
+          },
+          "gender": {
+            "type": "string"
+          },
+          "dateOfBirth": {
+            "type": "string",
+            "format": "date"
+          },
+          "nationalIdNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "birthCertificateNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "bloodGroup": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "religion": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "nationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "occupation": {
             "type": [
               "null",
               "string"
@@ -22151,6 +23062,9 @@
       "name": "Property"
     },
     {
+      "name": "Residents"
+    },
+    {
       "name": "Tenant Registrations"
     },
     {
@@ -22170,9 +23084,6 @@
     },
     {
       "name": "Users"
-    },
-    {
-      "name": "Residents"
     },
     {
       "name": "Expenses"
