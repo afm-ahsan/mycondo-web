@@ -52,7 +52,7 @@ export function ConfirmActionDialog({
   return (
     <AlertDialog open={open} onOpenChange={(next) => !isLoading && onOpenChange(next)}>
       <AlertDialogContent>
-        <AlertDialogHeader>
+        <AlertDialogHeader className={icon ? 'text-center' : undefined}>
           {icon && <div className="mx-auto">{icon}</div>}
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription asChild>
