@@ -1,6 +1,6 @@
 'use client';
 
-import { JSX, useCallback } from 'react';
+import { JSX, useCallback, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
@@ -35,13 +35,44 @@ const classNames: AccordionMenuClassNames = {
  * sidebar (`layouts/platform/components/sidebar-menu.tsx`), each of which filters against its own
  * auth slice before passing `menu` in here.
  */
+/** Strips a trailing slash (except the root `/` itself) so equivalent routes compare equal. */
+function normalizeRoute(path: string): string {
+  return path.length > 1 ? path.replace(/\/+$/, '') : path;
+}
+
+/** Collects every navigable `path` in the menu tree, including nested children. */
+function collectPaths(items: MenuConfig, acc: string[] = []): string[] {
+  for (const item of items) {
+    if (item.path) acc.push(normalizeRoute(item.path));
+    if (item.children) collectPaths(item.children, acc);
+  }
+  return acc;
+}
+
 export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
   const { pathname } = useLocation();
+  const currentPath = normalizeRoute(pathname);
 
-  const matchPath = useCallback(
-    (path: string): boolean => path === pathname || (path.length > 1 && pathname.startsWith(path)),
-    [pathname],
-  );
+  // Route is the single source of truth for active state. Rather than matching each menu item's
+  // path against the current route independently (which made `/residents` — Resident Directory —
+  // match as a *prefix* of `/residents/flat-owners`, activating both), find the one menu path that
+  // owns the current route: the longest registered path that is either an exact match or an
+  // ancestor of it (segment-bounded, so `/residents` never matches `/residents-foo`). Detail/
+  // create/edit routes not present in the menu (e.g. `/residents/flat-owners/123/edit`) still
+  // resolve to their nearest registered ancestor (`/residents/flat-owners`) via the same rule.
+  const activePath = useMemo(() => {
+    const paths = collectPaths(menu);
+    let best: string | undefined;
+    for (const path of paths) {
+      const matches = path === currentPath || (path.length > 1 && currentPath.startsWith(`${path}/`));
+      if (matches && (!best || path.length > best.length)) {
+        best = path;
+      }
+    }
+    return best;
+  }, [menu, currentPath]);
+
+  const matchPath = useCallback((path: string): boolean => path === activePath, [activePath]);
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
     return items.map((item: MenuItem, index: number) => {
