@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { Link, MemoryRouter } from 'react-router-dom';
 import { AppSidebarMenu } from './AppSidebarMenu';
 import type { MenuConfig } from '@/config/types';
@@ -104,5 +104,60 @@ describe('AppSidebarMenu — active state is route-driven and exclusive', () => 
     const flatOwners = await screen.findByRole('link', { name: 'Flat Owners' });
     expect(flatOwners).toHaveAttribute('aria-current', 'page');
     expect(screen.getByRole('link', { name: 'Resident Directory' })).not.toHaveAttribute('aria-current');
+  });
+});
+
+// Stubs a `DOMRect`-shaped return so the component's own visibility math (compared against the
+// scroll container's rect) can be driven deterministically — jsdom never lays elements out, so
+// every `getBoundingClientRect()` is zero by default.
+function mockRect(target: Element, rect: { top: number; bottom: number }) {
+  vi.spyOn(target, 'getBoundingClientRect').mockReturnValue({
+    top: rect.top,
+    bottom: rect.bottom,
+    left: 0,
+    right: 0,
+    width: 0,
+    height: rect.bottom - rect.top,
+    x: 0,
+    y: rect.top,
+    toJSON: () => {},
+  } as DOMRect);
+}
+
+describe('AppSidebarMenu — keeps the active item visible inside the sidebar scroll container', () => {
+  it('scrolls the sidebar container (not the page) when the newly active item starts below the visible area', async () => {
+    const user = userEvent.setup();
+    renderAt('/residents');
+
+    const scrollContainer = screen
+      .getByRole('link', { name: 'Resident Directory' })
+      .closest('.kt-scrollable-y-hover') as HTMLElement;
+    mockRect(scrollContainer, { top: 0, bottom: 400 });
+    mockRect(screen.getByRole('link', { name: 'Flat Owners' }), { top: 450, bottom: 470 });
+    const scrollBySpy = vi.fn();
+    scrollContainer.scrollBy = scrollBySpy;
+
+    await user.click(screen.getByRole('link', { name: 'Flat Owners' }));
+
+    expect(scrollBySpy).toHaveBeenCalledTimes(1);
+    // Container bottom (400) minus the 8px margin (392) vs. the active item's bottom (470).
+    expect(scrollBySpy).toHaveBeenCalledWith({ top: 78, behavior: 'smooth' });
+  });
+
+  it('does not scroll when the newly active item is already fully visible', async () => {
+    const user = userEvent.setup();
+    renderAt('/residents');
+
+    const scrollContainer = screen
+      .getByRole('link', { name: 'Resident Directory' })
+      .closest('.kt-scrollable-y-hover') as HTMLElement;
+    mockRect(scrollContainer, { top: 0, bottom: 400 });
+    mockRect(screen.getByRole('link', { name: 'Flat Owners' }), { top: 100, bottom: 120 });
+    const scrollBySpy = vi.fn();
+    scrollContainer.scrollBy = scrollBySpy;
+
+    await user.click(screen.getByRole('link', { name: 'Flat Owners' }));
+
+    expect(scrollBySpy).not.toHaveBeenCalled();
   });
 });

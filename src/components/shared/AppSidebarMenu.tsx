@@ -1,6 +1,6 @@
 'use client';
 
-import { JSX, useCallback, useMemo } from 'react';
+import { JSX, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { MenuConfig, MenuItem } from '@/config/types';
 import { cn } from '@/lib/utils';
@@ -52,6 +52,7 @@ function collectPaths(items: MenuConfig, acc: string[] = []): string[] {
 export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
   const { pathname } = useLocation();
   const currentPath = normalizeRoute(pathname);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Route is the single source of truth for active state. Rather than matching each menu item's
   // path against the current route independently (which made `/residents` — Resident Directory —
@@ -73,6 +74,53 @@ export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
   }, [menu, currentPath]);
 
   const matchPath = useCallback((path: string): boolean => path === activePath, [activePath]);
+
+  // Keeps the active leaf visible inside the sidebar's own scroll container whenever the route
+  // changes — Quick Actions/Links, browser back/forward, direct URL, and refresh all land here
+  // since they all funnel through `activePath`. Runs once immediately (covers same-level
+  // navigation and initial mount, where `AccordionMenu`'s active chain is already expanded) and
+  // again on the accordion's own open-animation completion — a just-expanded parent's content is
+  // unmounted until then (Radix Presence), so its final position isn't known any earlier, and
+  // there's no arbitrary delay involved.
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    const scrollActiveIntoView = () => {
+      const active = container.querySelector<HTMLElement>('[aria-current="page"]');
+      if (!active) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const activeRect = active.getBoundingClientRect();
+      const margin = 8;
+
+      let delta = 0;
+      if (activeRect.top < containerRect.top + margin) {
+        delta = activeRect.top - containerRect.top - margin;
+      } else if (activeRect.bottom > containerRect.bottom - margin) {
+        delta = activeRect.bottom - containerRect.bottom + margin;
+      }
+      if (delta !== 0) {
+        if (typeof container.scrollBy === 'function') {
+          container.scrollBy({ top: delta, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+        } else {
+          container.scrollTop += delta;
+        }
+      }
+    };
+
+    scrollActiveIntoView();
+
+    const handleAnimationEnd = (event: AnimationEvent) => {
+      if ((event.target as HTMLElement).getAttribute('data-state') === 'open') {
+        scrollActiveIntoView();
+      }
+    };
+    container.addEventListener('animationend', handleAnimationEnd);
+    return () => container.removeEventListener('animationend', handleAnimationEnd);
+  }, [activePath]);
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
     return items.map((item: MenuItem, index: number) => {
@@ -205,7 +253,10 @@ export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
   };
 
   return (
-    <div className="kt-scrollable-y-hover flex grow shrink-0 py-5 px-5 lg:max-h-[calc(100vh-5.5rem)]">
+    <div
+      ref={scrollContainerRef}
+      className="kt-scrollable-y-hover flex grow shrink-0 py-5 px-5 lg:max-h-[calc(100vh-5.5rem)]"
+    >
       <AccordionMenu
         selectedValue={pathname}
         matchPath={matchPath}
