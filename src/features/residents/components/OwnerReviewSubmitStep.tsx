@@ -9,51 +9,38 @@ import { toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useRegisterFlatOwner } from '../api/residentsApi';
+import { useCreateFlatOwnership, useOwnerHouseholdMembers } from '../api/residentsApi';
 import type { FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegistrationSchema';
 
 interface OwnerReviewSubmitStepProps {
   form: UseFormReturn<FlatOwnerRegistrationSchemaType>;
+  residentId: string;
   onBack: () => void;
-  onRegistered: (residentId: string) => void;
+  onRegistered: () => void;
 }
 
-/** Step 4 — read-only summary, then Submit performs the single atomic RegisterFlatOwnerCommand call
- * that creates the Resident and grants the first FlatOwnership. There is no draft/approval lifecycle
- * to advance here, unlike Tenant Registration — this step both finalizes and creates the record. */
-export function OwnerReviewSubmitStep({ form, onBack, onRegistered }: OwnerReviewSubmitStepProps) {
-  const [register, { isLoading }] = useRegisterFlatOwner();
+/** Step 5 — read-only summary, then Submit grants the FlatOwnership (CreateFlatOwnershipCommand) for
+ * the Resident already created and saved in Step 2. Unlike the old atomic RegisterFlatOwnerCommand
+ * flow, the Resident/Household/Documents are already persisted by this point — this step only
+ * finalizes the actual ownership grant, the one truly business-meaningful commitment. */
+export function OwnerReviewSubmitStep({ form, residentId, onBack, onRegistered }: OwnerReviewSubmitStepProps) {
+  const [createOwnership, { isLoading }] = useCreateFlatOwnership();
+  const { data: members } = useOwnerHouseholdMembers({ id: residentId });
   const [error, setError] = useState<string | null>(null);
   const values = form.getValues();
+  const activeMembers = members?.filter((m) => m.isActive) ?? [];
 
   async function handleSubmit() {
     setError(null);
     try {
-      const result = await register({
-        registerFlatOwnerCommand: {
+      await createOwnership({
+        createFlatOwnershipCommand: {
+          residentId,
           flatId: values.flatId,
           startDate: values.startDate,
-          fullName: values.fullName,
-          phone: values.phone || null,
-          email: values.email || null,
-          alternatePhone: values.alternatePhone || null,
-          nationalIdNumber: values.nationalIdNumber || null,
-          passportNumber: values.passportNumber || null,
-          dateOfBirth: values.dateOfBirth || null,
-          gender: values.gender || null,
-          presentAddress: values.presentAddress || null,
-          permanentAddress: values.permanentAddress || null,
-          fatherName: values.fatherName || null,
-          motherName: values.motherName || null,
-          maritalStatus: values.maritalStatus || null,
-          profession: values.profession || null,
-          employer: values.employer || null,
-          officeAddress: values.officeAddress || null,
-          emergencyContactName: values.emergencyContactName || null,
-          emergencyContactPhone: values.emergencyContactPhone || null,
         },
       }).unwrap();
-      onRegistered(result.residentId);
+      onRegistered();
     } catch (err) {
       setError(toUserMessage(toApiError(err) ?? err));
     }
@@ -80,7 +67,11 @@ export function OwnerReviewSubmitStep({ form, onBack, onRegistered }: OwnerRevie
         <ReviewField label="Email">{values.email || '—'}</ReviewField>
         <ReviewField label="National ID">{values.nationalIdNumber || '—'}</ReviewField>
         <ReviewField label="Passport">{values.passportNumber || '—'}</ReviewField>
+        <ReviewField label="Gender">{values.gender || '—'}</ReviewField>
         <ReviewField label="Date of birth">{values.dateOfBirth || '—'}</ReviewField>
+        <ReviewField label="Blood group">{values.bloodGroup || '—'}</ReviewField>
+        <ReviewField label="Religion">{values.religion || '—'}</ReviewField>
+        <ReviewField label="Nationality">{values.nationality || '—'}</ReviewField>
         <ReviewField label="Present address">{values.presentAddress || '—'}</ReviewField>
         <ReviewField label="Permanent address">{values.permanentAddress || '—'}</ReviewField>
         <ReviewField label="Profession">{values.profession || '—'}</ReviewField>
@@ -90,6 +81,21 @@ export function OwnerReviewSubmitStep({ form, onBack, onRegistered }: OwnerRevie
             : '—'}
         </ReviewField>
       </dl>
+
+      <div className="border-t pt-4">
+        <h4 className="mb-2 text-sm font-medium">Household</h4>
+        {activeMembers.length === 0 ? (
+          <p className="text-muted-foreground text-sm">No family members added.</p>
+        ) : (
+          <ul className="space-y-1 text-sm">
+            {activeMembers.map((m) => (
+              <li key={m.residentHouseholdMemberId}>
+                {m.relationshipType} — {m.fullName} ({m.gender}, DOB {m.dateOfBirth})
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       <div className="flex gap-2 border-t pt-4">
         <Button type="button" variant="outline" onClick={onBack} disabled={isLoading}>

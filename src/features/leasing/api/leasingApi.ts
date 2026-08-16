@@ -23,6 +23,7 @@ import {
   usePostApiV1OccupancyRegistrationsMutation,
   usePostApiV1VehicleAssignmentsByIdEndMutation,
   usePostApiV1WorkerAssignmentsByIdEndMutation,
+  usePutApiV1HouseholdMembersByIdMutation,
   usePutApiV1OccupancyRegistrationsByIdMutation,
   usePutApiV1OccupancyRegistrationsByIdPrimaryPhotoMutation,
 } from '@/api/generated/mycondoApi';
@@ -50,6 +51,7 @@ export const useMoveOutTenantRegistration = usePostApiV1OccupancyRegistrationsBy
 export const useTenantRegistrationStatusHistory = useGetApiV1OccupancyRegistrationsByIdStatusHistoryQuery;
 export const useHouseholdMembers = useGetApiV1OccupancyRegistrationsByIdHouseholdMembersQuery;
 export const useAddHouseholdMember = usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation;
+export const useUpdateHouseholdMember = usePutApiV1HouseholdMembersByIdMutation;
 export const useDeactivateHouseholdMember = usePostApiV1HouseholdMembersByIdDeactivateMutation;
 export const useWorkerAssignments = useGetApiV1OccupancyRegistrationsByIdWorkerAssignmentsQuery;
 export const useAssignWorker = usePostApiV1OccupancyRegistrationsByIdWorkerAssignmentsMutation;

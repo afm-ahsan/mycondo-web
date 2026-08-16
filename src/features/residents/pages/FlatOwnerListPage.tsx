@@ -272,6 +272,9 @@ function FlatOwnerDetailDialog({
           officeAddress: null,
           emergencyContactName: null,
           emergencyContactPhone: null,
+          bloodGroup: null,
+          religion: null,
+          nationality: null,
         },
       }).unwrap();
       toast.success('Owner profile updated.');

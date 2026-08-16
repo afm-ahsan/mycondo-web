@@ -7,29 +7,32 @@ import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
+import { Input } from '@/components/ui/input';
 import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
 import { GenderSelect } from '@/components/shared/GenderSelect';
 import { HouseholdMemberCard } from '@/components/shared/HouseholdMemberCard';
-import { Input } from '@/components/ui/input';
 import { RelationshipSelect } from '@/components/shared/RelationshipSelect';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useAddHouseholdMember, useDeactivateHouseholdMember, useHouseholdMembers, useUpdateHouseholdMember } from '../api/leasingApi';
-import { householdMemberSchema, type HouseholdMemberSchemaType } from '../schemas/householdMemberSchema';
+import {
+  useAddOwnerHouseholdMember,
+  useDeactivateOwnerHouseholdMember,
+  useOwnerHouseholdMembers,
+  useUpdateOwnerHouseholdMember,
+} from '../api/residentsApi';
+import { ownerHouseholdMemberSchema, type OwnerHouseholdMemberSchemaType } from '../schemas/ownerHouseholdMemberSchema';
 
-interface HouseholdMembersStepProps {
-  registrationId: string;
+interface OwnerHouseholdStepProps {
+  residentId: string;
   onContinue: () => void;
   onBack: () => void;
 }
 
-const EMPTY_VALUES: HouseholdMemberSchemaType = {
+const EMPTY_VALUES: OwnerHouseholdMemberSchemaType = {
   fullName: '',
-  relationshipToPrimary: '',
-  dateOfBirth: '',
+  relationshipType: '',
   gender: '',
-  phone: '',
+  dateOfBirth: '',
   nationalIdNumber: '',
   birthCertificateNumber: '',
   bloodGroup: '',
@@ -38,33 +41,33 @@ const EMPTY_VALUES: HouseholdMemberSchemaType = {
   occupation: '',
 };
 
-/** Step 3 — the household member list. Optional (a single-occupant registration can skip straight
- * to Continue); each member is its own backend record, added/updated/deactivated immediately rather
- * than batched with the rest of the wizard, so the list here is always the source of truth. */
-export function HouseholdMembersStep({ registrationId, onContinue, onBack }: HouseholdMembersStepProps) {
-  const { data: members, isLoading: isLoadingMembers } = useHouseholdMembers({ id: registrationId });
-  const [addMember, { isLoading: isAdding }] = useAddHouseholdMember();
-  const [updateMember, { isLoading: isUpdating }] = useUpdateHouseholdMember();
-  const [deactivateMember] = useDeactivateHouseholdMember();
+/** Step 3 — Father/Mother/Spouse/Child family members, recorded against the Resident created in
+ * Step 2. Optional: a single-owner registration can skip straight to Continue. Each member is its own
+ * backend record, added/updated/deactivated immediately rather than batched with the rest of the
+ * wizard, matching Tenant Registration's Household step. */
+export function OwnerHouseholdStep({ residentId, onContinue, onBack }: OwnerHouseholdStepProps) {
+  const { data: members, isLoading: isLoadingMembers } = useOwnerHouseholdMembers({ id: residentId });
+  const [addMember, { isLoading: isAdding }] = useAddOwnerHouseholdMember();
+  const [updateMember, { isLoading: isUpdating }] = useUpdateOwnerHouseholdMember();
+  const [deactivateMember] = useDeactivateOwnerHouseholdMember();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const form = useForm<HouseholdMemberSchemaType>({
-    resolver: zodResolver(householdMemberSchema),
+  const form = useForm<OwnerHouseholdMemberSchemaType>({
+    resolver: zodResolver(ownerHouseholdMemberSchema),
     defaultValues: EMPTY_VALUES,
   });
 
-  const isChild = form.watch('relationshipToPrimary') === 'Child';
+  const isChild = form.watch('relationshipType') === 'Child';
   const isSaving = isAdding || isUpdating;
 
   function startEdit(member: NonNullable<typeof members>[number]) {
-    setEditingId(member.householdMemberId);
+    setEditingId(member.residentHouseholdMemberId);
     form.reset({
       fullName: member.fullName,
-      relationshipToPrimary: member.relationshipToPrimary,
-      dateOfBirth: member.dateOfBirth ?? '',
-      gender: member.gender ?? '',
-      phone: member.phone ?? '',
+      relationshipType: member.relationshipType,
+      gender: member.gender,
+      dateOfBirth: member.dateOfBirth,
       // National ID / Birth Certificate are masked on read and can never be round-tripped back into
       // this form — leaving these blank on submit preserves the existing value server-side.
       nationalIdNumber: '',
@@ -81,15 +84,14 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
     form.reset(EMPTY_VALUES);
   }
 
-  async function onSubmit(values: HouseholdMemberSchemaType) {
+  async function onSubmit(values: OwnerHouseholdMemberSchemaType) {
     setError(null);
     const request = {
       fullName: values.fullName,
-      relationshipToPrimary: values.relationshipToPrimary,
-      dateOfBirth: values.dateOfBirth || null,
-      phone: values.phone || null,
+      relationshipType: values.relationshipType,
+      gender: values.gender,
+      dateOfBirth: values.dateOfBirth,
       nationalIdNumber: values.nationalIdNumber || null,
-      gender: values.gender || null,
       birthCertificateNumber: values.birthCertificateNumber || null,
       bloodGroup: values.bloodGroup || null,
       religion: values.religion || null,
@@ -99,9 +101,9 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
 
     try {
       if (editingId) {
-        await updateMember({ id: editingId, updateHouseholdMemberRequest: request }).unwrap();
+        await updateMember({ id: editingId, updateOwnerHouseholdMemberRequest: request }).unwrap();
       } else {
-        await addMember({ id: registrationId, addHouseholdMemberRequest: request }).unwrap();
+        await addMember({ id: residentId, addOwnerHouseholdMemberRequest: request }).unwrap();
       }
       setEditingId(null);
       form.reset(EMPTY_VALUES);
@@ -127,28 +129,21 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
         </Alert>
       )}
 
-      {isLoadingMembers ? (
-        <p className="text-muted-foreground text-sm">Loading household members…</p>
-      ) : activeMembers.length > 0 ? (
+      {!isLoadingMembers && activeMembers.length > 0 && (
         <div className="space-y-2">
           {activeMembers.map((member) => (
             <HouseholdMemberCard
-              key={member.householdMemberId}
-              relationshipLabel={member.relationshipToPrimary}
+              key={member.residentHouseholdMemberId}
+              relationshipLabel={member.relationshipType}
               fullName={member.fullName}
               gender={member.gender}
               dateOfBirth={member.dateOfBirth}
               onEdit={() => startEdit(member)}
-              onRemove={() => deactivateMember({ id: member.householdMemberId })}
+              onRemove={() => deactivateMember({ id: member.residentHouseholdMemberId })}
               disabled={isSaving}
             />
           ))}
         </div>
-      ) : (
-        <p className="text-muted-foreground text-sm">
-          No household members added yet. Add family members below, or continue if the primary occupant
-          lives alone.
-        </p>
       )}
 
       <Card>
@@ -171,7 +166,7 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
                 />
                 <FormField
                   control={form.control}
-                  name="relationshipToPrimary"
+                  name="relationshipType"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Relationship</FormLabel>
@@ -209,33 +204,6 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
                 />
                 <FormField
                   control={form.control}
-                  name="phone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mobile number (optional)</FormLabel>
-                      <FormControl>
-                        <BangladeshPhoneInput {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="bloodGroup"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Blood group (optional)</FormLabel>
-                      <BloodGroupSelect value={field.value} onChange={field.onChange} />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                <FormField
-                  control={form.control}
                   name="nationalIdNumber"
                   render={({ field }) => (
                     <FormItem>
@@ -260,22 +228,20 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
                     </FormItem>
                   )}
                 />
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <FormField
                   control={form.control}
-                  name="nationality"
+                  name="bloodGroup"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nationality (optional)</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
+                      <FormLabel>Blood group (optional)</FormLabel>
+                      <BloodGroupSelect value={field.value} onChange={field.onChange} />
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
                 <FormField
                   control={form.control}
                   name="religion"
@@ -291,10 +257,10 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
                 />
                 <FormField
                   control={form.control}
-                  name="occupation"
+                  name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>{isChild ? 'Education / Occupation (optional)' : 'Profession (optional)'}</FormLabel>
+                      <FormLabel>Nationality (optional)</FormLabel>
                       <FormControl>
                         <Input {...field} />
                       </FormControl>
@@ -304,15 +270,29 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
                 />
               </div>
 
+              <FormField
+                control={form.control}
+                name="occupation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>{isChild ? 'Education / Occupation (optional)' : 'Profession (optional)'}</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
               <div className="flex gap-2">
                 {editingId && (
                   <Button type="button" variant="outline" onClick={cancelEdit} disabled={isSaving}>
                     Cancel
                   </Button>
                 )}
-                <Button type="button" variant="outline" onClick={form.handleSubmit(onSubmit)} disabled={isSaving}>
+                <Button type="button" onClick={form.handleSubmit(onSubmit)} disabled={isSaving}>
                   <Plus className="size-4" />
-                  {editingId ? (isSaving ? 'Saving…' : 'Update household member') : isSaving ? 'Adding…' : 'Add household member'}
+                  {editingId ? (isSaving ? 'Saving…' : 'Update family member') : isSaving ? 'Adding…' : 'Add family member'}
                 </Button>
               </div>
             </div>

@@ -14,6 +14,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
+import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
+import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
+import { GenderSelect } from '@/components/shared/GenderSelect';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -52,6 +55,11 @@ export function PrimaryResidentStep({
       primaryEmail: defaultValues.primaryEmail ?? '',
       primaryNationalIdNumber: defaultValues.primaryNationalIdNumber ?? '',
       primaryDateOfBirth: defaultValues.primaryDateOfBirth ?? '',
+      primaryGender: defaultValues.primaryGender ?? '',
+      primaryBloodGroup: defaultValues.primaryBloodGroup ?? '',
+      primaryReligion: defaultValues.primaryReligion ?? '',
+      primaryNationality: defaultValues.primaryNationality ?? '',
+      primaryProfession: defaultValues.primaryProfession ?? '',
       primaryPermanentAddress: defaultValues.primaryPermanentAddress ?? '',
       emergencyContactName: defaultValues.emergencyContactName ?? '',
       emergencyContactPhone: defaultValues.emergencyContactPhone ?? '',
@@ -72,6 +80,11 @@ export function PrimaryResidentStep({
           primaryEmail: values.primaryEmail || null,
           primaryNationalIdNumber: values.primaryNationalIdNumber || null,
           primaryDateOfBirth: values.primaryDateOfBirth || null,
+          primaryGender: values.primaryGender || null,
+          primaryBloodGroup: values.primaryBloodGroup || null,
+          primaryReligion: values.primaryReligion || null,
+          primaryNationality: values.primaryNationality || null,
+          primaryProfession: values.primaryProfession || null,
           primaryPermanentAddress: values.primaryPermanentAddress || null,
           emergencyContactName: values.emergencyContactName || null,
           emergencyContactPhone: values.emergencyContactPhone || null,
@@ -144,13 +157,13 @@ export function PrimaryResidentStep({
             />
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <FormField
               control={form.control}
               name="primaryNationalIdNumber"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>National ID / Passport number (optional)</FormLabel>
+                  <FormLabel>National ID / Passport number</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -163,15 +176,80 @@ export function PrimaryResidentStep({
               name="primaryDateOfBirth"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date of birth (optional)</FormLabel>
+                  <FormLabel>Date of birth</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <DateOfBirthWithAge {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryGender"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Gender</FormLabel>
+                  <GenderSelect value={field.value} onChange={field.onChange} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <FormField
+              control={form.control}
+              name="primaryBloodGroup"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Blood group (optional)</FormLabel>
+                  <BloodGroupSelect value={field.value} onChange={field.onChange} />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryReligion"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Religion (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryNationality"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nationality (optional)</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
+
+          <FormField
+            control={form.control}
+            name="primaryProfession"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Profession (optional)</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <FormField
             control={form.control}
