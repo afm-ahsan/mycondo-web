@@ -12,12 +12,15 @@ import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
 import { GenderSelect } from '@/components/shared/GenderSelect';
 import { HouseholdMemberCard } from '@/components/shared/HouseholdMemberCard';
+import { HouseholdMemberPhotoUpload } from '@/components/shared/HouseholdMemberPhotoUpload';
 import { RelationshipSelect } from '@/components/shared/RelationshipSelect';
+import { AttachmentUploadPanel } from '@/features/attachments/components/AttachmentUploadPanel';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import {
   useAddOwnerHouseholdMember,
   useDeactivateOwnerHouseholdMember,
   useOwnerHouseholdMembers,
+  useSetOwnerHouseholdMemberPrimaryPhoto,
   useUpdateOwnerHouseholdMember,
 } from '../api/residentsApi';
 import { ownerHouseholdMemberSchema, type OwnerHouseholdMemberSchemaType } from '../schemas/ownerHouseholdMemberSchema';
@@ -50,6 +53,7 @@ export function OwnerHouseholdStep({ residentId, onContinue, onBack }: OwnerHous
   const [addMember, { isLoading: isAdding }] = useAddOwnerHouseholdMember();
   const [updateMember, { isLoading: isUpdating }] = useUpdateOwnerHouseholdMember();
   const [deactivateMember] = useDeactivateOwnerHouseholdMember();
+  const [setPrimaryPhoto] = useSetOwnerHouseholdMemberPrimaryPhoto();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -117,6 +121,7 @@ export function OwnerHouseholdStep({ residentId, onContinue, onBack }: OwnerHous
   }
 
   const activeMembers = members?.filter((m) => m.isActive) ?? [];
+  const editingMember = editingId ? activeMembers.find((m) => m.residentHouseholdMemberId === editingId) : undefined;
 
   return (
     <div className="space-y-4">
@@ -138,6 +143,7 @@ export function OwnerHouseholdStep({ residentId, onContinue, onBack }: OwnerHous
               fullName={member.fullName}
               gender={member.gender}
               dateOfBirth={member.dateOfBirth}
+              photoAttachmentId={member.primaryPhotoAttachmentId}
               onEdit={() => startEdit(member)}
               onRemove={() => deactivateMember({ id: member.residentHouseholdMemberId })}
               disabled={isSaving}
@@ -150,6 +156,33 @@ export function OwnerHouseholdStep({ residentId, onContinue, onBack }: OwnerHous
         <CardContent className="pt-6">
           <Form {...form}>
             <div className="space-y-4">
+              {editingMember && (
+                <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-start border-b pb-4">
+                  <HouseholdMemberPhotoUpload
+                    ownerType="ResidentHouseholdMember"
+                    ownerId={editingMember.residentHouseholdMemberId}
+                    primaryPhotoAttachmentId={editingMember.primaryPhotoAttachmentId}
+                    onSetPrimaryPhoto={(attachmentId) =>
+                      setPrimaryPhoto({
+                        id: editingMember.residentHouseholdMemberId,
+                        setPrimaryPhotoRequest: { attachmentId },
+                      }).unwrap()
+                    }
+                  />
+                  <div className="space-y-2">
+                    <FormLabel>Documents (NID, Birth Certificate, etc.)</FormLabel>
+                    <AttachmentUploadPanel
+                      ownerType="ResidentHouseholdMember"
+                      ownerId={editingMember.residentHouseholdMemberId}
+                      excludeAttachmentIds={
+                        editingMember.primaryPhotoAttachmentId ? [editingMember.primaryPhotoAttachmentId] : []
+                      }
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      maxSizeMb={10}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <FormField
                   control={form.control}

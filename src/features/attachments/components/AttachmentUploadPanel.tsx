@@ -23,6 +23,9 @@ interface AttachmentUploadPanelProps {
   hint?: string;
   multiple?: boolean;
   className?: string;
+  /** Attachment ids to hide from the list — e.g. an owner's profile-photo attachment, which shares
+   * this same ownerType/ownerId but is displayed separately (see HouseholdMemberPhotoUpload). */
+  excludeAttachmentIds?: string[];
 }
 
 /**
@@ -41,8 +44,12 @@ export function AttachmentUploadPanel({
   hint,
   multiple = true,
   className,
+  excludeAttachmentIds,
 }: AttachmentUploadPanelProps) {
-  const { data: existingDocuments, isLoading: isLoadingDocs } = useAttachmentsForOwner({ ownerType, ownerId });
+  const { data: allDocuments, isLoading: isLoadingDocs } = useAttachmentsForOwner({ ownerType, ownerId });
+  const existingDocuments = excludeAttachmentIds?.length
+    ? allDocuments?.filter((doc) => !excludeAttachmentIds.includes(doc.attachmentId))
+    : allDocuments;
   const [uploadAttachment] = useUploadAttachmentMutation();
   const [deleteAttachment] = useDeleteAttachment();
   const [pending, setPending] = useState<PendingUpload[]>([]);

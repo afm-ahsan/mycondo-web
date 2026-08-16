@@ -168,6 +168,46 @@
         }
       }
     },
+    "/api/v1/residents/household-members/{id}/primary-photo": {
+      "put": {
+        "tags": [
+          "Residents"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/household-members/{id}": {
       "put": {
         "tags": [
@@ -224,6 +264,46 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/household-members/{id}/primary-photo": {
+      "put": {
+        "tags": [
+          "Tenant Registrations"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPrimaryPhotoRequest"
+              }
+            }
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "OK",
@@ -15030,7 +15110,8 @@
           "religion",
           "nationality",
           "occupation",
-          "isActive"
+          "isActive",
+          "primaryPhotoAttachmentId"
         ],
         "type": "object",
         "properties": {
@@ -15105,6 +15186,13 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },
@@ -20990,7 +21078,8 @@
           "religion",
           "nationality",
           "occupation",
-          "isActive"
+          "isActive",
+          "primaryPhotoAttachmentId"
         ],
         "type": "object",
         "properties": {
@@ -21053,6 +21142,13 @@
           },
           "isActive": {
             "type": "boolean"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           }
         }
       },

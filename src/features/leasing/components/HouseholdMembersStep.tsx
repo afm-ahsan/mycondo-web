@@ -12,10 +12,18 @@ import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
 import { GenderSelect } from '@/components/shared/GenderSelect';
 import { HouseholdMemberCard } from '@/components/shared/HouseholdMemberCard';
+import { HouseholdMemberPhotoUpload } from '@/components/shared/HouseholdMemberPhotoUpload';
 import { Input } from '@/components/ui/input';
 import { RelationshipSelect } from '@/components/shared/RelationshipSelect';
+import { AttachmentUploadPanel } from '@/features/attachments/components/AttachmentUploadPanel';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
-import { useAddHouseholdMember, useDeactivateHouseholdMember, useHouseholdMembers, useUpdateHouseholdMember } from '../api/leasingApi';
+import {
+  useAddHouseholdMember,
+  useDeactivateHouseholdMember,
+  useHouseholdMembers,
+  useSetHouseholdMemberPrimaryPhoto,
+  useUpdateHouseholdMember,
+} from '../api/leasingApi';
 import { householdMemberSchema, type HouseholdMemberSchemaType } from '../schemas/householdMemberSchema';
 
 interface HouseholdMembersStepProps {
@@ -46,6 +54,7 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
   const [addMember, { isLoading: isAdding }] = useAddHouseholdMember();
   const [updateMember, { isLoading: isUpdating }] = useUpdateHouseholdMember();
   const [deactivateMember] = useDeactivateHouseholdMember();
+  const [setPrimaryPhoto] = useSetHouseholdMemberPrimaryPhoto();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -115,6 +124,7 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
   }
 
   const activeMembers = members?.filter((m) => m.isActive) ?? [];
+  const editingMember = editingId ? activeMembers.find((m) => m.householdMemberId === editingId) : undefined;
 
   return (
     <div className="space-y-4">
@@ -138,6 +148,7 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
               fullName={member.fullName}
               gender={member.gender}
               dateOfBirth={member.dateOfBirth}
+              photoAttachmentId={member.primaryPhotoAttachmentId}
               onEdit={() => startEdit(member)}
               onRemove={() => deactivateMember({ id: member.householdMemberId })}
               disabled={isSaving}
@@ -155,6 +166,33 @@ export function HouseholdMembersStep({ registrationId, onContinue, onBack }: Hou
         <CardContent className="pt-6">
           <Form {...form}>
             <div className="space-y-4">
+              {editingMember && (
+                <div className="grid gap-4 sm:grid-cols-[auto_1fr] sm:items-start border-b pb-4">
+                  <HouseholdMemberPhotoUpload
+                    ownerType="LeasingHouseholdMember"
+                    ownerId={editingMember.householdMemberId}
+                    primaryPhotoAttachmentId={editingMember.primaryPhotoAttachmentId}
+                    onSetPrimaryPhoto={(attachmentId) =>
+                      setPrimaryPhoto({
+                        id: editingMember.householdMemberId,
+                        setPrimaryPhotoRequest: { attachmentId },
+                      }).unwrap()
+                    }
+                  />
+                  <div className="space-y-2">
+                    <FormLabel>Documents (NID, Birth Certificate, etc.)</FormLabel>
+                    <AttachmentUploadPanel
+                      ownerType="LeasingHouseholdMember"
+                      ownerId={editingMember.householdMemberId}
+                      excludeAttachmentIds={
+                        editingMember.primaryPhotoAttachmentId ? [editingMember.primaryPhotoAttachmentId] : []
+                      }
+                      accept="image/jpeg,image/png,image/webp,application/pdf"
+                      maxSizeMb={10}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 <FormField
                   control={form.control}
