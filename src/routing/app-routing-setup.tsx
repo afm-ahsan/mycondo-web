@@ -471,6 +471,14 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/residents/flat-owners/:residentId/edit"
+            element={
+              <RequirePermission permission="ownership.manage" fallback={<AccessDeniedNotice />}>
+                <FlatOwnerRegistrationWizardPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/finance/expense-types"
             element={
               <RequirePermission permission="expensetype.view" fallback={<AccessDeniedNotice />}>

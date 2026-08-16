@@ -54,6 +54,13 @@ export class ApiError extends Error {
 }
 
 export function toUserMessage(error: unknown): string {
+  // RTK Query mutation rejections (`.unwrap()`) throw the base query's error wrapper as-is —
+  // `{ status, data, ... }` — not the `ApiError` `baseQueryWithRefresh` attaches as `.data`. Callers
+  // that already unwrap via `toApiError` are unaffected; this just makes passing the raw rejection
+  // directly behave the same way instead of silently falling through to the generic message below.
+  if (error && typeof error === 'object' && 'data' in error && (error as { data?: unknown }).data instanceof ApiError) {
+    error = (error as { data: ApiError }).data;
+  }
   if (error instanceof ApiError) {
     if (error.isValidation && error.errors) {
       const first = Object.values(error.errors)[0]?.[0];

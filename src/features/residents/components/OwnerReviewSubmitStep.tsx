@@ -15,6 +15,10 @@ import type { FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegist
 interface OwnerReviewSubmitStepProps {
   form: UseFormReturn<FlatOwnerRegistrationSchemaType>;
   residentId: string;
+  /** Edit mode: the FlatOwnership already exists (that's how we got here), so Submit must not try to
+   * grant it again — that would just hit the duplicate-ownership 409. This step becomes a plain
+   * "Done" that returns to the register. */
+  isEditMode?: boolean;
   onBack: () => void;
   onRegistered: () => void;
 }
@@ -23,7 +27,7 @@ interface OwnerReviewSubmitStepProps {
  * the Resident already created and saved in Step 2. Unlike the old atomic RegisterFlatOwnerCommand
  * flow, the Resident/Household/Documents are already persisted by this point — this step only
  * finalizes the actual ownership grant, the one truly business-meaningful commitment. */
-export function OwnerReviewSubmitStep({ form, residentId, onBack, onRegistered }: OwnerReviewSubmitStepProps) {
+export function OwnerReviewSubmitStep({ form, residentId, isEditMode, onBack, onRegistered }: OwnerReviewSubmitStepProps) {
   const [createOwnership, { isLoading }] = useCreateFlatOwnership();
   const { data: members } = useOwnerHouseholdMembers({ id: residentId });
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +35,10 @@ export function OwnerReviewSubmitStep({ form, residentId, onBack, onRegistered }
   const activeMembers = members?.filter((m) => m.isActive) ?? [];
 
   async function handleSubmit() {
+    if (isEditMode) {
+      onRegistered();
+      return;
+    }
     setError(null);
     try {
       await createOwnership({
@@ -102,7 +110,7 @@ export function OwnerReviewSubmitStep({ form, residentId, onBack, onRegistered }
           Back
         </Button>
         <Button type="button" onClick={handleSubmit} disabled={isLoading}>
-          {isLoading ? 'Registering…' : 'Register owner'}
+          {isEditMode ? 'Done' : isLoading ? 'Registering…' : 'Register owner'}
         </Button>
       </div>
     </div>
