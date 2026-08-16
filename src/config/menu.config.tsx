@@ -77,6 +77,12 @@ export const MENU_SIDEBAR: MenuConfig = [
     icon: ShieldUser,
     children: [
       {
+        title: 'Entry Gates',
+        icon: DoorOpen,
+        path: '/security/entry-gates',
+        permission: PERMISSIONS.gate.manage,
+      },
+      {
         title: 'Visitor Management',
         children: [
           { title: 'Guest Register', path: '/security/guests', permission: PERMISSIONS.visitor.view },
@@ -171,12 +177,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             permission: PERMISSIONS.staffAttendance.view,
           },
         ],
-      },
-      {
-        title: 'Entry Gates',
-        icon: DoorOpen,
-        path: '/security/entry-gates',
-        permission: PERMISSIONS.gate.manage,
       },
     ],
   },
