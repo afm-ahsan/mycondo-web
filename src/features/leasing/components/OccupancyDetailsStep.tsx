@@ -128,7 +128,7 @@ export function OccupancyDetailsStep({
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" id="occupancy-details-step">
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <FormField
               control={form.control}
               name="buildingId"
@@ -167,61 +167,64 @@ export function OccupancyDetailsStep({
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="occupancyType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Occupancy type</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select occupancy type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Owner">Owner-occupant</SelectItem>
+                        <SelectItem value="Occupant">Renter / occupant</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
 
-          <FormField
-            control={form.control}
-            name="occupancyType"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Occupancy type</FormLabel>
-                <FormControl>
-                  <Select value={field.value} onValueChange={field.onChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select occupancy type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Owner">Owner-occupant</SelectItem>
-                      <SelectItem value="Occupant">Renter / occupant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="primaryFullName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Primary occupant's full name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="e.g. Karim Ahmed" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          <FormField
-            control={form.control}
-            name="primaryFullName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Primary occupant's full name</FormLabel>
-                <FormControl>
-                  <Input placeholder="e.g. Karim Ahmed" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="moveInExpectedDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Expected move-in date (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-          <FormField
-            control={form.control}
-            name="moveInExpectedDate"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Expected move-in date (optional)</FormLabel>
-                <FormControl>
-                  <Input type="date" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? 'Saving…' : 'Save & Continue'}
-          </Button>
+          <div className="flex gap-2 border-t pt-4">
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Saving…' : 'Save & Continue'}
+            </Button>
+          </div>
         </form>
       </Form>
     </div>

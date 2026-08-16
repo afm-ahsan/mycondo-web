@@ -83,7 +83,7 @@ export function TenantRegistrationWizardPage() {
         <CardHeader>
           <CardTitle>Tenant Registration</CardTitle>
         </CardHeader>
-        <CardContent className="max-w-3xl space-y-6">
+        <CardContent className="space-y-6">
           <Stepper value={activeStep} onValueChange={goToStep}>
             <StepperNav className="mb-6">
               {STEPS.map(({ step, title }, index) => (
