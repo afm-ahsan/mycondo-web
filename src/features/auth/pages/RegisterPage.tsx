@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Eye, EyeOff } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
 import { ApiError, toUserMessage } from '@/api/errors';
@@ -18,6 +18,9 @@ import {
 import { Input } from '@/components/ui/input';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
+import { PasswordInput } from '@/components/shared/PasswordInput';
+import { PasswordPolicyInfo } from '@/components/shared/PasswordPolicyInfo';
+import { PasswordRequirementsChecklist } from '@/components/shared/PasswordRequirementsChecklist';
 import { useAppDispatch } from '@/store/hooks';
 import { sessionStarted } from '@/store/slices/authSlice';
 import { toAuthUser, useRegister, useResolveTenantBySlug } from '../api/authApi';
@@ -27,7 +30,6 @@ import { registerSchema, type RegisterSchemaType } from '../schemas/registerSche
 export function RegisterPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [passwordVisible, setPasswordVisible] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [resolveTenantBySlug, { isFetching: isResolvingTenant }] = useResolveTenantBySlug();
@@ -45,6 +47,7 @@ export function RegisterPage() {
       confirmPassword: '',
     },
   });
+  const password = form.watch('password');
 
   async function onSubmit(values: RegisterSchemaType) {
     setError(null);
@@ -168,33 +171,16 @@ export function RegisterPage() {
         <FormField
           control={form.control}
           name="password"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
-              <div className="relative">
-                <FormControl>
-                  <Input
-                    placeholder="At least 12 characters"
-                    type={passwordVisible ? 'text' : 'password'}
-                    {...field}
-                  />
-                </FormControl>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  mode="icon"
-                  onClick={() => setPasswordVisible(!passwordVisible)}
-                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
-                  aria-pressed={passwordVisible}
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                >
-                  {passwordVisible ? (
-                    <EyeOff className="text-muted-foreground" />
-                  ) : (
-                    <Eye className="text-muted-foreground" />
-                  )}
-                </Button>
+              <div className="flex items-center gap-1.5">
+                <FormLabel>Password</FormLabel>
+                <PasswordPolicyInfo />
               </div>
+              <FormControl>
+                <PasswordInput placeholder="Choose a password" label="password" {...field} />
+              </FormControl>
+              {fieldState.isDirty && <PasswordRequirementsChecklist value={password} />}
               <FormMessage />
             </FormItem>
           )}
@@ -207,11 +193,7 @@ export function RegisterPage() {
             <FormItem>
               <FormLabel>Confirm password</FormLabel>
               <FormControl>
-                <Input
-                  placeholder="Re-enter your password"
-                  type={passwordVisible ? 'text' : 'password'}
-                  {...field}
-                />
+                <PasswordInput placeholder="Re-enter your password" label="confirm password" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

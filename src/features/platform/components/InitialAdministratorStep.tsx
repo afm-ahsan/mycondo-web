@@ -1,10 +1,11 @@
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/shared/PasswordInput';
+import { PasswordPolicyInfo } from '@/components/shared/PasswordPolicyInfo';
+import { PasswordRequirementsChecklist } from '@/components/shared/PasswordRequirementsChecklist';
 import {
   initialAdministratorSchema,
   type InitialAdministratorSchemaType,
@@ -17,11 +18,11 @@ interface InitialAdministratorStepProps {
 }
 
 export function InitialAdministratorStep({ defaultValues, onContinue, onBack }: InitialAdministratorStepProps) {
-  const [passwordVisible, setPasswordVisible] = useState(false);
   const form = useForm<InitialAdministratorSchemaType>({
     resolver: zodResolver(initialAdministratorSchema),
     defaultValues,
   });
+  const password = form.watch('password');
 
   return (
     <Form {...form}>
@@ -55,25 +56,16 @@ export function InitialAdministratorStep({ defaultValues, onContinue, onBack }: 
         <FormField
           control={form.control}
           name="password"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel>Initial password</FormLabel>
-              <div className="relative">
-                <FormControl>
-                  <Input type={passwordVisible ? 'text' : 'password'} {...field} />
-                </FormControl>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  mode="icon"
-                  onClick={() => setPasswordVisible(!passwordVisible)}
-                  aria-label={passwordVisible ? 'Hide password' : 'Show password'}
-                  aria-pressed={passwordVisible}
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                >
-                  {passwordVisible ? <EyeOff className="text-muted-foreground" /> : <Eye className="text-muted-foreground" />}
-                </Button>
+              <div className="flex items-center gap-1.5">
+                <FormLabel>Initial password</FormLabel>
+                <PasswordPolicyInfo />
               </div>
+              <FormControl>
+                <PasswordInput label="initial password" {...field} />
+              </FormControl>
+              {fieldState.isDirty && <PasswordRequirementsChecklist value={password} />}
               <FormMessage />
             </FormItem>
           )}
