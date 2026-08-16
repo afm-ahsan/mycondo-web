@@ -28,6 +28,9 @@ export function SidebarHeader() {
           className="small-logo h-8 w-auto max-w-none shrink-0"
           alt="CondoBD"
         />
+        <span className="default-logo truncate bg-gradient-to-r from-blue-600 via-teal-500 to-emerald-500 bg-clip-text text-base font-semibold text-transparent">
+          Akter Residence Park
+        </span>
       </Link>
       <Button
         onClick={handleToggleClick}

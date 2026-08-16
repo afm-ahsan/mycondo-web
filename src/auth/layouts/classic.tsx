@@ -16,7 +16,7 @@ export function ClassicLayout() {
         `}
       </style>
       <main className="flex flex-col items-center justify-center grow bg-center bg-no-repeat page-bg">
-        <div className="m-5 mb-6 flex flex-col items-center gap-2">
+        <div className="m-5 mb-6">
           <Link to="/">
             <img
               src={toAbsoluteUrl('/media/app/condobd-logo.png')}
@@ -24,9 +24,6 @@ export function ClassicLayout() {
               alt="CondoBD"
             />
           </Link>
-          <span className="bg-gradient-to-r from-blue-600 via-teal-500 to-emerald-500 bg-clip-text text-lg font-semibold text-transparent">
-            Akter Residence Park
-          </span>
         </div>
         <Card className="w-full max-w-[400px]">
           <CardContent className="p-6">
