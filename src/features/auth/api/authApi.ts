@@ -33,6 +33,10 @@ export const useResolveTenantBySlug = useLazyGetApiV1TenantsBySlugBySlugQuery;
  * auto-refetch. Building real FormData by hand instead. Never edit the generated file to fix this —
  * regenerating would revert it.
  */
+// Module-scoped, not per-hook: RTK Query dedupes this query to a single cache entry (no args), so
+// there's only ever one live avatar object URL to track regardless of how many components subscribe.
+let avatarObjectUrl: string | null = null;
+
 const avatarApi = mycondoApi.injectEndpoints({
   endpoints: (build) => ({
     uploadMyAvatar: build.mutation<UserProfileDto, File>({
@@ -45,12 +49,29 @@ const avatarApi = mycondoApi.injectEndpoints({
     }),
     // Avatars are served from an authenticated endpoint, never a public/static path (see
     // UserContextResolver.ResolveAvatarUrl's comment on the backend) — an <img src> can't attach a
-    // bearer token, so this fetches the bytes as a blob and the caller turns that into an object URL
-    // (see useAvatarUrl) instead of pointing an <img> straight at the API URL. Tagged the same as the
-    // profile query so an upload/remove elsewhere refetches the bytes too, not just the URL field.
-    getMyAvatarBlob: build.query<Blob, void>({
+    // bearer token, so this fetches the bytes as a blob and immediately converts to an object URL in
+    // transformResponse, so only a plain string ever reaches Redux (a Blob fails RTK's
+    // isPlainObject serializableCheck). onCacheEntryAdded revokes it once this cache entry (there's
+    // only ever one — the query takes no args) is dropped after the last subscriber unmounts;
+    // transformResponse revokes the previous URL too, covering the invalidatesTags-driven refetch
+    // after upload/remove. Tagged the same as the profile query for that refetch.
+    getMyAvatarBlob: build.query<string, void>({
       query: () => ({ url: '/api/v1/auth/me/avatar', responseHandler: (response: Response) => response.blob() }),
+      transformResponse: (blob: Blob) => {
+        if (avatarObjectUrl) {
+          URL.revokeObjectURL(avatarObjectUrl);
+        }
+        avatarObjectUrl = URL.createObjectURL(blob);
+        return avatarObjectUrl;
+      },
       providesTags: ['Auth'],
+      onCacheEntryAdded: async (_arg, { cacheEntryRemoved }) => {
+        await cacheEntryRemoved;
+        if (avatarObjectUrl) {
+          URL.revokeObjectURL(avatarObjectUrl);
+          avatarObjectUrl = null;
+        }
+      },
     }),
   }),
   overrideExisting: false,
