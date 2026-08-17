@@ -117,7 +117,7 @@ export function AccountMenu({
             </div>
           </DropdownMenuItem>
           <div className="p-2 mt-1">
-            <Button variant="outline" size="sm" className="w-full" onClick={handleLogoutClick} disabled={isLoggingOut}>
+            <Button variant="destructive" size="sm" className="w-full" onClick={handleLogoutClick} disabled={isLoggingOut}>
               Logout
             </Button>
           </div>
