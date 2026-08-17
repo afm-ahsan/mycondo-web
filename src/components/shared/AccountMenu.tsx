@@ -120,7 +120,7 @@ export function AccountMenu({
             <Button
               variant="outline"
               size="sm"
-              className="w-full hover:bg-[var(--color-warning-accent,var(--color-yellow-500))] hover:text-[var(--color-warning-foreground,var(--color-white))] hover:border-[var(--color-warning-accent,var(--color-yellow-500))]"
+              className="w-full hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
               onClick={handleLogoutClick}
               disabled={isLoggingOut}
             >
