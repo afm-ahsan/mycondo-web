@@ -22,6 +22,11 @@ interface UploadAttachmentArgs {
  * `mycondoApi` itself so `invalidatesTags: ['Attachments']` type-checks and actually triggers the
  * owning list query's refetch. Never edit the generated file to fix this — regenerating reverts it.
  */
+// Module-scoped, keyed by attachmentId: RTK Query gives each attachmentId its own cache entry, so
+// each needs its own tracked object URL (see getMyAvatarBlob's single-entry variant in authApi.ts for
+// the same pattern applied to a no-args query).
+const attachmentObjectUrls = new Map<string, string>();
+
 const attachmentsApi = mycondoApi.injectEndpoints({
   endpoints: (build) => ({
     uploadAttachment: build.mutation<AttachmentDto, UploadAttachmentArgs>({
@@ -35,15 +40,34 @@ const attachmentsApi = mycondoApi.injectEndpoints({
       invalidatesTags: ['Attachments'],
     }),
     // Attachments are served from an authenticated endpoint, never a public/static path — an
-    // <img src> can't attach a bearer token, so this fetches the bytes as a blob and the caller turns
-    // that into an object URL (see useAttachmentContentUrl) instead of pointing an <img> straight at
-    // the API URL, the same pattern as useAvatarUrl/getMyAvatarBlob.
-    getAttachmentContentBlob: build.query<Blob, string>({
+    // <img src> can't attach a bearer token, so this fetches the bytes as a blob and immediately
+    // converts to an object URL in transformResponse, so only a plain string ever reaches Redux (a
+    // Blob fails RTK's isPlainObject serializableCheck). onCacheEntryAdded revokes it once this
+    // attachmentId's cache entry is dropped after the last subscriber unmounts; transformResponse
+    // revokes the previous URL too, covering the invalidatesTags-driven refetch after re-upload.
+    getAttachmentContentBlob: build.query<string, string>({
       query: (attachmentId) => ({
         url: `/api/v1/attachments/${attachmentId}/content`,
         responseHandler: (response: Response) => response.blob(),
       }),
+      transformResponse: (blob: Blob, _meta, attachmentId) => {
+        const previousUrl = attachmentObjectUrls.get(attachmentId);
+        if (previousUrl) {
+          URL.revokeObjectURL(previousUrl);
+        }
+        const url = URL.createObjectURL(blob);
+        attachmentObjectUrls.set(attachmentId, url);
+        return url;
+      },
       providesTags: ['Attachments'],
+      onCacheEntryAdded: async (attachmentId, { cacheEntryRemoved }) => {
+        await cacheEntryRemoved;
+        const url = attachmentObjectUrls.get(attachmentId);
+        if (url) {
+          URL.revokeObjectURL(url);
+          attachmentObjectUrls.delete(attachmentId);
+        }
+      },
     }),
   }),
   overrideExisting: false,
