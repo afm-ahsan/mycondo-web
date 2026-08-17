@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ApiError, toUserMessage } from '@/api/errors';
+import { toApiError, toUserMessage } from '@/api/errors';
 import { AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -165,16 +165,4 @@ export function NewOrganizationWizardPage() {
       </Card>
     </>
   );
-}
-
-function toApiError(err: unknown): ApiError | null {
-  if (
-    err &&
-    typeof err === 'object' &&
-    'data' in err &&
-    err.data instanceof ApiError
-  ) {
-    return err.data;
-  }
-  return null;
 }

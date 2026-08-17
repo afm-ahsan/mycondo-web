@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ApiError, toUserMessage } from './errors';
+import { ApiError, toApiError, toUserMessage } from './errors';
 
 describe('toUserMessage', () => {
   it('returns the detail for an already-unwrapped ApiError', () => {
@@ -39,5 +39,36 @@ describe('toUserMessage', () => {
       errors: { FullName: ['Full name is required.'] },
     });
     expect(toUserMessage(error)).toBe('Full name is required.');
+  });
+
+  // baseQueryWithRefresh/platformBaseQueryWithRefresh attach `apiError.toPayload()` — a plain object,
+  // not the ApiError instance — to avoid Redux's non-serializable-value warning. toUserMessage must
+  // reconstruct the same behavior from that plain shape.
+  it('unwraps an RTK Query rejection wrapper carrying a serialized ApiError payload as .data', () => {
+    const payload = new ApiError({
+      status: 409,
+      title: 'Conflict',
+      detail: 'This resident already owns this flat.',
+    }).toPayload();
+    expect(toUserMessage({ status: 409, data: payload })).toBe('This resident already owns this flat.');
+  });
+});
+
+describe('toApiError', () => {
+  it('reconstructs an ApiError from a serialized payload without ever needing a class instance in state', () => {
+    const payload = new ApiError({ status: 400, title: 'Validation failed', errors: { Email: ['Email is required.'] } }, 'corr-1').toPayload();
+
+    expect(payload).not.toBeInstanceOf(ApiError);
+    expect(() => JSON.stringify(payload)).not.toThrow();
+
+    const apiError = toApiError({ status: 400, data: payload });
+    expect(apiError).toBeInstanceOf(ApiError);
+    expect(apiError?.isValidation).toBe(true);
+    expect(apiError?.correlationId).toBe('corr-1');
+  });
+
+  it('returns null for a rejection with no recognizable error data', () => {
+    expect(toApiError({ status: 500, data: undefined })).toBeNull();
+    expect(toApiError(null)).toBeNull();
   });
 });

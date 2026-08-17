@@ -51,6 +51,59 @@ export class ApiError extends Error {
   get isServer(): boolean {
     return this.status >= 500;
   }
+
+  /**
+   * A plain, JSON-serializable twin of this instance — what `baseQueryWithRefresh`/
+   * `platformBaseQueryWithRefresh` attach as `.data` instead of the class instance itself. Redux's
+   * default `serializableCheck` middleware flags any class instance (its `isPlainObject` walks the
+   * prototype chain looking for a bare `Object.prototype`, which `ApiError extends Error` never has),
+   * so an `ApiError` must never be dispatched into RTK Query/Redux state directly — only reconstructed
+   * from this shape at the point of use via `toApiError`/`toUserMessage`.
+   */
+  toPayload(): ApiErrorPayload {
+    return {
+      status: this.status,
+      title: this.title,
+      detail: this.detail,
+      errors: this.errors,
+      correlationId: this.correlationId,
+      raw: this.raw,
+    };
+  }
+}
+
+export interface ApiErrorPayload {
+  status: number;
+  title: string;
+  detail?: string;
+  errors?: Record<string, string[]>;
+  correlationId?: string;
+  raw: ProblemDetails;
+}
+
+function isApiErrorPayload(value: unknown): value is ApiErrorPayload {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'status' in value &&
+    'title' in value &&
+    'raw' in value
+  );
+}
+
+/** Unwraps an RTK Query rejection into the `ApiError` `baseQueryWithRefresh` attaches as `.data`. */
+export function toApiError(err: unknown): ApiError | null {
+  if (!err || typeof err !== 'object' || !('data' in err)) {
+    return null;
+  }
+  const data = (err as { data?: unknown }).data;
+  if (data instanceof ApiError) {
+    return data;
+  }
+  if (isApiErrorPayload(data)) {
+    return new ApiError(data.raw, data.correlationId);
+  }
+  return null;
 }
 
 export function toUserMessage(error: unknown): string {
@@ -58,15 +111,13 @@ export function toUserMessage(error: unknown): string {
   // `{ status, data, ... }` — not the `ApiError` `baseQueryWithRefresh` attaches as `.data`. Callers
   // that already unwrap via `toApiError` are unaffected; this just makes passing the raw rejection
   // directly behave the same way instead of silently falling through to the generic message below.
-  if (error && typeof error === 'object' && 'data' in error && (error as { data?: unknown }).data instanceof ApiError) {
-    error = (error as { data: ApiError }).data;
-  }
-  if (error instanceof ApiError) {
-    if (error.isValidation && error.errors) {
-      const first = Object.values(error.errors)[0]?.[0];
-      return first ?? error.title;
+  const apiError = toApiError(error) ?? (error instanceof ApiError ? error : null);
+  if (apiError) {
+    if (apiError.isValidation && apiError.errors) {
+      const first = Object.values(apiError.errors)[0]?.[0];
+      return first ?? apiError.title;
     }
-    return error.detail ?? error.title;
+    return apiError.detail ?? apiError.title;
   }
   if (error instanceof Error) {
     return error.message;

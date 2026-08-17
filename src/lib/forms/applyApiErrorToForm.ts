@@ -1,13 +1,7 @@
 import type { FieldValues, Path, UseFormReturn } from 'react-hook-form';
-import { ApiError } from '@/api/errors';
+import { ApiError, toApiError } from '@/api/errors';
 
-/** Unwraps an RTK Query rejection into the `ApiError` `baseQueryWithRefresh` attaches as `.data`. */
-export function toApiError(err: unknown): ApiError | null {
-  if (err && typeof err === 'object' && 'data' in err && (err as { data?: unknown }).data instanceof ApiError) {
-    return (err as { data: ApiError }).data;
-  }
-  return null;
-}
+export { toApiError };
 
 interface ApplyApiErrorToFormOptions<TFieldValues extends FieldValues> {
   /** Field to attach a conflict (409) message to, e.g. a uniqueness violation. */

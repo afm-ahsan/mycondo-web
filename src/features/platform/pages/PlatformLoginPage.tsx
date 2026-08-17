@@ -4,7 +4,7 @@ import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { setPlatformAccessToken } from '@/api/platformBaseApi';
-import { ApiError, toUserMessage } from '@/api/errors';
+import { toApiError, toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { useAppDispatch } from '@/store/hooks';
 import { platformSessionStarted } from '@/store/slices/platformAuthSlice';
 import { toPlatformAuthUser, usePlatformLogin } from '../api/platformAuthApi';
+import { markPlatformSessionActive } from '../lib/platformSession';
 import { platformLoginSchema, type PlatformLoginSchemaType } from '../schemas/platformLoginSchema';
 
 /**
@@ -49,6 +50,7 @@ export function PlatformLoginPage() {
       const response = await platformLogin(values).unwrap();
 
       setPlatformAccessToken(response.accessToken);
+      markPlatformSessionActive();
       dispatch(platformSessionStarted(toPlatformAuthUser(response.user)));
 
       navigate(searchParams.get('next') ?? '/platform/dashboard');
@@ -147,11 +149,4 @@ export function PlatformLoginPage() {
       </form>
     </Form>
   );
-}
-
-function toApiError(err: unknown): ApiError | null {
-  if (err && typeof err === 'object' && 'data' in err && err.data instanceof ApiError) {
-    return err.data;
-  }
-  return null;
 }
