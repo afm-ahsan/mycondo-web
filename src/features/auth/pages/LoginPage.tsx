@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ApiError, toUserMessage } from '@/api/errors';
+import { toApiError, toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -171,11 +171,4 @@ export function LoginPage() {
       </form>
     </Form>
   );
-}
-
-function toApiError(err: unknown): ApiError | null {
-  if (err && typeof err === 'object' && 'data' in err && err.data instanceof ApiError) {
-    return err.data;
-  }
-  return null;
 }

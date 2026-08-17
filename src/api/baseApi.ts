@@ -83,7 +83,7 @@ export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, Fetc
           { ...problem, status: problem.status ?? Number(result.error.status) },
           correlationId,
         );
-        return { error: { ...result.error, data: apiError } as FetchBaseQueryError };
+        return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
       }
     }
 

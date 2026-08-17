@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link, useNavigate } from 'react-router-dom';
-import { ApiError, toUserMessage } from '@/api/errors';
+import { toApiError, toUserMessage } from '@/api/errors';
 import { setAccessToken } from '@/api/baseApi';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -219,11 +219,4 @@ export function RegisterPage() {
       </form>
     </Form>
   );
-}
-
-function toApiError(err: unknown): ApiError | null {
-  if (err && typeof err === 'object' && 'data' in err && err.data instanceof ApiError) {
-    return err.data;
-  }
-  return null;
 }

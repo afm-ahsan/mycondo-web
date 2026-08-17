@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
+import { clearPlatformSessionHint, hasPlatformSessionHint, markPlatformSessionActive } from '@/features/platform/lib/platformSession';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
 import { ApiError, type ProblemDetails } from './errors';
 
@@ -43,21 +44,31 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unkno
     let result = await rawPlatformBaseQuery(args, api, extraOptions);
 
     if (result.error?.status === 401) {
-      // No body needed — the platform refresh endpoint reads the token from the
-      // mycondo_platform_rt cookie only, unlike the tenant refresh call (which still needs an
-      // explicit tenantId; see baseApi.ts). There is no Platform equivalent of "which tenant" to read.
-      const refresh = await rawPlatformBaseQuery(
-        { url: '/api/v1/platform/auth/refresh', method: 'POST' },
-        api,
-        extraOptions,
-      );
-
-      if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
-        setPlatformAccessToken((refresh.data as { accessToken: string }).accessToken);
-        result = await rawPlatformBaseQuery(args, api, extraOptions);
-      } else {
+      if (!hasPlatformSessionHint()) {
+        // No known prior platform session (first visit, or already logged out elsewhere) — calling
+        // refresh here would just re-hit the empty-cookie case, so skip straight to "session ended"
+        // rather than firing a doomed request.
         setPlatformAccessToken(null);
         api.dispatch(platformSessionEnded());
+      } else {
+        // No body needed — the platform refresh endpoint reads the token from the
+        // mycondo_platform_rt cookie only, unlike the tenant refresh call (which still needs an
+        // explicit tenantId; see baseApi.ts). There is no Platform equivalent of "which tenant" to read.
+        const refresh = await rawPlatformBaseQuery(
+          { url: '/api/v1/platform/auth/refresh', method: 'POST' },
+          api,
+          extraOptions,
+        );
+
+        if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
+          setPlatformAccessToken((refresh.data as { accessToken: string }).accessToken);
+          markPlatformSessionActive();
+          result = await rawPlatformBaseQuery(args, api, extraOptions);
+        } else {
+          setPlatformAccessToken(null);
+          clearPlatformSessionHint();
+          api.dispatch(platformSessionEnded());
+        }
       }
     }
 
@@ -69,7 +80,7 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unkno
           { ...problem, status: problem.status ?? Number(result.error.status) },
           correlationId,
         );
-        return { error: { ...result.error, data: apiError } as FetchBaseQueryError };
+        return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
       }
     }
 

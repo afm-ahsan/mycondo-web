@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
 import { AccountMenu } from '@/components/shared/AccountMenu';
 import { usePlatformLogout } from '../api/platformAuthApi';
+import { clearPlatformSessionHint } from '../lib/platformSession';
 
 export function PlatformUserMenu() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function PlatformUserMenu() {
       await logoutMutation().unwrap();
     } finally {
       setPlatformAccessToken(null);
+      clearPlatformSessionHint();
       dispatch(platformSessionEnded());
       navigate('/platform/login');
     }
