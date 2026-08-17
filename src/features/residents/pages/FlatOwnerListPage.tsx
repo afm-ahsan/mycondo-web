@@ -409,7 +409,7 @@ function FlatOwnerDetailDialog({
                 />
                 <FlatSelect buildingId={addFlatBuildingId} value={addFlatFlatId} onValueChange={setAddFlatFlatId} />
                 {alreadyOwnsSelectedFlat ? (
-                  <p className="text-warning text-xs">This owner already has active ownership of this flat.</p>
+                  <p className="text-destructive text-xs">This owner already has active ownership of this flat.</p>
                 ) : (
                   <Button type="button" size="sm" onClick={handleAddFlat} disabled={!addFlatFlatId || isAddingFlat}>
                     {isAddingFlat ? 'Granting…' : 'Grant ownership'}
