@@ -219,6 +219,16 @@ describe('GlobalHttpLoader', () => {
     expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
   });
 
+  it('stays hidden for a silent request (e.g. login) even though HttpInertBoundary-facing state is active', () => {
+    render(<GlobalHttpLoader />);
+
+    act(() => beginHttpRequest('load', true));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+
+    act(() => endHttpRequest('load', true));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
   it('hides again if the branded loader becomes active while a request is already in flight', () => {
     render(<GlobalHttpLoader />);
 

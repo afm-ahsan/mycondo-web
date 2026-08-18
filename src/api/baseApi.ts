@@ -1,7 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
-import { type AppFetchArgs, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
+import { type AppFetchArgs, isSilentHttpRequest, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
 import type { AuthResponse } from './generated/mycondoApi';
@@ -54,11 +54,12 @@ export const baseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, F
     // (original, refresh, retry) — the counter must move once per RTK Query call, not once per
     // underlying network round-trip.
     const operation = resolveHttpOperation(args);
+    const silent = isSilentHttpRequest(args);
     // Strip our own `operation` field before handing off to fetchBaseQuery — it isn't a real FetchArgs
     // member, and fetchBaseQuery spreads unrecognized args straight into the RequestInit passed to
     // fetch().
     const rawArgs = typeof args === 'string' ? args : stripOperation(args);
-    beginHttpRequest(operation);
+    beginHttpRequest(operation, silent);
     try {
       let result = await rawBaseQuery(rawArgs, api, extraOptions);
 
@@ -102,7 +103,7 @@ export const baseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, F
 
       return result;
     } finally {
-      endHttpRequest(operation);
+      endHttpRequest(operation, silent);
     }
   };
 

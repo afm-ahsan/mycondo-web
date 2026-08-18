@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { resolveHttpOperation, stripOperation } from './httpOperation';
+import { isSilentHttpRequest, resolveHttpOperation, stripOperation } from './httpOperation';
 
 describe('resolveHttpOperation', () => {
   it('treats a bare string arg (shorthand GET) as load', () => {
@@ -73,6 +73,34 @@ describe('resolveHttpOperation', () => {
         operation: 'update',
       }),
     ).toBe('update');
+  });
+});
+
+describe('isSilentHttpRequest', () => {
+  it('treats a bare string arg as never silent', () => {
+    expect(isSilentHttpRequest('/api/v1/auth/login')).toBe(false);
+  });
+
+  it('silences the session-lifecycle auth calls, both tenant and platform', () => {
+    expect(isSilentHttpRequest({ url: '/api/v1/auth/login', method: 'POST' })).toBe(true);
+    expect(isSilentHttpRequest({ url: '/api/v1/auth/refresh', method: 'POST' })).toBe(true);
+    expect(isSilentHttpRequest({ url: '/api/v1/auth/logout', method: 'POST' })).toBe(true);
+    expect(isSilentHttpRequest({ url: '/api/v1/platform/auth/login', method: 'POST' })).toBe(true);
+  });
+
+  it('silences the tenant-by-slug lookup the Login/Register pages call alongside a session-lifecycle call', () => {
+    expect(isSilentHttpRequest({ url: '/api/v1/tenants/by-slug/akter-residence-park', method: 'GET' })).toBe(
+      true,
+    );
+  });
+
+  it('does not silence other /auth/* routes that are genuine user-submitted mutations', () => {
+    expect(isSilentHttpRequest({ url: '/api/v1/auth/me', method: 'PUT' })).toBe(false);
+    expect(isSilentHttpRequest({ url: '/api/v1/auth/register', method: 'POST' })).toBe(false);
+  });
+
+  it('does not silence unrelated requests', () => {
+    expect(isSilentHttpRequest({ url: '/api/v1/buildings', method: 'GET' })).toBe(false);
   });
 });
 

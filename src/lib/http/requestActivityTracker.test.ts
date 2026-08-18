@@ -137,3 +137,36 @@ describe('operation-aware tracking', () => {
     expect(getActiveHttpOperation()).toBeNull();
   });
 });
+
+describe('silent requests', () => {
+  it('still counts toward activeRequestCount but never becomes the active operation', () => {
+    const { result } = renderHook(() => useIsHttpRequestActive());
+
+    act(() => beginHttpRequest('load', true));
+    expect(getActiveHttpRequestCount()).toBe(1);
+    expect(result.current).toBe(true);
+    expect(getActiveHttpOperation()).toBeNull();
+
+    act(() => endHttpRequest('load', true));
+    expect(getActiveHttpRequestCount()).toBe(0);
+    expect(getActiveHttpOperation()).toBeNull();
+  });
+
+  it('does not preempt a concurrent non-silent operation, and reappears correctly once it ends', () => {
+    act(() => {
+      beginHttpRequest('load', true);
+      beginHttpRequest('save');
+    });
+    expect(getActiveHttpRequestCount()).toBe(2);
+    expect(getActiveHttpOperation()).toBe('save');
+
+    act(() => endHttpRequest('save'));
+    // The silent request is still outstanding — activeRequestCount reflects that — but it must not
+    // surface as an operation once it's the only thing left in flight.
+    expect(getActiveHttpRequestCount()).toBe(1);
+    expect(getActiveHttpOperation()).toBeNull();
+
+    act(() => endHttpRequest('load', true));
+    expect(getActiveHttpRequestCount()).toBe(0);
+  });
+});

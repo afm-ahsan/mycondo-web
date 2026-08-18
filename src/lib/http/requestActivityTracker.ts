@@ -29,17 +29,27 @@ function notify(): void {
   for (const listener of listeners) listener();
 }
 
-/** Call once, synchronously, right before an application HTTP request starts. */
-export function beginHttpRequest(operation: HttpOperation = 'load'): void {
+/**
+ * Call once, synchronously, right before an application HTTP request starts. `silent` (see
+ * httpOperation.ts's isSilentHttpRequest) still counts toward activeRequestCount — HttpInertBoundary
+ * must keep blocking interaction — but is excluded from the per-operation counters GlobalHttpLoader
+ * reads, so a request with a loading indicator of its own (e.g. the Sign In button) never also
+ * triggers the floating "Loading…" overlay.
+ */
+export function beginHttpRequest(operation: HttpOperation = 'load', silent = false): void {
   activeRequestCount += 1;
-  operationCounts[operation] += 1;
+  if (!silent) {
+    operationCounts[operation] += 1;
+  }
   notify();
 }
 
 /** Call once, in a `finally`, when that same request settles (success, error, or thrown exception). */
-export function endHttpRequest(operation: HttpOperation = 'load'): void {
+export function endHttpRequest(operation: HttpOperation = 'load', silent = false): void {
   activeRequestCount = Math.max(0, activeRequestCount - 1);
-  operationCounts[operation] = Math.max(0, operationCounts[operation] - 1);
+  if (!silent) {
+    operationCounts[operation] = Math.max(0, operationCounts[operation] - 1);
+  }
   notify();
 }
 

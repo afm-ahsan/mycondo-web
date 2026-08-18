@@ -40,6 +40,20 @@ const SESSION_LIFECYCLE_URL_PREFIXES = [
   '/api/v1/platform/auth/logout',
 ];
 
+// Calls that must never surface in GlobalHttpLoader, on top of the session-lifecycle URLs above: the
+// tenant-by-slug lookup runs from LoginPage/RegisterPage right alongside a session-lifecycle call, and
+// both pages already show their own Sign In/Create account button spinner — a floating "Loading…" pill
+// over the form would just be a second, redundant indicator for the same wait. Still counted toward
+// activeRequestCount (requestActivityTracker.ts), so HttpInertBoundary keeps blocking the rest of the
+// app while these are in flight — only the operation-labelled, user-visible counters are skipped.
+const SILENT_URL_PREFIXES = [...SESSION_LIFECYCLE_URL_PREFIXES, '/api/v1/tenants/by-slug'];
+
+/** Whether a request must be excluded from GlobalHttpLoader — see SILENT_URL_PREFIXES. */
+export function isSilentHttpRequest(args: string | AppFetchArgs): boolean {
+  if (typeof args === 'string') return false;
+  return SILENT_URL_PREFIXES.some((prefix) => args.url.startsWith(prefix));
+}
+
 function hasSearchIntent(url: string, params: Record<string, unknown> | undefined): boolean {
   if (url.replace(/\/+$/, '').toLowerCase().endsWith('/search')) return true;
   const value = params?.search ?? params?.searchText;

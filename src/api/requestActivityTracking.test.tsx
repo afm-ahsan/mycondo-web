@@ -77,9 +77,11 @@ describe('request activity tracking — tenant baseQueryWithRefresh', () => {
     });
 
     await waitFor(() => expect(getActiveHttpRequestCount()).toBe(1));
-    // Login is a session-lifecycle call, not a user-initiated create — must not drive the "Saving…"
-    // operation despite being a POST (see mycondo-web loader spec "Authentication Is Not Saving").
-    expect(getActiveHttpOperation()).toBe('load');
+    // Login is a session-lifecycle call with its own button spinner — it must still block interaction
+    // via activeRequestCount (HttpInertBoundary), but must never surface as an operation GlobalHttpLoader
+    // would render a floating "Loading…" pill for (see mycondo-web loader spec "Authentication Is Not
+    // Saving" and "Session-Lifecycle Calls Are Silent").
+    expect(getActiveHttpOperation()).toBeNull();
 
     await act(async () => {
       await pending;
@@ -199,7 +201,7 @@ describe('request activity tracking — platform platformBaseQueryWithRefresh', 
     });
 
     await waitFor(() => expect(getActiveHttpRequestCount()).toBe(1));
-    expect(getActiveHttpOperation()).toBe('load');
+    expect(getActiveHttpOperation()).toBeNull();
 
     await act(async () => {
       await pending;

@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
 import { clearPlatformSessionHint, hasPlatformSessionHint, markPlatformSessionActive } from '@/features/platform/lib/platformSession';
-import { type AppFetchArgs, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
+import { type AppFetchArgs, isSilentHttpRequest, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
 import { ApiError, type ProblemDetails } from './errors';
@@ -48,8 +48,9 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, un
     // (original, refresh, retry) — the counter must move once per RTK Query call, not once per
     // underlying network round-trip.
     const operation = resolveHttpOperation(args);
+    const silent = isSilentHttpRequest(args);
     const rawArgs = typeof args === 'string' ? args : stripOperation(args);
-    beginHttpRequest(operation);
+    beginHttpRequest(operation, silent);
     try {
       let result = await rawPlatformBaseQuery(rawArgs, api, extraOptions);
 
@@ -96,7 +97,7 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, un
 
       return result;
     } finally {
-      endHttpRequest(operation);
+      endHttpRequest(operation, silent);
     }
   };
 
