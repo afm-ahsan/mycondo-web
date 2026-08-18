@@ -6,7 +6,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
+import { Ban, LogIn, Plus, ShieldCheck, Users as UsersIcon } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
@@ -24,6 +24,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Dialog,
@@ -167,31 +168,32 @@ export function GuestDirectoryPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <RequirePermission permission={PERMISSIONS.visitor.blockManage}>
-          <div className="flex justify-center">
-            {row.original.isBlocked ? (
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={isUnblocking}
-                onClick={() => handleUnblock(row.original.guestProfileId)}
-              >
-                Unblock
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={isBlocking}
-                onClick={() => setBlockTarget(row.original)}
-              >
-                Block
-              </Button>
-            )}
-          </div>
-        </RequirePermission>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.fullName}`}
+          actions={[
+            {
+              key: 'unblock',
+              label: 'Unblock',
+              icon: <ShieldCheck />,
+              onClick: () => handleUnblock(row.original.guestProfileId),
+              permission: PERMISSIONS.visitor.blockManage,
+              hidden: !row.original.isBlocked,
+              disabled: isUnblocking,
+            },
+            {
+              key: 'block',
+              label: 'Block',
+              icon: <Ban />,
+              onClick: () => setBlockTarget(row.original),
+              permission: PERMISSIONS.visitor.blockManage,
+              hidden: row.original.isBlocked,
+              disabled: isBlocking,
+              variant: 'destructive',
+            },
+          ]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

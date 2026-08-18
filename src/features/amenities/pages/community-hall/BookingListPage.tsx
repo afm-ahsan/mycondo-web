@@ -7,8 +7,8 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { CalendarDays, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { CalendarDays, Eye, Plus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -23,6 +23,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
@@ -71,6 +72,7 @@ const BOOKING_LIST_FILTER_DEFAULTS = {
  * other list page (see ServiceChargeRuleDirectoryPage).
  */
 export function BookingListPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(BOOKING_LIST_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -159,13 +161,12 @@ export function BookingListPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={row.original.bookingId}>View</Link>
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for booking ${row.original.bookingId}`}
+          actions={[{ key: 'view', label: 'View', icon: <Eye />, onClick: () => navigate(row.original.bookingId) }]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

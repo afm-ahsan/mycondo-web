@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Eye, Plus } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -15,6 +15,7 @@ import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -45,6 +46,7 @@ const PAYMENT_LIST_FILTER_DEFAULTS = {
 };
 
 export function PaymentListPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [createOpen, setCreateOpen] = useState(false);
   useEffect(() => {
@@ -123,13 +125,14 @@ export function PaymentListPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={`/billing/payments/${row.original.paymentId}`}>View</Link>
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for payment ${row.original.referenceNumber ?? row.original.paymentId}`}
+          actions={[
+            { key: 'view', label: 'View', icon: <Eye />, onClick: () => navigate(`/billing/payments/${row.original.paymentId}`) },
+          ]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

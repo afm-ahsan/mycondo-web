@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Plus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -46,6 +47,7 @@ const READING_FILTER_DEFAULTS = { buildingId: '', meterId: '', status: '', page:
  * already arrives here with a meterId pre-filled.
  */
 export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(READING_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -108,13 +110,19 @@ export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={`/utilities/${utilityType.toLowerCase()}/readings/${row.original.readingId}`}>View</Link>
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for reading ${row.original.readingId}`}
+          actions={[
+            {
+              key: 'view',
+              label: 'View',
+              icon: <Eye />,
+              onClick: () => navigate(`/utilities/${utilityType.toLowerCase()}/readings/${row.original.readingId}`),
+            },
+          ]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

@@ -6,7 +6,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { LogIn, Plus, Users as UsersIcon } from 'lucide-react';
+import { LogIn, Plus, Settings2, Users as UsersIcon } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
   Card,
@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
@@ -135,13 +136,12 @@ export function DomesticWorkerDirectoryPage() {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-            Manage
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.fullName}`}
+          actions={[{ key: 'manage', label: 'Manage', icon: <Settings2 />, onClick: () => setManageTarget(row.original) }]}
+        />
       ),
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];

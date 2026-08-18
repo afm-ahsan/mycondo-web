@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Plus } from 'lucide-react';
+import { Plus, Settings2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import {
@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -105,13 +106,12 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-            Manage
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for rate plan ${row.original.name}`}
+          actions={[{ key: 'manage', label: 'Manage', icon: <Settings2 />, onClick: () => setManageTarget(row.original) }]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

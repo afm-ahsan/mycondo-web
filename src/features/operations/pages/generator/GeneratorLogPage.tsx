@@ -7,7 +7,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, Plus, Settings2 } from 'lucide-react';
+import { AlertCircle, Plus, Settings2, Square } from 'lucide-react';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -23,6 +23,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -155,17 +156,22 @@ export function GeneratorLogPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
-      cell: ({ row }) =>
-        row.original.status === 'Open' ? (
-          <RequirePermission permission={PERMISSIONS.generator.operationManage}>
-            <div className="flex justify-center">
-              <Button size="sm" variant="outline" onClick={() => setStoppingSessionId(row.original.generatorSessionId)}>
-                Stop
-              </Button>
-            </div>
-          </RequirePermission>
-        ) : null,
+      size: DATA_GRID_COLUMN_SIZE.action,
+      cell: ({ row }) => (
+        <RowActionsMenu
+          ariaLabel={`Actions for ${generatorNameById[row.original.generatorId] ?? 'session'}`}
+          actions={[
+            {
+              key: 'stop',
+              label: 'Stop',
+              icon: <Square />,
+              onClick: () => setStoppingSessionId(row.original.generatorSessionId),
+              permission: PERMISSIONS.generator.operationManage,
+              hidden: row.original.status !== 'Open',
+            },
+          ]}
+        />
+      ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
