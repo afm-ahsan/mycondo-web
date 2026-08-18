@@ -20,6 +20,7 @@ import { useAppDispatch } from '@/store/hooks';
 import { sessionStarted } from '@/store/slices/authSlice';
 import { setAccessToken } from '@/api/baseApi';
 import { toAuthUser, useLogin, useResolveTenantBySlug } from '../api/authApi';
+import { useMinimumLoadingDuration } from '../hooks/useMinimumLoadingDuration';
 import { persistTenantId } from '../lib/tenantSession';
 import { loginSchema, type LoginSchemaType } from '../schemas/loginSchema';
 
@@ -32,7 +33,7 @@ export function LoginPage() {
 
   const [resolveTenantBySlug, { isFetching: isResolvingTenant }] = useResolveTenantBySlug();
   const [login, { isLoading: isLoggingIn }] = useLogin();
-  const isSubmitting = isResolvingTenant || isLoggingIn;
+  const isSubmitting = useMinimumLoadingDuration(isResolvingTenant || isLoggingIn);
 
   const form = useForm<LoginSchemaType>({
     resolver: zodResolver(loginSchema),
