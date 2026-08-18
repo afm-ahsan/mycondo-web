@@ -18,6 +18,7 @@ import { FlatSelect } from '@/components/shared/FlatSelect';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { formatDate } from '@/lib/helpers';
 import {
   useAssignMeter,
   useMarkMeterFaulty,
@@ -197,7 +198,7 @@ function AssignmentSection({ meter, buildingId }: { meter: MeterDto; buildingId:
       ) : currentAssignment ? (
         <p className="text-sm">
           Currently assigned to flat <span className="font-mono text-xs">{currentAssignment.flatId}</span> since{' '}
-          {new Date(currentAssignment.assignedFromUtc).toLocaleDateString()}.
+          {formatDate(currentAssignment.assignedFromUtc)}.
         </p>
       ) : (
         <p className="text-muted-foreground text-sm">Not currently assigned to a flat.</p>
@@ -219,8 +220,8 @@ function AssignmentSection({ meter, buildingId }: { meter: MeterDto; buildingId:
         <ul className="text-xs text-muted-foreground space-y-1 pt-2">
           {history.map((a) => (
             <li key={a.meterAssignmentId}>
-              Flat {a.flatId}: {new Date(a.assignedFromUtc).toLocaleDateString()} –{' '}
-              {a.assignedToUtc ? new Date(a.assignedToUtc).toLocaleDateString() : 'ongoing'}
+              Flat {a.flatId}: {formatDate(a.assignedFromUtc)} –{' '}
+              {a.assignedToUtc ? formatDate(a.assignedToUtc) : 'ongoing'}
             </li>
           ))}
         </ul>

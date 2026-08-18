@@ -20,6 +20,7 @@ import { FlatSelect } from '@/components/shared/FlatSelect';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { formatDate } from '@/lib/helpers';
 import {
   useApproveWorkerAssignment,
   useCreateWorkerAssignment,
@@ -202,9 +203,9 @@ function AssignmentsSection({ worker }: { worker: DomesticWorkerProfileDto }) {
                 <div className="space-y-0.5">
                   <div className="font-mono text-xs text-muted-foreground">Flat ID: {assignment.flatId}</div>
                   <div>
-                    Valid {new Date(assignment.validFromUtc).toLocaleDateString()}
+                    Valid {formatDate(assignment.validFromUtc)}
                     {assignment.validToUtc
-                      ? ` – ${new Date(assignment.validToUtc).toLocaleDateString()}`
+                      ? ` – ${formatDate(assignment.validToUtc)}`
                       : ' – ongoing'}
                   </div>
                   {(assignment.allowedDays || assignment.allowedStartTime) && (

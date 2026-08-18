@@ -13,6 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
@@ -26,6 +27,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { toUserMessage } from '@/api/errors';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { formatDateTime } from '@/lib/helpers';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useParcels } from '../api/parcelsApi';
@@ -116,7 +118,7 @@ export function ParcelRegisterPage() {
       id: 'receivedAtUtc',
       accessorFn: (row) => row.receivedAtUtc,
       header: ({ column }) => <DataGridColumnHeader title="Received" column={column} />,
-      cell: ({ row }) => new Date(row.original.receivedAtUtc).toLocaleString(),
+      cell: ({ row }) => formatDateTime(row.original.receivedAtUtc),
       size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {

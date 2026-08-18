@@ -14,6 +14,7 @@ import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { VoidInvoiceDialog } from '../components/VoidInvoiceDialog';
 import { useInvoiceDetail } from '../api/invoicesApi';
 import { formatBillingPeriod } from '../lib/billingPeriod';
+import { formatDate, formatDateTime } from '@/lib/helpers';
 import { invoiceStatusToneMap, type InvoiceStatus } from '../lib/invoiceStatus';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { InvoiceDto } from '@/api/generated/mycondoApi';
@@ -75,15 +76,15 @@ export function InvoiceDetailPage() {
             <DetailRow label="Source" value={invoice.source} />
             <DetailRow label="Flat" value={<span className="font-mono text-xs">{invoice.flatId}</span>} />
             <DetailRow label="Billing period" value={formatBillingPeriod(invoice.periodStart, invoice.periodEnd)} />
-            <DetailRow label="Invoice date" value={invoice.invoiceDate} />
-            <DetailRow label="Due date" value={invoice.dueDate} />
+            <DetailRow label="Invoice date" value={formatDate(invoice.invoiceDate)} />
+            <DetailRow label="Due date" value={formatDate(invoice.dueDate)} />
             <DetailRow label="Subtotal" value={<MoneyDisplay amount={invoice.subtotalAmount} />} />
             <DetailRow label="Total" value={<MoneyDisplay amount={invoice.totalAmount} className="font-semibold" />} />
             <DetailRow label="Paid" value={<MoneyDisplay amount={invoice.amountPaid} />} />
             <DetailRow label="Outstanding balance" value={<MoneyDisplay amount={invoice.balance} className="font-semibold" />} />
             {invoice.voidedAtUtc && (
               <>
-                <DetailRow label="Voided at" value={new Date(invoice.voidedAtUtc).toLocaleString()} />
+                <DetailRow label="Voided at" value={formatDateTime(invoice.voidedAtUtc)} />
                 <DetailRow label="Void reason" value={invoice.voidReason ?? '—'} />
               </>
             )}

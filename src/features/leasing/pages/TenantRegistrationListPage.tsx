@@ -15,6 +15,7 @@ import { toUserMessage } from '@/api/errors';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { formatDate } from '@/lib/helpers';
 import type { OccupancyRegistrationDto } from '@/api/generated/mycondoApi';
 import { useTenantRegistrations } from '../api/leasingApi';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -174,7 +175,7 @@ function RegistrationCard({ registration }: { registration: OccupancyRegistratio
       </div>
       <div className="text-muted-foreground flex items-center justify-between text-xs">
         <span>{registration.occupancyType}</span>
-        <span>{registration.moveInExpectedDate ? `Move-in ${registration.moveInExpectedDate}` : ''}</span>
+        <span>{registration.moveInExpectedDate ? `Move-in ${formatDate(registration.moveInExpectedDate)}` : ''}</span>
       </div>
     </Link>
   );

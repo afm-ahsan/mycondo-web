@@ -20,6 +20,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { formatDate } from '@/lib/helpers';
 import { RequestCorrectionDialog } from '../components/RequestCorrectionDialog';
 import { StaffMemberPicker } from '../components/StaffMemberPicker';
 import { useApproveCorrection, useAttendanceRegister, useClockOut } from '../api/staffAttendanceApi';
@@ -299,7 +300,7 @@ export function AttendanceRegisterPage() {
           clockOutTarget && (
             <>
               {clockOutTarget.staffMemberFullName} — clocked in at {formatTimeOfDay(clockOutTarget.checkInUtc)} on{' '}
-              {clockOutTarget.workDate}.
+              {formatDate(clockOutTarget.workDate)}.
             </>
           )
         }

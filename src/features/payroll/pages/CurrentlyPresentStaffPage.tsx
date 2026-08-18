@@ -18,6 +18,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
+import { formatDate } from '@/lib/helpers';
 import { useAttendanceRegister, useClockOut } from '../api/staffAttendanceApi';
 import { formatShift, formatTimeOfDay } from '../lib/format';
 import type { AttendanceRegisterEntryDto } from '@/api/generated/mycondoApi';
@@ -169,7 +170,7 @@ export function CurrentlyPresentStaffPage() {
           clockOutTarget && (
             <>
               {clockOutTarget.staffMemberFullName} — clocked in at {formatTimeOfDay(clockOutTarget.checkInUtc)} on{' '}
-              {clockOutTarget.workDate}.
+              {formatDate(clockOutTarget.workDate)}.
             </>
           )
         }

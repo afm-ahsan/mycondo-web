@@ -15,6 +15,7 @@ import { AllocationSummary } from '../components/AllocationSummary';
 import { ReversePaymentDialog } from '../components/ReversePaymentDialog';
 import { usePaymentDetail } from '../api/paymentsApi';
 import { paymentStatusToneMap, type PaymentStatus } from '../lib/paymentStatus';
+import { formatDate, formatDateTime } from '@/lib/helpers';
 import type { PaymentDto } from '@/api/generated/mycondoApi';
 
 function DetailRow({ label, value }: { label: string; value: React.ReactNode }) {
@@ -74,10 +75,10 @@ export function PaymentDetailPage() {
             <DetailRow label="Amount" value={<MoneyDisplay amount={payment.amount} className="font-semibold" />} />
             <DetailRow label="Method" value={payment.paymentMethod} />
             <DetailRow label="Reference" value={payment.referenceNumber ?? '—'} />
-            <DetailRow label="Business date" value={payment.businessDate} />
+            <DetailRow label="Business date" value={formatDate(payment.businessDate)} />
             {payment.reversedAtUtc && (
               <>
-                <DetailRow label="Reversed at" value={new Date(payment.reversedAtUtc).toLocaleString()} />
+                <DetailRow label="Reversed at" value={formatDateTime(payment.reversedAtUtc)} />
                 <DetailRow label="Reversal reason" value={payment.reversalReason ?? '—'} />
               </>
             )}

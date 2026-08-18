@@ -7,6 +7,7 @@ import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { formatDate } from '@/lib/helpers';
 import { useHouseholdMembers, useSubmitTenantRegistration, useTenantRegistration } from '../api/leasingApi';
 import { tenantRegistrationStatusToneMap, type TenantRegistrationStatus } from '../lib/status';
 
@@ -64,7 +65,7 @@ export function ReviewSubmitStep({ registrationId, onBack }: ReviewSubmitStepPro
         <ReviewField label="Email">{registration.primaryEmail ?? '—'}</ReviewField>
         <ReviewField label="National ID">{registration.primaryNationalIdNumberMasked ?? '—'}</ReviewField>
         <ReviewField label="Gender">{registration.primaryGender ?? '—'}</ReviewField>
-        <ReviewField label="Date of birth">{registration.primaryDateOfBirth ?? '—'}</ReviewField>
+        <ReviewField label="Date of birth">{formatDate(registration.primaryDateOfBirth)}</ReviewField>
         <ReviewField label="Blood group">{registration.primaryBloodGroup ?? '—'}</ReviewField>
         <ReviewField label="Religion">{registration.primaryReligion ?? '—'}</ReviewField>
         <ReviewField label="Nationality">{registration.primaryNationality ?? '—'}</ReviewField>
@@ -75,7 +76,7 @@ export function ReviewSubmitStep({ registrationId, onBack }: ReviewSubmitStepPro
             ? `${registration.emergencyContactName}${registration.emergencyContactPhone ? ` (${registration.emergencyContactPhone})` : ''}`
             : '—'}
         </ReviewField>
-        <ReviewField label="Expected move-in">{registration.moveInExpectedDate ?? '—'}</ReviewField>
+        <ReviewField label="Expected move-in">{formatDate(registration.moveInExpectedDate)}</ReviewField>
       </dl>
 
       <div className="border-t pt-4">
@@ -87,7 +88,7 @@ export function ReviewSubmitStep({ registrationId, onBack }: ReviewSubmitStepPro
             {activeMembers.map((m) => (
               <li key={m.householdMemberId}>
                 {m.relationshipToPrimary} — {m.fullName}
-                {m.gender ? ` (${m.gender}${m.dateOfBirth ? `, DOB ${m.dateOfBirth}` : ''})` : ''}
+                {m.gender ? ` (${m.gender}${m.dateOfBirth ? `, DOB ${formatDate(m.dateOfBirth)}` : ''})` : ''}
               </li>
             ))}
           </ul>

@@ -52,6 +52,7 @@ import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
+import { formatDate } from '@/lib/helpers';
 import {
   useCreateFlatOwnership,
   useEndFlatOwnership,
@@ -450,7 +451,7 @@ function FlatOwnerDetailDialog({
                   <div key={o.flatOwnershipId} className="flex items-center justify-between border-b py-1.5">
                     <span>
                       {o.flatNumber} — {o.buildingName}
-                      <span className="text-muted-foreground"> (since {o.startDate})</span>
+                      <span className="text-muted-foreground"> (since {formatDate(o.startDate)})</span>
                     </span>
                     <Badge variant={o.status === 'Active' ? 'success' : 'secondary'} appearance="light">
                       {o.status}

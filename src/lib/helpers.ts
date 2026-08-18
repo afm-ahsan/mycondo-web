@@ -95,8 +95,15 @@ export function timeAgo(date: Date | string): string {
   return `${Math.floor(diff / 31536000)} year${Math.floor(diff / 31536000) > 1 ? 's' : ''} ago`;
 }
 
-export function formatDate(input: Date | string | number): string {
-  const date = new Date(input);
+const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Standard MyCondo date-only display, e.g. "August 18, 2026". Safe against null/undefined/invalid input.
+ * A bare "YYYY-MM-DD" string is parsed as local midnight rather than UTC midnight, so the calendar day
+ * shown never shifts backward/forward depending on the viewer's timezone offset from UTC. */
+export function formatDate(input: Date | string | number | null | undefined): string {
+  if (input === null || input === undefined || input === '') return '—';
+  const date = typeof input === 'string' && DATE_ONLY_PATTERN.test(input) ? new Date(`${input}T00:00:00`) : new Date(input);
+  if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString('en-US', {
     month: 'long',
     day: 'numeric',
@@ -104,9 +111,21 @@ export function formatDate(input: Date | string | number): string {
   });
 }
 
-export function formatDateTime(input: Date | string | number): string {
+// MyCondo currently operates in a single property timezone (Akter Residence Park, Bangladesh).
+// There is no org/property-level timezone setting in the API contract yet, so this is pinned here
+// rather than left to the viewer's device — a UTC instant must read as the same wall-clock business
+// time for every viewer regardless of where their browser happens to be set.
+const BUSINESS_TIME_ZONE = 'Asia/Dhaka';
+
+/** Standard MyCondo date-time display, e.g. "August 18, 2026 at 5:56 AM" — no seconds. Safe against
+ * null/undefined/invalid input. Renders in the fixed MyCondo business timezone, not the viewer's
+ * device timezone, so a UTC instant displays identically for every viewer. */
+export function formatDateTime(input: Date | string | number | null | undefined): string {
+  if (input === null || input === undefined || input === '') return '—';
   const date = new Date(input);
+  if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleString('en-US', {
+    timeZone: BUSINESS_TIME_ZONE,
     month: 'long',
     day: 'numeric',
     year: 'numeric',

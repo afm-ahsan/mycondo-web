@@ -9,6 +9,7 @@ import { toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { formatDate } from '@/lib/helpers';
 import { useCreateFlatOwnership, useOwnerHouseholdMembers } from '../api/residentsApi';
 import type { FlatOwnerRegistrationSchemaType } from '../schemas/flatOwnerRegistrationSchema';
 
@@ -69,14 +70,14 @@ export function OwnerReviewSubmitStep({ form, residentId, isEditMode, onBack, on
         <ReviewField label="Building / Flat">
           <PropertyPreview buildingId={values.buildingId} flatId={values.flatId} />
         </ReviewField>
-        <ReviewField label="Ownership since">{values.startDate}</ReviewField>
+        <ReviewField label="Ownership since">{formatDate(values.startDate)}</ReviewField>
         <ReviewField label="Owner name">{values.fullName}</ReviewField>
         <ReviewField label="Phone">{values.phone || '—'}</ReviewField>
         <ReviewField label="Email">{values.email || '—'}</ReviewField>
         <ReviewField label="National ID">{values.nationalIdNumber || '—'}</ReviewField>
         <ReviewField label="Passport">{values.passportNumber || '—'}</ReviewField>
         <ReviewField label="Gender">{values.gender || '—'}</ReviewField>
-        <ReviewField label="Date of birth">{values.dateOfBirth || '—'}</ReviewField>
+        <ReviewField label="Date of birth">{formatDate(values.dateOfBirth)}</ReviewField>
         <ReviewField label="Blood group">{values.bloodGroup || '—'}</ReviewField>
         <ReviewField label="Religion">{values.religion || '—'}</ReviewField>
         <ReviewField label="Nationality">{values.nationality || '—'}</ReviewField>
@@ -98,7 +99,7 @@ export function OwnerReviewSubmitStep({ form, residentId, isEditMode, onBack, on
           <ul className="space-y-1 text-sm">
             {activeMembers.map((m) => (
               <li key={m.residentHouseholdMemberId}>
-                {m.relationshipType} — {m.fullName} ({m.gender}, DOB {m.dateOfBirth})
+                {m.relationshipType} — {m.fullName} ({m.gender}, DOB {formatDate(m.dateOfBirth)})
               </li>
             ))}
           </ul>
