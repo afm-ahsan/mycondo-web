@@ -67,7 +67,10 @@ describe('FacilitySettingsPage', () => {
     const user = userEvent.setup();
     renderWithProviders(<FacilitySettingsPage facilityContext="SwimmingPool" />, { auth: { user: managerUser, isInitialized: true } });
 
-    await user.click(await screen.findByRole('button', { name: 'Deactivate' }));
+    const row = (await screen.findByText('Main Hall')).closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /actions for main hall/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByRole('menuitem', { name: 'Deactivate' }));
     expect(deactivateCalled).toBe(false);
 
     const dialog = await screen.findByRole('alertdialog');
