@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { AlertTriangle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   applyApiErrorToForm,
@@ -43,13 +43,14 @@ import {
  */
 export function BookingFormPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [requestBooking, { isLoading }] = useRequestBooking();
   const [pageError, setPageError] = useState<string | null>(null);
 
   const form = useForm<BookingRequestSchemaType>({
     resolver: zodResolver(bookingRequestSchema),
     defaultValues: {
-      facilityId: '',
+      facilityId: searchParams.get('facilityId') ?? '',
       residentId: '',
       flatId: '',
       eventType: '',
@@ -92,7 +93,7 @@ export function BookingFormPage() {
         },
       }).unwrap();
       toast.success('Booking requested.');
-      navigate(`../${booking.bookingId}`);
+      navigate(`/facilities/community-hall/bookings/${booking.bookingId}`);
     } catch (err) {
       const apiError = toApiError(err);
       const handled = applyApiErrorToForm(form, apiError);
@@ -110,7 +111,7 @@ export function BookingFormPage() {
         title="New Booking"
         crumbs={[
           { label: 'Facilities' },
-          { label: 'Community Hall', path: '../bookings' },
+          { label: 'Community Hall', path: '/facilities/community-hall/bookings' },
           { label: 'New Booking' },
         ]}
       />

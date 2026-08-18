@@ -77,11 +77,19 @@ export function BookingCalendarPage() {
         crumbs={[{ label: 'Facilities' }, { label: 'Community Hall' }, { label: 'Booking Calendar' }]}
         primaryAction={
           <>
-            <Button variant="outline" onClick={() => navigate('../bookings')}>
+            <Button variant="outline" onClick={() => navigate('/facilities/community-hall/bookings')}>
               <List /> List
             </Button>
             <RequirePermission permission={PERMISSIONS.facility.bookingCreate}>
-              <Button onClick={() => navigate('../bookings/new')}>
+              <Button
+                onClick={() =>
+                  navigate(
+                    filters.facilityId
+                      ? `/facilities/community-hall/bookings/new?facilityId=${encodeURIComponent(filters.facilityId)}`
+                      : '/facilities/community-hall/bookings/new',
+                  )
+                }
+              >
                 <Plus /> New Booking
               </Button>
             </RequirePermission>
@@ -124,7 +132,7 @@ export function BookingCalendarPage() {
               bookings={bookings}
               blackoutDates={blackoutDates ?? []}
               facilityNameById={facilityNameById}
-              onSelectBooking={(id) => navigate(`../bookings/${id}`)}
+              onSelectBooking={(id) => navigate(`/facilities/community-hall/bookings/${id}`)}
             />
           </div>
           <div className="md:hidden">
@@ -133,7 +141,7 @@ export function BookingCalendarPage() {
               bookings={bookings}
               blackoutDates={blackoutDates ?? []}
               facilityNameById={facilityNameById}
-              onSelectBooking={(id) => navigate(`../bookings/${id}`)}
+              onSelectBooking={(id) => navigate(`/facilities/community-hall/bookings/${id}`)}
             />
           </div>
         </>

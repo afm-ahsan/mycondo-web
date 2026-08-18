@@ -102,7 +102,7 @@ export function BookingDetailsPage() {
         title={`Booking ${booking.bookingId.slice(0, 8)}`}
         crumbs={[
           { label: 'Facilities' },
-          { label: 'Community Hall', path: '../bookings' },
+          { label: 'Community Hall', path: '/facilities/community-hall/bookings' },
           { label: booking.bookingId.slice(0, 8) },
         ]}
         primaryAction={

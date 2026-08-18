@@ -282,6 +282,11 @@ export const MENU_SIDEBAR: MenuConfig = [
         icon: PartyPopper,
         children: [
           {
+            title: 'Halls / Settings',
+            path: '/facilities/community-hall/settings',
+            permission: PERMISSIONS.facility.manage,
+          },
+          {
             title: 'Booking Calendar',
             path: '/facilities/community-hall/calendar',
             permission: PERMISSIONS.facility.bookingView,
@@ -291,17 +296,17 @@ export const MENU_SIDEBAR: MenuConfig = [
             path: '/facilities/community-hall/bookings',
             permission: PERMISSIONS.facility.bookingView,
           },
-          {
-            title: 'Halls / Settings',
-            path: '/facilities/swimming-pool/settings',
-            permission: PERMISSIONS.facility.manage,
-          },
         ],
       },
       {
         title: 'Swimming Pool',
         icon: Waves,
         children: [
+          {
+            title: 'Closures / Settings',
+            path: '/facilities/swimming-pool/settings',
+            permission: PERMISSIONS.facility.manage,
+          },
           { title: 'Pool Access', path: '/facilities/swimming-pool/access', permission: PERMISSIONS.pool.checkin },
           {
             title: 'Current Users',
@@ -312,11 +317,6 @@ export const MENU_SIDEBAR: MenuConfig = [
             title: 'Usage History',
             path: '/facilities/swimming-pool/history',
             permission: PERMISSIONS.pool.view,
-          },
-          {
-            title: 'Closures / Settings',
-            path: '/facilities/swimming-pool/settings',
-            permission: PERMISSIONS.facility.manage,
           },
         ],
       },

@@ -56,13 +56,26 @@ import type { FacilityDto } from '@/api/generated/mycondoApi';
 const SETTINGS_FILTER_DEFAULTS = { type: '__all__' };
 const SETTINGS_COLUMN_COUNT = 5;
 
+// Facility is one backend entity for both types, so this single page covers hall and pool
+// creation/configuration alike (resolved with the user via `AskUserQuestion` before this slice was
+// built, see Slice G plan §"Two placement decisions"). It's mounted at two distinct routes —
+// /facilities/community-hall/settings and /facilities/swimming-pool/settings — each passing its own
+// `facilityContext` so the title/breadcrumb reflect how the user actually navigated in, instead of
+// always reading "Closures / Settings — Swimming Pool" even from the Community Hall menu.
+const CONTEXT_COPY = {
+  CommunityHall: { title: 'Halls / Settings', parentLabel: 'Community Hall' },
+  SwimmingPool: { title: 'Closures / Settings', parentLabel: 'Swimming Pool' },
+} as const;
+
+interface FacilitySettingsPageProps {
+  facilityContext: keyof typeof CONTEXT_COPY;
+}
+
 /**
- * Manages both Community Hall and Swimming Pool facilities — the menu tree only has a
- * "Closures/Settings" slot under Swimming Pool, but Facility is one backend entity for both types, so
- * this single page covers hall creation/configuration too (resolved with the user via
- * `AskUserQuestion` before this slice was built, see Slice G plan §"Two placement decisions").
+ * Manages both Community Hall and Swimming Pool facilities — see `CONTEXT_COPY` above for why.
  */
-export function FacilitySettingsPage() {
+export function FacilitySettingsPage({ facilityContext }: FacilitySettingsPageProps) {
+  const { title, parentLabel } = CONTEXT_COPY[facilityContext];
   const [filters, setFilters] = useUrlFilters(SETTINGS_FILTER_DEFAULTS);
   const [editTarget, setEditTarget] = useState<FacilityDto | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
@@ -100,8 +113,8 @@ export function FacilitySettingsPage() {
   return (
     <div className="space-y-4">
       <PageHeader
-        title="Closures / Settings"
-        crumbs={[{ label: 'Facilities' }, { label: 'Swimming Pool' }, { label: 'Closures / Settings' }]}
+        title={title}
+        crumbs={[{ label: 'Facilities' }, { label: parentLabel }, { label: title }]}
         primaryAction={
           <RequirePermission permission={PERMISSIONS.facility.manage}>
             <Button onClick={() => setCreateOpen(true)}>

@@ -191,7 +191,7 @@ export function BookingListPage() {
         primaryAction={
           <>
             <Button variant="outline" asChild>
-              <Link to="../calendar">
+              <Link to="/facilities/community-hall/calendar">
                 <CalendarDays /> Calendar
               </Link>
             </Button>
