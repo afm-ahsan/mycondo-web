@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
 import { clearPlatformSessionHint, hasPlatformSessionHint, markPlatformSessionActive } from '@/features/platform/lib/platformSession';
+import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
 import { ApiError, type ProblemDetails } from './errors';
 
@@ -41,50 +42,58 @@ const rawPlatformBaseQuery = fetchBaseQuery({
 
 export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   async (args, api, extraOptions) => {
-    let result = await rawPlatformBaseQuery(args, api, extraOptions);
+    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts)
+    // even though a 401 below can fan this out into up to three raw fetches (original, refresh, retry)
+    // — the counter must move once per RTK Query call, not once per underlying network round-trip.
+    beginHttpRequest();
+    try {
+      let result = await rawPlatformBaseQuery(args, api, extraOptions);
 
-    if (result.error?.status === 401) {
-      if (!hasPlatformSessionHint()) {
-        // No known prior platform session (first visit, or already logged out elsewhere) — calling
-        // refresh here would just re-hit the empty-cookie case, so skip straight to "session ended"
-        // rather than firing a doomed request.
-        setPlatformAccessToken(null);
-        api.dispatch(platformSessionEnded());
-      } else {
-        // No body needed — the platform refresh endpoint reads the token from the
-        // mycondo_platform_rt cookie only, unlike the tenant refresh call (which still needs an
-        // explicit tenantId; see baseApi.ts). There is no Platform equivalent of "which tenant" to read.
-        const refresh = await rawPlatformBaseQuery(
-          { url: '/api/v1/platform/auth/refresh', method: 'POST' },
-          api,
-          extraOptions,
-        );
-
-        if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
-          setPlatformAccessToken((refresh.data as { accessToken: string }).accessToken);
-          markPlatformSessionActive();
-          result = await rawPlatformBaseQuery(args, api, extraOptions);
-        } else {
+      if (result.error?.status === 401) {
+        if (!hasPlatformSessionHint()) {
+          // No known prior platform session (first visit, or already logged out elsewhere) — calling
+          // refresh here would just re-hit the empty-cookie case, so skip straight to "session ended"
+          // rather than firing a doomed request.
           setPlatformAccessToken(null);
-          clearPlatformSessionHint();
           api.dispatch(platformSessionEnded());
+        } else {
+          // No body needed — the platform refresh endpoint reads the token from the
+          // mycondo_platform_rt cookie only, unlike the tenant refresh call (which still needs an
+          // explicit tenantId; see baseApi.ts). There is no Platform equivalent of "which tenant" to read.
+          const refresh = await rawPlatformBaseQuery(
+            { url: '/api/v1/platform/auth/refresh', method: 'POST' },
+            api,
+            extraOptions,
+          );
+
+          if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
+            setPlatformAccessToken((refresh.data as { accessToken: string }).accessToken);
+            markPlatformSessionActive();
+            result = await rawPlatformBaseQuery(args, api, extraOptions);
+          } else {
+            setPlatformAccessToken(null);
+            clearPlatformSessionHint();
+            api.dispatch(platformSessionEnded());
+          }
         }
       }
-    }
 
-    if (result.error) {
-      const problem = result.error.data as ProblemDetails | undefined;
-      if (problem && typeof problem === 'object') {
-        const correlationId = result.meta?.response?.headers.get(CORRELATION_HEADER) ?? undefined;
-        const apiError = new ApiError(
-          { ...problem, status: problem.status ?? Number(result.error.status) },
-          correlationId,
-        );
-        return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
+      if (result.error) {
+        const problem = result.error.data as ProblemDetails | undefined;
+        if (problem && typeof problem === 'object') {
+          const correlationId = result.meta?.response?.headers.get(CORRELATION_HEADER) ?? undefined;
+          const apiError = new ApiError(
+            { ...problem, status: problem.status ?? Number(result.error.status) },
+            correlationId,
+          );
+          return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
+        }
       }
-    }
 
-    return result;
+      return result;
+    } finally {
+      endHttpRequest();
+    }
   };
 
 export const platformBaseApi = createApi({

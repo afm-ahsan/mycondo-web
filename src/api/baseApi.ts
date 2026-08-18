@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
+import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
 import type { AuthResponse } from './generated/mycondoApi';
 import { ApiError, type ProblemDetails } from './errors';
@@ -47,47 +48,55 @@ interface PartialAuthState {
 // not this automatic-retry path — there's no prior Redux state to read from yet on first load.
 export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
   async (args, api, extraOptions) => {
-    let result = await rawBaseQuery(args, api, extraOptions);
+    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts)
+    // even though a 401 below can fan this out into up to three raw fetches (original, refresh, retry)
+    // — the counter must move once per RTK Query call, not once per underlying network round-trip.
+    beginHttpRequest();
+    try {
+      let result = await rawBaseQuery(args, api, extraOptions);
 
-    if (result.error?.status === 401) {
-      const tenantId = (api.getState() as PartialAuthState).auth?.user?.tenantId;
+      if (result.error?.status === 401) {
+        const tenantId = (api.getState() as PartialAuthState).auth?.user?.tenantId;
 
-      const refresh = tenantId
-        ? await rawBaseQuery(
-            { url: '/api/v1/auth/refresh', method: 'POST', body: { tenantId } },
-            api,
-            extraOptions,
-          )
-        : { data: undefined };
+        const refresh = tenantId
+          ? await rawBaseQuery(
+              { url: '/api/v1/auth/refresh', method: 'POST', body: { tenantId } },
+              api,
+              extraOptions,
+            )
+          : { data: undefined };
 
-      if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
-        const { accessToken: newAccessToken, user } = refresh.data as AuthResponse;
-        setAccessToken(newAccessToken);
-        // Without this, a tab left open across an access-token expiry keeps working (the token
-        // itself is fresh) but Redux's `auth.user.permissions` stays frozen at whatever it was at
-        // last login/reload — a role/permission grant change server-side (e.g. a newly-granted
-        // permission) would never reach the permission-gated UI until a hard reload or re-login.
-        api.dispatch(sessionRestored(toAuthUser(user)));
-        result = await rawBaseQuery(args, api, extraOptions);
-      } else {
-        setAccessToken(null);
-        api.dispatch(sessionEnded());
+        if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
+          const { accessToken: newAccessToken, user } = refresh.data as AuthResponse;
+          setAccessToken(newAccessToken);
+          // Without this, a tab left open across an access-token expiry keeps working (the token
+          // itself is fresh) but Redux's `auth.user.permissions` stays frozen at whatever it was at
+          // last login/reload — a role/permission grant change server-side (e.g. a newly-granted
+          // permission) would never reach the permission-gated UI until a hard reload or re-login.
+          api.dispatch(sessionRestored(toAuthUser(user)));
+          result = await rawBaseQuery(args, api, extraOptions);
+        } else {
+          setAccessToken(null);
+          api.dispatch(sessionEnded());
+        }
       }
-    }
 
-    if (result.error) {
-      const problem = result.error.data as ProblemDetails | undefined;
-      if (problem && typeof problem === 'object') {
-        const correlationId = readCorrelationId(result.meta?.response);
-        const apiError = new ApiError(
-          { ...problem, status: problem.status ?? Number(result.error.status) },
-          correlationId,
-        );
-        return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
+      if (result.error) {
+        const problem = result.error.data as ProblemDetails | undefined;
+        if (problem && typeof problem === 'object') {
+          const correlationId = readCorrelationId(result.meta?.response);
+          const apiError = new ApiError(
+            { ...problem, status: problem.status ?? Number(result.error.status) },
+            correlationId,
+          );
+          return { error: { ...result.error, data: apiError.toPayload() } as FetchBaseQueryError };
+        }
       }
-    }
 
-    return result;
+      return result;
+    } finally {
+      endHttpRequest();
+    }
   };
 
 function readCorrelationId(response: Response | undefined): string | undefined {

@@ -1,6 +1,8 @@
 import { AppRouting } from '@/routing/app-routing';
 import { HelmetProvider } from 'react-helmet-async';
 import { BrowserRouter } from 'react-router-dom';
+import { GlobalHttpLoader } from '@/components/common/global-http-loader';
+import { HttpInertBoundary } from '@/components/common/http-inert-boundary';
 import { Toaster } from '@/components/ui/sonner';
 import { useSessionBootstrap } from '@/features/auth/hooks/useSessionBootstrap';
 import { usePlatformSessionBootstrap } from '@/features/platform/hooks/usePlatformSessionBootstrap';
@@ -29,7 +31,10 @@ export function App() {
               <PageHeaderProvider>
                 <BrowserRouter basename={BASE_URL}>
                   <Toaster />
-                  <AppRouting />
+                  <GlobalHttpLoader />
+                  <HttpInertBoundary>
+                    <AppRouting />
+                  </HttpInertBoundary>
                 </BrowserRouter>
               </PageHeaderProvider>
             </TooltipsProvider>
