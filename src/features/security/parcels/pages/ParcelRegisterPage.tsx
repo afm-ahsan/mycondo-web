@@ -27,7 +27,7 @@ import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { toUserMessage } from '@/api/errors';
 import { useUrlFilters } from '@/hooks/use-url-filters';
-import { formatDateTime } from '@/lib/helpers';
+import { formatDateTime, formatLabel } from '@/lib/helpers';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useParcels } from '../api/parcelsApi';
@@ -105,13 +105,13 @@ export function ParcelRegisterPage() {
     {
       id: 'recipientFlatId',
       header: 'Flat',
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.recipientFlatId}</span>,
+      cell: ({ row }) => row.original.recipientFlatDisplayName,
       size: DATA_GRID_COLUMN_SIZE.medium,
     },
     {
       id: 'parcelType',
       header: 'Type',
-      cell: ({ row }) => `${row.original.parcelType} (${row.original.packageCount})`,
+      cell: ({ row }) => `${formatLabel(row.original.parcelType)} (${row.original.packageCount})`,
       size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {

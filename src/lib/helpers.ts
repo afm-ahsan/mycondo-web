@@ -155,3 +155,23 @@ export function formatNumber(value: number | string | null | undefined, fraction
   const numeric = typeof value === 'string' ? Number(value) : value;
   return Number.isFinite(numeric) ? numeric.toFixed(fractionDigits) : '—';
 }
+
+/** Turns a backend PascalCase/camelCase enum or status member (e.g. "AwaitingCollection") into a
+ * human-readable label ("Awaiting Collection"). A value with no lowercase letters is left untouched —
+ * that covers business codes/acronyms (e.g. "AISHA", "NID", "INV-2026-0012") that must not be split.
+ * Prefer an explicit label map for business-vocabulary statuses; use this as the generic fallback. */
+export function formatLabel(value: string | null | undefined): string {
+  if (value === null || value === undefined || value === '') return '—';
+  if (!/[a-z]/.test(value)) return value;
+
+  const spaced = value
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/([A-Z]+)([A-Z][a-z])/g, '$1 $2')
+    .trim();
+
+  return spaced
+    .split(' ')
+    .filter(Boolean)
+    .map((word) => (/[a-z]/.test(word) ? word[0].toUpperCase() + word.slice(1) : word))
+    .join(' ');
+}

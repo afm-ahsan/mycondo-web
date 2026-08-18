@@ -18832,6 +18832,7 @@
           "toStatus",
           "occurredAtUtc",
           "performedBy",
+          "performedByDisplayName",
           "notes"
         ],
         "type": "object",
@@ -18858,6 +18859,9 @@
             ],
             "format": "uuid"
           },
+          "performedByDisplayName": {
+            "type": "string"
+          },
           "notes": {
             "type": [
               "null",
@@ -18874,6 +18878,7 @@
           "trackingNumber",
           "senderName",
           "recipientFlatId",
+          "recipientFlatDisplayName",
           "recipientResidentId",
           "parcelType",
           "packageCount",
@@ -18922,6 +18927,9 @@
           "recipientFlatId": {
             "type": "string",
             "format": "uuid"
+          },
+          "recipientFlatDisplayName": {
+            "type": "string"
           },
           "recipientResidentId": {
             "type": [
