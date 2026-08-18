@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Link } from 'react-router-dom';
+import { Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -35,6 +37,7 @@ import type { InvoiceDto } from '@/api/generated/mycondoApi';
 const INVOICE_LIST_FILTER_DEFAULTS = { buildingId: '', flatId: '', status: '', source: '', page: '1', pageSize: '10' };
 
 export function InvoiceListPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(INVOICE_LIST_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -122,13 +125,12 @@ export function InvoiceListPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for invoice ${row.original.invoiceId}`}
+          actions={[{ key: 'view', label: 'View', icon: <Eye />, onClick: () => navigate(`/billing/invoices/${row.original.invoiceId}`) }]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },

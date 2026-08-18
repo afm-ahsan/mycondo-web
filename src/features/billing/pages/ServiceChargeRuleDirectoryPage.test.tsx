@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -101,7 +101,9 @@ describe('ServiceChargeRuleDirectoryPage', () => {
     renderWithProviders(<ServiceChargeRuleDirectoryPage />, { auth: { user: adminUser, isInitialized: true } });
 
     await chooseOption(user, 'Select a building', 'Tower A (A)');
-    await user.click(await screen.findByRole('button', { name: /manage/i }));
+    await user.click(await screen.findByRole('button', { name: /actions for monthly maintenance/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByRole('menuitem', { name: 'Manage' }));
     await user.click(await screen.findByRole('button', { name: /deactivate rule/i }));
 
     await waitFor(() => expect(deactivateCalled).toBe(true));

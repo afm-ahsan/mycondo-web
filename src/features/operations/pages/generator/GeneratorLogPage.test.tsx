@@ -1,7 +1,7 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
 import type { AuthUser } from '@/store/slices/authSlice';
@@ -136,7 +136,9 @@ describe('GeneratorLogPage', () => {
     const user = userEvent.setup();
     renderWithProviders(<GeneratorLogPage />, { auth: { user: operatorUser, isInitialized: true } });
 
-    await user.click(await screen.findByRole('button', { name: /^stop$/i }));
+    await user.click(await screen.findByRole('button', { name: /actions for generator 1/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByRole('menuitem', { name: 'Stop' }));
 
     const fuelInput = screen.getByLabelText(/closing fuel level/i);
     await user.clear(fuelInput);

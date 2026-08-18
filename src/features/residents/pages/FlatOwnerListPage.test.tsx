@@ -162,7 +162,9 @@ describe('FlatOwnerListPage', () => {
     renderWithProviders(<FlatOwnerListPage />, { auth: { user: adminUser, isInitialized: true } });
 
     await screen.findByText('Jane Owner');
-    await user.click(screen.getByRole('button', { name: /end ownership/i }));
+    await user.click(screen.getByRole('button', { name: /actions for jane owner/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByRole('menuitem', { name: /end ownership/i }));
 
     const alert = await screen.findByRole('alertdialog');
     expect(within(alert).getByText(/end this ownership\?/i)).toBeInTheDocument();

@@ -4,18 +4,17 @@ import { LogOut } from 'lucide-react';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
-import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { formatDate } from '@/lib/helpers';
@@ -106,16 +105,22 @@ export function CurrentlyPresentStaffPage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.medium,
+      size: DATA_GRID_COLUMN_SIZE.action,
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-            <Button size="sm" variant="outline" onClick={() => setClockOutTarget(row.original)} disabled={isClockingOut}>
-              <LogOut /> Clock Out
-            </Button>
-          </RequirePermission>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.staffMemberFullName}`}
+          actions={[
+            {
+              key: 'clockOut',
+              label: 'Clock Out',
+              icon: <LogOut />,
+              onClick: () => setClockOutTarget(row.original),
+              permission: PERMISSIONS.staffAttendance.manage,
+              disabled: isClockingOut,
+            },
+          ]}
+        />
       ),
     },
   ];

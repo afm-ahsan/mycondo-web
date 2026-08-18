@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { PlusIcon, UserX } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -14,6 +14,7 @@ import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardTo
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   AlertDialog,
@@ -139,20 +140,25 @@ export function FlatOwnerListPage() {
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
-      // Single-action column (pending approval to switch to the standard kebab menu — see table audit).
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.medium,
-      cell: ({ row }) =>
-        row.original.status === 'Active' ? (
-          <RequirePermission permission="ownership.manage">
-            <div className="flex justify-center">
-              <Button variant="outline" size="sm" onClick={() => setEndTarget(row.original)}>
-                End ownership
-              </Button>
-            </div>
-          </RequirePermission>
-        ) : null,
+      size: DATA_GRID_COLUMN_SIZE.action,
+      cell: ({ row }) => (
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.ownerFullName}`}
+          actions={[
+            {
+              key: 'endOwnership',
+              label: 'End ownership',
+              icon: <UserX />,
+              onClick: () => setEndTarget(row.original),
+              permission: 'ownership.manage',
+              hidden: row.original.status !== 'Active',
+              variant: 'destructive',
+            },
+          ]}
+        />
+      ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];

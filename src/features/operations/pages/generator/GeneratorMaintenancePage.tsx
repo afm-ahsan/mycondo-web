@@ -5,7 +5,7 @@ import {
   type PaginationState,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, Plus } from 'lucide-react';
+import { AlertCircle, CheckCircle2, Plus, Wrench } from 'lucide-react';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +20,7 @@ import {
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -224,15 +225,20 @@ export function GeneratorMaintenancePage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-          <div className="flex justify-center">
-            <Button size="sm" variant="outline" onClick={() => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId)}>
-              Complete
-            </Button>
-          </div>
-        </RequirePermission>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${generatorNameById[row.original.generatorId] ?? 'schedule'}`}
+          actions={[
+            {
+              key: 'complete',
+              label: 'Complete',
+              icon: <CheckCircle2 />,
+              onClick: () => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId),
+              permission: PERMISSIONS.generator.maintenanceManage,
+            },
+          ]}
+        />
       ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
@@ -287,17 +293,22 @@ export function GeneratorMaintenancePage() {
     {
       id: 'actions',
       header: 'Action',
-      size: DATA_GRID_COLUMN_SIZE.compact,
-      cell: ({ row }) =>
-        !row.original.downtimeEndUtc ? (
-          <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-            <div className="flex justify-center">
-              <Button size="sm" variant="outline" onClick={() => setResolvingBreakdownId(row.original.generatorBreakdownRecordId)}>
-                Resolve
-              </Button>
-            </div>
-          </RequirePermission>
-        ) : null,
+      size: DATA_GRID_COLUMN_SIZE.action,
+      cell: ({ row }) => (
+        <RowActionsMenu
+          ariaLabel={`Actions for ${generatorNameById[row.original.generatorId] ?? 'breakdown'}`}
+          actions={[
+            {
+              key: 'resolve',
+              label: 'Resolve',
+              icon: <Wrench />,
+              onClick: () => setResolvingBreakdownId(row.original.generatorBreakdownRecordId),
+              permission: PERMISSIONS.generator.maintenanceManage,
+              hidden: !!row.original.downtimeEndUtc,
+            },
+          ]}
+        />
+      ),
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];

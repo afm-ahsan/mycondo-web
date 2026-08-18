@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Package, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Eye, Package, Plus } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -15,6 +15,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -50,6 +51,7 @@ const statusToneMap: StatusBadgeMap<ParcelStatus> = {
 const REGISTER_FILTER_DEFAULTS = { status: '', recipientFlatId: '', page: '1', pageSize: '10' };
 
 export function ParcelRegisterPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(REGISTER_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -132,13 +134,19 @@ export function ParcelRegisterPage() {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <div className="flex justify-center">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={`/security/parcels/${row.original.parcelId}`}>View</Link>
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for parcel ${row.original.parcelReference ?? row.original.trackingNumber ?? ''}`}
+          actions={[
+            {
+              key: 'view',
+              label: 'View',
+              icon: <Eye />,
+              onClick: () => navigate(`/security/parcels/${row.original.parcelId}`),
+            },
+          ]}
+        />
       ),
-      size: DATA_GRID_COLUMN_SIZE.compact,
+      size: DATA_GRID_COLUMN_SIZE.action,
       meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
