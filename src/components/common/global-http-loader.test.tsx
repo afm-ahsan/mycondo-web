@@ -2,14 +2,21 @@ import { act, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, describe, expect, it } from 'vitest';
 import {
+  beginBrandedLoader,
+  endBrandedLoader,
+  resetBrandedLoaderActivityForTests,
+} from '@/lib/http/brandedLoaderTracker';
+import {
   beginHttpRequest,
   endHttpRequest,
   resetHttpRequestActivityForTests,
 } from '@/lib/http/requestActivityTracker';
+import { ScreenLoader } from './screen-loader';
 import { GlobalHttpLoader } from './global-http-loader';
 
 afterEach(() => {
   resetHttpRequestActivityForTests();
+  resetBrandedLoaderActivityForTests();
 });
 
 describe('GlobalHttpLoader', () => {
@@ -116,5 +123,56 @@ describe('GlobalHttpLoader', () => {
 
     act(() => endHttpRequest());
     expect(document.activeElement).toBe(saveButton);
+  });
+
+  it('stays suppressed while the CondoBD branded loader (ScreenLoader) is mounted', () => {
+    render(
+      <>
+        <ScreenLoader />
+        <GlobalHttpLoader />
+      </>,
+    );
+
+    act(() => beginHttpRequest());
+
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
+    expect(screen.getByAltText('CondoBD')).toBeInTheDocument();
+  });
+
+  it('appears immediately once the branded loader unmounts, without resetting activeRequestCount', () => {
+    const { rerender } = render(
+      <>
+        <ScreenLoader />
+        <GlobalHttpLoader />
+      </>,
+    );
+
+    act(() => {
+      beginHttpRequest();
+      beginHttpRequest();
+    });
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
+
+    rerender(<GlobalHttpLoader />);
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+
+    act(() => endHttpRequest());
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+
+    act(() => endHttpRequest());
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
+  });
+
+  it('hides again if the branded loader becomes active while a request is already in flight', () => {
+    render(<GlobalHttpLoader />);
+
+    act(() => beginHttpRequest());
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+
+    act(() => beginBrandedLoader());
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
+
+    act(() => endBrandedLoader());
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
   });
 });
