@@ -49,7 +49,7 @@ describe('FacilitySettingsPage', () => {
       http.get(`${API_BASE}/api/v1/facilities`, () => HttpResponse.json({ items: [], page: 1, pageSize: 100, total: 0 })),
     );
 
-    renderWithProviders(<FacilitySettingsPage />, { auth: { user: managerUser, isInitialized: true } });
+    renderWithProviders(<FacilitySettingsPage facilityContext="SwimmingPool" />, { auth: { user: managerUser, isInitialized: true } });
 
     expect(await screen.findByText('No facilities configured yet')).toBeInTheDocument();
   });
@@ -65,7 +65,7 @@ describe('FacilitySettingsPage', () => {
     );
 
     const user = userEvent.setup();
-    renderWithProviders(<FacilitySettingsPage />, { auth: { user: managerUser, isInitialized: true } });
+    renderWithProviders(<FacilitySettingsPage facilityContext="SwimmingPool" />, { auth: { user: managerUser, isInitialized: true } });
 
     await user.click(await screen.findByRole('button', { name: 'Deactivate' }));
     expect(deactivateCalled).toBe(false);
@@ -75,5 +75,22 @@ describe('FacilitySettingsPage', () => {
     await user.click(within(dialog).getByRole('button', { name: 'Deactivate' }));
 
     await waitFor(() => expect(deactivateCalled).toBe(true));
+  });
+
+  it('shows a context-appropriate title depending on which menu entry it was reached from', async () => {
+    server.use(
+      http.get(`${API_BASE}/api/v1/facilities`, () => HttpResponse.json({ items: [], page: 1, pageSize: 100, total: 0 })),
+    );
+
+    const { unmount } = renderWithProviders(<FacilitySettingsPage facilityContext="CommunityHall" />, {
+      auth: { user: managerUser, isInitialized: true },
+    });
+    expect(await screen.findByRole('heading', { name: 'Halls / Settings' })).toBeInTheDocument();
+    unmount();
+
+    renderWithProviders(<FacilitySettingsPage facilityContext="SwimmingPool" />, {
+      auth: { user: managerUser, isInitialized: true },
+    });
+    expect(await screen.findByRole('heading', { name: 'Closures / Settings' })).toBeInTheDocument();
   });
 });

@@ -1,8 +1,13 @@
 import { HttpResponse, http } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
+import { Provider } from 'react-redux';
 import { server } from '@/test/server';
 import { renderWithProviders } from '@/test/renderWithProviders';
+import { createStore } from '@/store/store';
+import { PageHeaderProvider } from '@/providers/page-header-provider';
 import type { AuthUser } from '@/store/slices/authSlice';
 import { BookingCalendarPage } from './BookingCalendarPage';
 
@@ -128,5 +133,40 @@ describe('BookingCalendarPage', () => {
 
     expect(await screen.findByText(/failed to load bookings/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument();
+  });
+
+  it('navigates "+ New Booking" to the real /facilities/community-hall/bookings/new route, not an error page', async () => {
+    mockFacilities();
+    server.use(
+      http.get(`${API_BASE}/api/v1/facility-bookings`, () => HttpResponse.json({ items: [], page: 1, pageSize: 100, total: 0 })),
+      http.get(`${API_BASE}/api/v1/facilities/fac-1/blackout-dates`, () => HttpResponse.json([])),
+    );
+
+    // Mirrors app-routing-setup.tsx: the calendar route is a single flat leaf path nested under
+    // pathless layout <Route> wrappers — the exact shape that made `navigate('../bookings/new')`
+    // resolve to "/bookings/new" (routePathnames only has 2 contributing matches, so one ".." pops
+    // straight to the app root) instead of "/facilities/community-hall/bookings/new".
+    const store = createStore({ auth: { user: viewerUser, isInitialized: true } });
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/facilities/community-hall/calendar']}>
+        <Provider store={store}>
+          <PageHeaderProvider>
+            <Routes>
+              <Route element={<Outlet />}>
+                <Route element={<Outlet />}>
+                  <Route path="/facilities/community-hall/calendar" element={<BookingCalendarPage />} />
+                  <Route path="/facilities/community-hall/bookings/new" element={<div>New booking form</div>} />
+                </Route>
+              </Route>
+            </Routes>
+          </PageHeaderProvider>
+        </Provider>
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('button', { name: /new booking/i }));
+
+    expect(await screen.findByText('New booking form')).toBeInTheDocument();
   });
 });

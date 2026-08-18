@@ -983,6 +983,14 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/facilities/community-hall/settings"
+            element={
+              <RequirePermission permission={PERMISSIONS.facility.manage} fallback={<AccessDeniedNotice />}>
+                <FacilitySettingsPage facilityContext="CommunityHall" />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/facilities/swimming-pool/access"
             element={
               <RequirePermission permission={PERMISSIONS.pool.checkin} fallback={<AccessDeniedNotice />}>
@@ -1010,7 +1018,7 @@ export function AppRoutingSetup() {
             path="/facilities/swimming-pool/settings"
             element={
               <RequirePermission permission={PERMISSIONS.facility.manage} fallback={<AccessDeniedNotice />}>
-                <FacilitySettingsPage />
+                <FacilitySettingsPage facilityContext="SwimmingPool" />
               </RequirePermission>
             }
           />
