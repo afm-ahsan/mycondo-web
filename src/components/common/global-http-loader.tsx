@@ -2,18 +2,25 @@
 
 import { useEffect, useRef } from 'react';
 import { LoaderCircleIcon } from 'lucide-react';
+import { HTTP_OPERATION_LABEL } from '@/lib/http/httpOperation';
 import { useIsBrandedLoaderActive } from '@/lib/http/brandedLoaderTracker';
-import { useIsHttpRequestActive } from '@/lib/http/requestActivityTracker';
+import { useActiveHttpOperation } from '@/lib/http/requestActivityTracker';
 
 /**
  * Renders whenever any application HTTP request is in flight — driven primarily by the centralized
- * activeRequestCount in requestActivityTracker.ts (incremented/decremented by baseApi.ts and
+ * per-operation counters in requestActivityTracker.ts (incremented/decremented by baseApi.ts and
  * platformBaseApi.ts around every fetch, including auth/refresh/upload/download), never by an
  * individual page/component's own `isLoading`. Mount once at the application shell (see App.tsx).
  *
+ * Shows the semantic operation currently in flight (Loading/Saving/Updating/Deleting/Searching — see
+ * httpOperation.ts) rather than a generic "Loading…", so the overlay always tells the user what
+ * MyCondo is actually doing. When multiple requests overlap, useActiveHttpOperation resolves to the
+ * highest-priority one (Deleting > Updating > Saving > Searching > Loading), so a background GET
+ * triggered by, say, cache invalidation never visually preempts the mutation the user is waiting on.
+ *
  * Suppressed while a CondoBD branded loader (ScreenLoader, e.g. during session-bootstrap on
  * RequireAuth/RequirePlatformAuth) is mounted — the branded loader takes visual priority so the two
- * never render on top of each other. This does NOT pause activeRequestCount tracking: a request that
+ * never render on top of each other. This does NOT pause the underlying counters: a request that
  * starts while the branded loader is up still surfaces this overlay the instant the branded loader
  * unmounts, if still in flight. See brandedLoaderTracker.ts.
  *
@@ -32,9 +39,10 @@ import { useIsHttpRequestActive } from '@/lib/http/requestActivityTracker';
  * dialog/dropdown content).
  */
 export function GlobalHttpLoader() {
-  const isHttpRequestActive = useIsHttpRequestActive();
+  const activeOperation = useActiveHttpOperation();
   const isBrandedLoaderActive = useIsBrandedLoaderActive();
-  const isActive = isHttpRequestActive && !isBrandedLoaderActive;
+  const isActive = activeOperation !== null && !isBrandedLoaderActive;
+  const label = HTTP_OPERATION_LABEL[activeOperation ?? 'load'];
   const overlayRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
@@ -61,11 +69,11 @@ export function GlobalHttpLoader() {
       className="fixed inset-0 z-[100] flex cursor-wait items-center justify-center outline-none"
       role="status"
       aria-live="polite"
-      aria-label="Loading"
+      aria-label={label}
     >
       <div className="pointer-events-none flex items-center gap-2 rounded-full border border-border bg-background/95 px-4 py-2 shadow-lg shadow-black/10 backdrop-blur-sm">
         <LoaderCircleIcon className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />
-        <span className="text-sm font-medium text-foreground">Loading…</span>
+        <span className="text-sm font-medium text-foreground">{label}…</span>
       </div>
     </div>
   );

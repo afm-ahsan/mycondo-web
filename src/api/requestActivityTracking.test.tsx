@@ -11,6 +11,7 @@ import { setPlatformAccessToken } from '@/api/platformBaseApi';
 import { useLogin, useMyProfile } from '@/features/auth/api/authApi';
 import { usePlatformLogin } from '@/features/platform/api/platformAuthApi';
 import {
+  getActiveHttpOperation,
   getActiveHttpRequestCount,
   resetHttpRequestActivityForTests,
 } from '@/lib/http/requestActivityTracker';
@@ -76,6 +77,9 @@ describe('request activity tracking — tenant baseQueryWithRefresh', () => {
     });
 
     await waitFor(() => expect(getActiveHttpRequestCount()).toBe(1));
+    // Login is a session-lifecycle call, not a user-initiated create — must not drive the "Saving…"
+    // operation despite being a POST (see mycondo-web loader spec "Authentication Is Not Saving").
+    expect(getActiveHttpOperation()).toBe('load');
 
     await act(async () => {
       await pending;
@@ -195,6 +199,7 @@ describe('request activity tracking — platform platformBaseQueryWithRefresh', 
     });
 
     await waitFor(() => expect(getActiveHttpRequestCount()).toBe(1));
+    expect(getActiveHttpOperation()).toBe('load');
 
     await act(async () => {
       await pending;
