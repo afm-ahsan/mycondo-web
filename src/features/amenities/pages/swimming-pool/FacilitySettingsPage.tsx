@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AlertCircle, Landmark, Plus } from 'lucide-react';
+import { AlertCircle, Ban, CalendarOff, CheckCircle2, Landmark, Pencil, Plus } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import type { z } from 'zod';
@@ -33,6 +33,7 @@ import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { TableSkeleton } from '@/components/feedback/TableSkeleton';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm';
@@ -157,8 +158,8 @@ export function FacilitySettingsPage({ facilityContext }: FacilitySettingsPagePr
                     <TableHead>Name</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Capacity</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead />
+                    <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-center">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -170,31 +171,40 @@ export function FacilitySettingsPage({ facilityContext }: FacilitySettingsPagePr
                         <TableCell className="font-medium">{facility.name}</TableCell>
                         <TableCell>{FACILITY_TYPE_LABELS[facility.facilityType as 'CommunityHall' | 'SwimmingPool']}</TableCell>
                         <TableCell>{facility.capacity}</TableCell>
-                        <TableCell>
+                        <TableCell className="text-center">
                           <Badge variant={facility.isActive ? 'success' : 'secondary'} appearance="light">
                             {facility.isActive ? 'Active' : 'Inactive'}
                           </Badge>
                         </TableCell>
-                        <TableCell>
-                          <RequirePermission permission={PERMISSIONS.facility.manage}>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => setEditTarget(facility)}>
-                                Edit
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={() => setBlackoutTarget(facility)}>
-                                Closures
-                              </Button>
-                              {facility.isActive ? (
-                                <Button size="sm" variant="outline" onClick={() => setDeactivateTarget(facility)}>
-                                  Deactivate
-                                </Button>
-                              ) : (
-                                <Button size="sm" variant="outline" onClick={() => handleReactivate(facility)}>
-                                  Reactivate
-                                </Button>
-                              )}
-                            </div>
-                          </RequirePermission>
+                        <TableCell className="text-center">
+                          <RowActionsMenu
+                            ariaLabel={`Actions for ${facility.name}`}
+                            actions={[
+                              {
+                                key: 'edit',
+                                label: 'Edit',
+                                icon: <Pencil />,
+                                onClick: () => setEditTarget(facility),
+                                permission: PERMISSIONS.facility.manage,
+                              },
+                              {
+                                key: 'closures',
+                                label: 'Closures',
+                                icon: <CalendarOff />,
+                                onClick: () => setBlackoutTarget(facility),
+                                permission: PERMISSIONS.facility.manage,
+                              },
+                              {
+                                key: 'toggle-active',
+                                label: facility.isActive ? 'Deactivate' : 'Reactivate',
+                                icon: facility.isActive ? <Ban /> : <CheckCircle2 />,
+                                onClick: () =>
+                                  facility.isActive ? setDeactivateTarget(facility) : handleReactivate(facility),
+                                permission: PERMISSIONS.facility.manage,
+                                variant: facility.isActive ? 'destructive' : undefined,
+                              },
+                            ]}
+                          />
                         </TableCell>
                       </TableRow>
                     ))

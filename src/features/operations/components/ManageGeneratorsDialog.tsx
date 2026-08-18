@@ -10,6 +10,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { TableSkeleton } from '@/components/feedback/TableSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
@@ -124,8 +125,8 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
                 <TableHead>Model</TableHead>
                 <TableHead>Capacity (kVA)</TableHead>
                 <TableHead>Location</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead />
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -148,36 +149,36 @@ export function ManageGeneratorsDialog({ open, onOpenChange }: ManageGeneratorsD
                     <TableCell>{generator.model ?? '—'}</TableCell>
                     <TableCell>{generator.capacityKva ?? '—'}</TableCell>
                     <TableCell>{generator.location ?? '—'}</TableCell>
-                    <TableCell>
+                    <TableCell className="text-center">
                       <Badge variant={generator.isActive ? 'primary' : 'secondary'} appearance="light">
                         {generator.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      <RequirePermission permission={PERMISSIONS.generator.manage}>
-                        <div className="flex gap-2">
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            aria-label="Edit generator"
-                            onClick={() => {
+                    <TableCell className="text-center">
+                      <RowActionsMenu
+                        ariaLabel={`Actions for ${generator.name}`}
+                        actions={[
+                          {
+                            key: 'edit',
+                            label: 'Edit',
+                            icon: <Pencil />,
+                            onClick: () => {
                               setEditingGenerator(generator);
                               setFormOpen(true);
-                            }}
-                          >
-                            <Pencil />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            aria-label={generator.isActive ? 'Deactivate generator' : 'Reactivate generator'}
-                            disabled={pendingToggleId === generator.generatorId}
-                            onClick={() => handleToggleActive(generator)}
-                          >
-                            {generator.isActive ? <PowerOff /> : <Power />}
-                          </Button>
-                        </div>
-                      </RequirePermission>
+                            },
+                            permission: PERMISSIONS.generator.manage,
+                          },
+                          {
+                            key: 'toggle-active',
+                            label: generator.isActive ? 'Deactivate' : 'Reactivate',
+                            icon: generator.isActive ? <PowerOff /> : <Power />,
+                            onClick: () => handleToggleActive(generator),
+                            permission: PERMISSIONS.generator.manage,
+                            disabled: pendingToggleId === generator.generatorId,
+                            variant: generator.isActive ? 'destructive' : undefined,
+                          },
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
