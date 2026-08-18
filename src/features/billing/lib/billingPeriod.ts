@@ -1,11 +1,13 @@
+import { parseDateOnly } from '@/lib/helpers';
+
 /**
  * Formats an already-known [periodStart, periodEnd] pair for display — pure presentation, never
  * derives what a billing period *should* be. A whole-calendar-month range collapses to "August
  * 2026"; anything else (a custom Utility/FacilityBooking range) shows both bounds.
  */
 export function formatBillingPeriod(periodStart: string, periodEnd: string): string {
-  const start = new Date(periodStart);
-  const end = new Date(periodEnd);
+  const start = parseDateOnly(periodStart);
+  const end = parseDateOnly(periodEnd);
 
   const isFullCalendarMonth =
     start.getFullYear() === end.getFullYear() &&

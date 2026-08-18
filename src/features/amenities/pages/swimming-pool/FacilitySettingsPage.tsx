@@ -47,6 +47,8 @@ import {
   useUpdateFacilityConfiguration,
 } from '../../api/facilitiesApi';
 import { PageHeader } from '@/components/shared/PageHeader';
+import { formatDate } from '@/lib/helpers';
+import { FACILITY_TYPE_LABELS } from '../../lib/format';
 import { blackoutDateSchema, type BlackoutDateSchemaType } from '../../schemas/blackoutDateSchema';
 import { facilitySchema, type FacilitySchemaType } from '../../schemas/facilitySchema';
 import type { FacilityDto } from '@/api/generated/mycondoApi';
@@ -121,8 +123,8 @@ export function FacilitySettingsPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="__all__">All types</SelectItem>
-                <SelectItem value="CommunityHall">Community Hall</SelectItem>
-                <SelectItem value="SwimmingPool">Swimming Pool</SelectItem>
+                <SelectItem value="CommunityHall">{FACILITY_TYPE_LABELS.CommunityHall}</SelectItem>
+                <SelectItem value="SwimmingPool">{FACILITY_TYPE_LABELS.SwimmingPool}</SelectItem>
               </SelectContent>
             </Select>
           </CardToolbar>
@@ -153,7 +155,7 @@ export function FacilitySettingsPage() {
                     (data?.items ?? []).map((facility) => (
                       <TableRow key={facility.facilityId}>
                         <TableCell className="font-medium">{facility.name}</TableCell>
-                        <TableCell>{facility.facilityType}</TableCell>
+                        <TableCell>{FACILITY_TYPE_LABELS[facility.facilityType as 'CommunityHall' | 'SwimmingPool']}</TableCell>
                         <TableCell>{facility.capacity}</TableCell>
                         <TableCell>
                           <Badge variant={facility.isActive ? 'success' : 'secondary'} appearance="light">
@@ -638,7 +640,7 @@ function BlackoutDatesDialog({
           {(data ?? []).filter((b) => b.isActive).map((blackout) => (
             <li key={blackout.blackoutDateId} className="text-sm border rounded p-2">
               <div className="font-medium">
-                {blackout.dateFrom} – {blackout.dateTo}
+                {formatDate(blackout.dateFrom)} – {formatDate(blackout.dateTo)}
               </div>
               <div className="text-muted-foreground text-xs">{blackout.reason}</div>
             </li>

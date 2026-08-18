@@ -40,7 +40,9 @@ import { toUserMessage } from '@/api/errors';
 import { FlatsMissingAreaNotice } from '../components/FlatsMissingAreaNotice';
 import { ServiceChargeRuleFormDialog } from '../components/ServiceChargeRuleFormDialog';
 import { ServiceChargeRuleManageDialog } from '../components/ServiceChargeRuleManageDialog';
+import { formatDate, formatLabel } from '@/lib/helpers';
 import { useServiceChargeRules } from '../api/serviceChargeRulesApi';
+import { CALCULATION_METHOD_LABELS } from '../lib/constants';
 import { ruleDisplayStatus } from '../lib/ruleStatus';
 import type { ServiceChargeRuleDto } from '@/api/generated/mycondoApi';
 
@@ -123,7 +125,9 @@ export function ServiceChargeRuleDirectoryPage() {
       id: 'calculationMethod',
       header: 'Method',
       size: DATA_GRID_COLUMN_SIZE.compact,
-      cell: ({ row }) => row.original.calculationMethod,
+      cell: ({ row }) =>
+        CALCULATION_METHOD_LABELS[row.original.calculationMethod as keyof typeof CALCULATION_METHOD_LABELS] ??
+        formatLabel(row.original.calculationMethod),
     },
     {
       id: 'rate',
@@ -147,7 +151,7 @@ export function ServiceChargeRuleDirectoryPage() {
       id: 'effective',
       header: 'Effective',
       size: DATA_GRID_COLUMN_SIZE.medium,
-      cell: ({ row }) => `${row.original.effectiveFrom} – ${row.original.effectiveTo ?? 'open'}`,
+      cell: ({ row }) => `${formatDate(row.original.effectiveFrom)} – ${row.original.effectiveTo ? formatDate(row.original.effectiveTo) : 'open'}`,
     },
     {
       id: 'status',

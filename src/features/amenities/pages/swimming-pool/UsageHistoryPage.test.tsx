@@ -33,6 +33,7 @@ function session(overrides: Partial<Record<string, unknown>> = {}) {
     poolSessionId: 'session-1',
     facilityId: 'pool-1',
     flatId: 'flat-12345678',
+    flatDisplayName: 'AISHA A8',
     personType: 'Resident',
     ageCategory: 'Adult',
     accompaniedBySessionId: null,
@@ -41,7 +42,9 @@ function session(overrides: Partial<Record<string, unknown>> = {}) {
     guestFeeAmount: null,
     safetyAcknowledgedAtUtc: null,
     checkedInBy: 'user-1',
+    checkedInByDisplayName: 'Ahsan Uddin',
     checkedOutBy: 'user-1',
+    checkedOutByDisplayName: 'Ahsan Uddin',
     overrideReason: null,
     status: 'CheckedOut',
     ...overrides,
@@ -63,6 +66,10 @@ describe('UsageHistoryPage', () => {
     renderWithProviders(<UsageHistoryPage />, { auth: { user: managerUser, isInitialized: true } });
 
     expect(await screen.findByText('Resident')).toBeInTheDocument();
+    expect(await screen.findByText('AISHA A8')).toBeInTheDocument();
+    expect(screen.getAllByText('Ahsan Uddin').length).toBeGreaterThan(0);
+    expect(screen.queryByText(/flat-12345678/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/user-1/)).not.toBeInTheDocument();
   });
 
   it('paginates incidents instead of silently truncating beyond the first page', async () => {

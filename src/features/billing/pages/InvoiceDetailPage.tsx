@@ -14,7 +14,8 @@ import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { VoidInvoiceDialog } from '../components/VoidInvoiceDialog';
 import { useInvoiceDetail } from '../api/invoicesApi';
 import { formatBillingPeriod } from '../lib/billingPeriod';
-import { formatDate, formatDateTime } from '@/lib/helpers';
+import { CALCULATION_METHOD_LABELS } from '../lib/constants';
+import { formatDate, formatDateTime, formatLabel } from '@/lib/helpers';
 import { invoiceStatusToneMap, type InvoiceStatus } from '../lib/invoiceStatus';
 import { StatusBadge } from '@/components/ui/status-badge';
 import type { InvoiceDto } from '@/api/generated/mycondoApi';
@@ -73,7 +74,7 @@ export function InvoiceDetailPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <DetailRow label="Source" value={invoice.source} />
+            <DetailRow label="Source" value={formatLabel(invoice.source)} />
             <DetailRow label="Flat" value={<span className="font-mono text-xs">{invoice.flatId}</span>} />
             <DetailRow label="Billing period" value={formatBillingPeriod(invoice.periodStart, invoice.periodEnd)} />
             <DetailRow label="Invoice date" value={formatDate(invoice.invoiceDate)} />
@@ -129,7 +130,10 @@ export function InvoiceDetailPage() {
                 <TableRow key={line.invoiceLineId}>
                   <TableCell>{line.description}</TableCell>
                   <TableCell>{line.ruleCategorySnapshot}</TableCell>
-                  <TableCell>{line.calculationMethodSnapshot}</TableCell>
+                  <TableCell>
+                    {CALCULATION_METHOD_LABELS[line.calculationMethodSnapshot as keyof typeof CALCULATION_METHOD_LABELS] ??
+                      formatLabel(line.calculationMethodSnapshot)}
+                  </TableCell>
                   <TableCell className="text-right">
                     <MoneyDisplay amount={line.rateSnapshot} />
                   </TableCell>

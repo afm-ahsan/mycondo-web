@@ -26,7 +26,7 @@ import {
 } from '@/components/ui/select';
 import { EntityFormDialog } from '@/components/shared/EntityFormDialog';
 import { useCreateServiceChargeRule } from '../api/serviceChargeRulesApi';
-import { BILLING_FREQUENCIES, CALCULATION_METHODS, FLAT_TYPES } from '../lib/constants';
+import { BILLING_FREQUENCIES, CALCULATION_METHOD_LABELS, CALCULATION_METHODS, FLAT_TYPES } from '../lib/constants';
 import {
   createServiceChargeRuleSchema,
   type CreateServiceChargeRuleSchemaType,
@@ -133,7 +133,7 @@ export function ServiceChargeRuleFormDialog({ buildingId, open, onOpenChange }: 
                     <SelectContent>
                       {CALCULATION_METHODS.map((method) => (
                         <SelectItem key={method} value={method}>
-                          {method === 'FixedAmount' ? 'Fixed Amount' : 'Per Square Foot'}
+                          {CALCULATION_METHOD_LABELS[method]}
                         </SelectItem>
                       ))}
                     </SelectContent>

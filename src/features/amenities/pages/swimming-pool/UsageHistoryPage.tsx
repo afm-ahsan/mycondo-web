@@ -105,7 +105,7 @@ export function UsageHistoryPage() {
       id: 'flat',
       header: 'Building/Flat',
       size: DATA_GRID_COLUMN_SIZE.medium,
-      cell: ({ row }) => <span className="font-mono text-xs">{row.original.flatId.slice(0, 8)}</span>,
+      cell: ({ row }) => row.original.flatDisplayName,
     },
     { id: 'entry', header: 'Entry', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatTimeOfDay(row.original.entryAtUtc) },
     { id: 'exit', header: 'Exit', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatTimeOfDay(row.original.exitAtUtc) },
@@ -131,11 +131,7 @@ export function UsageHistoryPage() {
       id: 'operator',
       header: 'Operator',
       size: DATA_GRID_COLUMN_SIZE.medium,
-      cell: ({ row }) => (
-        <span className="font-mono text-xs">
-          {(row.original.checkedOutBy ?? row.original.checkedInBy)?.slice(0, 8) ?? '—'}
-        </span>
-      ),
+      cell: ({ row }) => row.original.checkedOutByDisplayName ?? row.original.checkedInByDisplayName,
     },
   ];
 
@@ -164,11 +160,6 @@ export function UsageHistoryPage() {
         </TabsList>
 
         <TabsContent value="history" className="space-y-4">
-          <p className="text-muted-foreground text-xs">
-            &quot;Building/Flat&quot; and &quot;Operator&quot; show raw ids — mycondo-api has no
-            flat-by-id or user-directory lookup endpoint in scope for this slice, so names can&apos;t
-            be resolved without knowing the building in advance.
-          </p>
           {isError ? (
             <Card>
               <ErrorState description="Failed to load usage history. Please try again." onRetry={refetch} />
