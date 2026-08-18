@@ -2,13 +2,20 @@
 
 import { useEffect, useRef } from 'react';
 import { LoaderCircleIcon } from 'lucide-react';
+import { useIsBrandedLoaderActive } from '@/lib/http/brandedLoaderTracker';
 import { useIsHttpRequestActive } from '@/lib/http/requestActivityTracker';
 
 /**
- * Renders whenever any application HTTP request is in flight — driven solely by the centralized
+ * Renders whenever any application HTTP request is in flight — driven primarily by the centralized
  * activeRequestCount in requestActivityTracker.ts (incremented/decremented by baseApi.ts and
  * platformBaseApi.ts around every fetch, including auth/refresh/upload/download), never by an
  * individual page/component's own `isLoading`. Mount once at the application shell (see App.tsx).
+ *
+ * Suppressed while a CondoBD branded loader (ScreenLoader, e.g. during session-bootstrap on
+ * RequireAuth/RequirePlatformAuth) is mounted — the branded loader takes visual priority so the two
+ * never render on top of each other. This does NOT pause activeRequestCount tracking: a request that
+ * starts while the branded loader is up still surfaces this overlay the instant the branded loader
+ * unmounts, if still in flight. See brandedLoaderTracker.ts.
  *
  * Deliberately blocking: the outer element is a full-viewport `fixed inset-0` div with no
  * `pointer-events-none`, so it sits on top of (and intercepts clicks on) everything beneath it —
@@ -25,7 +32,9 @@ import { useIsHttpRequestActive } from '@/lib/http/requestActivityTracker';
  * dialog/dropdown content).
  */
 export function GlobalHttpLoader() {
-  const isActive = useIsHttpRequestActive();
+  const isHttpRequestActive = useIsHttpRequestActive();
+  const isBrandedLoaderActive = useIsBrandedLoaderActive();
+  const isActive = isHttpRequestActive && !isBrandedLoaderActive;
   const overlayRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedRef = useRef<HTMLElement | null>(null);
 
