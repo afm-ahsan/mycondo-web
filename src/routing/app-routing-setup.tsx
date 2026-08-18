@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import { ClassicLayout } from '@/auth/layouts/classic';
+import { PublicLayout } from '@/layouts/public/layout';
 import { AccessDeniedNotice } from '@/components/shared/AccessDeniedNotice';
 import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
@@ -45,6 +46,13 @@ const LoginPage = lazyPage(() => import('@/features/auth/pages/LoginPage'), 'Log
 const RegisterPage = lazyPage(() => import('@/features/auth/pages/RegisterPage'), 'RegisterPage');
 const AuthWelcomeMessagePage = lazyPage(() => import('@/pages/auth'), 'AuthWelcomeMessagePage');
 const AuthAccountDeactivatedPage = lazyPage(() => import('@/pages/auth'), 'AuthAccountDeactivatedPage');
+
+// Public/legal pages — linked from both the pre-login footer (ClassicLayout) and the
+// authenticated app footer (Demo1Layout), so they live outside RequireAuth in their own layout.
+const AboutUsPage = lazyPage(() => import('@/pages/public'), 'AboutUsPage');
+const TermsAndConditionsPage = lazyPage(() => import('@/pages/public'), 'TermsAndConditionsPage');
+const PrivacyPolicyPage = lazyPage(() => import('@/pages/public'), 'PrivacyPolicyPage');
+const ContactUsPage = lazyPage(() => import('@/pages/public'), 'ContactUsPage');
 
 // Platform (see mycondo-docs ADR-019) — deliberately not linked from the tenant /login page; an
 // internal-only route for MyCondo's own operations staff, structurally separate from every tenant
@@ -1183,6 +1191,40 @@ export function AppRoutingSetup() {
           element={
             <Suspense fallback={<PageSkeleton />}>
               <PlatformLoginPage />
+            </Suspense>
+          }
+        />
+      </Route>
+      <Route element={<PublicLayout />}>
+        <Route
+          path="/about"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <AboutUsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/terms-and-conditions"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <TermsAndConditionsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/privacy-policy"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <PrivacyPolicyPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/contact-us"
+          element={
+            <Suspense fallback={<PageSkeleton />}>
+              <ContactUsPage />
             </Suspense>
           }
         />
