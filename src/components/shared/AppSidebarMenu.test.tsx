@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { Link, MemoryRouter } from 'react-router-dom';
@@ -159,5 +159,67 @@ describe('AppSidebarMenu — keeps the active item visible inside the sidebar sc
     await user.click(screen.getByRole('link', { name: 'Flat Owners' }));
 
     expect(scrollBySpy).not.toHaveBeenCalled();
+  });
+});
+
+// Reproduces "Sidebar Scroll Reproduce Exact Accordion Interaction": clicking an unrelated,
+// currently-collapsed group's header (no route change) used to unconditionally re-scroll to the
+// current active route on the group's open animationend — jumping the sidebar away from the group
+// the user just opened and toward a page they weren't navigating to.
+const MENU_WITH_UNRELATED_GROUP: MenuConfig = [
+  { title: 'Dashboard', path: '/' },
+  {
+    title: 'Residents',
+    children: [
+      { title: 'Flat Owners', path: '/residents/flat-owners' },
+      { title: 'Resident Directory', path: '/residents' },
+    ],
+  },
+  {
+    title: 'Operations',
+    children: [{ title: 'Utilities', path: '/operations/utilities' }],
+  },
+];
+
+describe('AppSidebarMenu — manual accordion toggles never re-scroll toward an unrelated active route', () => {
+  it('reveals the manually expanded group instead of jumping back to the (off-screen) active item', async () => {
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/residents/flat-owners']}>
+        {<AppSidebarMenu menu={MENU_WITH_UNRELATED_GROUP} />}
+      </MemoryRouter> as ReactNode,
+    );
+
+    const scrollContainer = screen
+      .getByRole('link', { name: 'Flat Owners' })
+      .closest('.kt-scrollable-y-hover') as HTMLElement;
+    mockRect(scrollContainer, { top: 0, bottom: 400 });
+    // Active item is currently scrolled out of view above the container — exactly the state that
+    // triggered the bug (any accordion open animation unconditionally re-scrolled here).
+    mockRect(screen.getByRole('link', { name: 'Flat Owners' }), { top: -80, bottom: -60 });
+
+    const scrollBySpy = vi.fn();
+    scrollContainer.scrollBy = scrollBySpy;
+
+    // "Utilities" isn't in the DOM yet — Operations starts collapsed (Radix Presence).
+    expect(screen.queryByRole('link', { name: 'Utilities' })).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Operations' }));
+
+    const content = screen
+      .getByRole('link', { name: 'Utilities' })
+      .closest('[data-slot="accordion-menu-sub-content"]') as HTMLElement;
+    // The group's own trigger sits in the DOM right before its content — mocked here, not on the
+    // button, since that's what the component actually reads to avoid scrolling the trigger itself
+    // out of view.
+    mockRect(content.previousElementSibling as Element, { top: 350, bottom: 370 });
+    mockRect(content, { top: 370, bottom: 500 });
+
+    fireEvent.animationEnd(content);
+
+    // Scrolls down just enough to reveal the newly expanded content (container bottom 400 minus the
+    // 8px margin (392) vs. the content's bottom (500)) — never up toward "Flat Owners".
+    expect(scrollBySpy).toHaveBeenCalledTimes(1);
+    expect(scrollBySpy).toHaveBeenCalledWith({ top: 108, behavior: 'smooth' });
   });
 });

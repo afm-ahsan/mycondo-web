@@ -53,6 +53,7 @@ export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
   const { pathname } = useLocation();
   const currentPath = normalizeRoute(pathname);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const manualToggleRef = useRef(false);
 
   // Route is the single source of truth for active state. Rather than matching each menu item's
   // path against the current route independently (which made `/residents` — Resident Directory —
@@ -75,52 +76,104 @@ export function AppSidebarMenu({ menu }: { menu: MenuConfig }) {
 
   const matchPath = useCallback((path: string): boolean => path === activePath, [activePath]);
 
+  const applyScrollDelta = useCallback((delta: number) => {
+    const container = scrollContainerRef.current;
+    if (!container || delta === 0) return;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (typeof container.scrollBy === 'function') {
+      container.scrollBy({ top: delta, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
+    } else {
+      container.scrollTop += delta;
+    }
+  }, []);
+
+  const scrollActiveIntoView = useCallback(() => {
+    const container = scrollContainerRef.current;
+    if (!container) return;
+    const active = container.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!active) return;
+
+    const containerRect = container.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+    const margin = 8;
+
+    let delta = 0;
+    if (activeRect.top < containerRect.top + margin) {
+      delta = activeRect.top - containerRect.top - margin;
+    } else if (activeRect.bottom > containerRect.bottom - margin) {
+      delta = activeRect.bottom - containerRect.bottom + margin;
+    }
+    applyScrollDelta(delta);
+  }, [applyScrollDelta]);
+
+  // Reveals a group the user just manually expanded (a group header click, not a navigation) without
+  // jumping toward the unrelated active route elsewhere in the tree: scrolls down only enough to
+  // expose the newly opened content, and never past the point where its own trigger — what the user
+  // actually clicked — would scroll out of view.
+  const revealManuallyExpandedGroup = useCallback(
+    (content: HTMLElement) => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+      const trigger = content.previousElementSibling as HTMLElement | null;
+      const containerRect = container.getBoundingClientRect();
+      const contentRect = content.getBoundingClientRect();
+      const margin = 8;
+      if (contentRect.bottom <= containerRect.bottom - margin) return;
+      const desired = contentRect.bottom - containerRect.bottom + margin;
+      const maxDelta = trigger ? Math.max(0, trigger.getBoundingClientRect().top - containerRect.top) : desired;
+      applyScrollDelta(Math.min(desired, maxDelta));
+    },
+    [applyScrollDelta],
+  );
+
   // Keeps the active leaf visible inside the sidebar's own scroll container whenever the route
-  // changes — Quick Actions/Links, browser back/forward, direct URL, and refresh all land here
-  // since they all funnel through `activePath`. Runs once immediately (covers same-level
-  // navigation and initial mount, where `AccordionMenu`'s active chain is already expanded) and
-  // again on the accordion's own open-animation completion — a just-expanded parent's content is
-  // unmounted until then (Radix Presence), so its final position isn't known any earlier, and
-  // there's no arbitrary delay involved.
+  // changes — Quick Actions/Links, browser back/forward, direct URL, and refresh all land here since
+  // they all funnel through `activePath`. Runs immediately (covers same-level navigation and initial
+  // mount, where `AccordionMenu`'s active chain is already expanded); a route-driven parent expansion
+  // that hasn't finished yet is picked up by the animationend listener below, since `manualToggleRef`
+  // is never set for it.
+  useEffect(() => {
+    manualToggleRef.current = false;
+    scrollActiveIntoView();
+  }, [activePath, scrollActiveIntoView]);
+
+  // Distinguishes a manual accordion click from a route-driven expansion, and scrolls accordingly.
+  // Every accordion open animation used to unconditionally re-scroll to the active route — so
+  // manually expanding an unrelated, already-visible group (e.g. clicking "Utilities" while "Flats"
+  // stays the active page elsewhere in the tree) jumped the sidebar back toward "Flats" and hid the
+  // very group the user just opened. `manualToggleRef` is set synchronously on a group-header click
+  // and consumed by the next *open* animationend (close animations are ignored so they never clear a
+  // pending manual flag before its matching open event arrives); a route-driven expansion never sets
+  // it, so it still falls through to `scrollActiveIntoView` unchanged.
   useEffect(() => {
     const container = scrollContainerRef.current;
     if (!container) return;
 
-    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    const scrollActiveIntoView = () => {
-      const active = container.querySelector<HTMLElement>('[aria-current="page"]');
-      if (!active) return;
-
-      const containerRect = container.getBoundingClientRect();
-      const activeRect = active.getBoundingClientRect();
-      const margin = 8;
-
-      let delta = 0;
-      if (activeRect.top < containerRect.top + margin) {
-        delta = activeRect.top - containerRect.top - margin;
-      } else if (activeRect.bottom > containerRect.bottom - margin) {
-        delta = activeRect.bottom - containerRect.bottom + margin;
-      }
-      if (delta !== 0) {
-        if (typeof container.scrollBy === 'function') {
-          container.scrollBy({ top: delta, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
-        } else {
-          container.scrollTop += delta;
-        }
+    const handleClick = (event: MouseEvent) => {
+      if ((event.target as HTMLElement).closest('[data-slot="accordion-menu-sub-trigger"]')) {
+        manualToggleRef.current = true;
       }
     };
 
-    scrollActiveIntoView();
-
     const handleAnimationEnd = (event: AnimationEvent) => {
-      if ((event.target as HTMLElement).getAttribute('data-state') === 'open') {
+      const target = event.target as HTMLElement;
+      if (target.getAttribute('data-state') !== 'open') return;
+      const wasManualToggle = manualToggleRef.current;
+      manualToggleRef.current = false;
+      if (wasManualToggle) {
+        revealManuallyExpandedGroup(target);
+      } else {
         scrollActiveIntoView();
       }
     };
+
+    container.addEventListener('click', handleClick);
     container.addEventListener('animationend', handleAnimationEnd);
-    return () => container.removeEventListener('animationend', handleAnimationEnd);
-  }, [activePath]);
+    return () => {
+      container.removeEventListener('click', handleClick);
+      container.removeEventListener('animationend', handleAnimationEnd);
+    };
+  }, [scrollActiveIntoView, revealManuallyExpandedGroup]);
 
   const buildMenu = (items: MenuConfig): JSX.Element[] => {
     return items.map((item: MenuItem, index: number) => {
