@@ -15,6 +15,7 @@ import { PageSkeleton } from '@/components/feedback/PageSkeleton';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useIdempotencyKey } from '@/lib/idempotency/useIdempotencyKey';
+import { formatDate } from '@/lib/helpers';
 import { CorrectReadingDialog } from '../components/CorrectReadingDialog';
 import { useFinalizeReading, useReadingDetail, useReviewReading } from '../api/readingsApi';
 import type { UtilityType } from '../lib/constants';
@@ -96,7 +97,7 @@ export function ReadingDetailPage({ utilityType }: ReadingDetailPageProps) {
   return (
     <>
       <PageHeader
-        title={`Reading — ${reading.periodStart} to ${reading.periodEnd}`}
+        title={`Reading — ${formatDate(reading.periodStart)} to ${formatDate(reading.periodEnd)}`}
         crumbs={[{ label: 'Finance' }, { label: utilityType }, { label: 'Readings', path: `/utilities/${utilityType.toLowerCase()}/readings` }, { label: 'Detail' }]}
         secondaryActions={
           <div className="flex gap-2">
@@ -148,11 +149,11 @@ export function ReadingDetailPage({ utilityType }: ReadingDetailPageProps) {
           <CardContent>
             <DetailRow label="Flat" value={<span className="font-mono text-xs">{reading.flatId}</span>} />
             <DetailRow label="Meter" value={<span className="font-mono text-xs">{reading.meterId}</span>} />
-            <DetailRow label="Period" value={`${reading.periodStart} – ${reading.periodEnd}`} />
+            <DetailRow label="Period" value={`${formatDate(reading.periodStart)} – ${formatDate(reading.periodEnd)}`} />
             <DetailRow label="Previous reading" value={reading.previousReading} />
             <DetailRow label="Present reading" value={reading.presentReading} />
             <DetailRow label="Consumption" value={reading.consumptionUnits} />
-            <DetailRow label="Reading date" value={reading.readingDate} />
+            <DetailRow label="Reading date" value={formatDate(reading.readingDate)} />
             {reading.overrideReason && <DetailRow label="Continuity override reason" value={reading.overrideReason} />}
             {reading.isAbnormalConsumption && (
               <DetailRow

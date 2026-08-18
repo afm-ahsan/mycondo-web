@@ -30,6 +30,7 @@ import { FlatSelect } from '@/components/shared/FlatSelect';
 import { GateSelect } from '@/components/shared/GateSelect';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { EntryGateEmptyNotice } from '@/features/security/gates/components/EntryGateEmptyNotice';
+import { formatDateTime } from '@/lib/helpers';
 import {
   useCheckInProvider,
   useCheckOutProvider,
@@ -429,7 +430,7 @@ function CheckOutRow({
     <li className="flex items-center justify-between gap-3 py-3 text-sm">
       <span>
         Flat {hostFlatId ?? '—'} · entered{' '}
-        {new Date(entryAtUtc).toLocaleString()}
+        {formatDateTime(entryAtUtc)}
       </span>
       {open ? (
         <CheckOutInlineForm

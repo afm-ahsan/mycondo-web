@@ -6,6 +6,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
+import { formatDateTime } from '@/lib/helpers';
 import { useUser, useUserRoleAssignments } from '../api/identityApi';
 
 interface ViewUserDialogProps {
@@ -49,10 +50,10 @@ export function ViewUserDialog({ userId, open, onOpenChange }: ViewUserDialogPro
               </dd>
               <dt className="text-muted-foreground">Last login</dt>
               <dd className="col-span-2">
-                {user.lastLoginAtUtc ? new Date(user.lastLoginAtUtc).toLocaleString() : 'Never'}
+                {user.lastLoginAtUtc ? formatDateTime(user.lastLoginAtUtc) : 'Never'}
               </dd>
               <dt className="text-muted-foreground">Created</dt>
-              <dd className="col-span-2">{new Date(user.createdAtUtc).toLocaleString()}</dd>
+              <dd className="col-span-2">{formatDateTime(user.createdAtUtc)}</dd>
             </dl>
 
             <div>
