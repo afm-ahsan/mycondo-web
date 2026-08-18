@@ -22,7 +22,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
@@ -118,6 +118,7 @@ export function StaffRosterPage() {
       id: 'isActive',
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <StatusBadge status={row.original.isActive ? 'Active' : 'Inactive'} toneMap={activeToneMap} />
       ),
@@ -126,6 +127,7 @@ export function StaffRosterPage() {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.action,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <RowActionsMenu
           ariaLabel={`Actions for ${row.original.fullName}`}

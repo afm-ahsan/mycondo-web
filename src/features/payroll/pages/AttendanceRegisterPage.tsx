@@ -10,7 +10,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -164,6 +164,7 @@ export function AttendanceRegisterPage() {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.action,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => {
         const record = row.original;
         return (

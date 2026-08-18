@@ -18,3 +18,13 @@ export const DATA_GRID_COLUMN_SIZE = {
   /** Names, emails, descriptions, addresses — the columns that need the most room. */
   flexible: 220,
 } as const;
+
+/**
+ * Shared `meta` for the `Status` and `Action` columns of `DataGrid` tables — centers both the
+ * header label and the cell content (badge, kebab trigger, or direct action button/link).
+ * Spread into a column's `meta` (and merge in any additional `cellClassName` the column needs).
+ */
+export const DATA_GRID_COLUMN_ALIGN_CENTER = {
+  headerClassName: 'text-center',
+  cellClassName: 'text-center',
+} as const;

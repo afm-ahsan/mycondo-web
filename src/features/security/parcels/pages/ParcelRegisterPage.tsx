@@ -13,7 +13,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
@@ -126,18 +126,20 @@ export function ParcelRegisterPage() {
       header: 'Status',
       cell: ({ row }) => <StatusBadge status={row.original.status as ParcelStatus} toneMap={statusToneMap} />,
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <Button size="sm" variant="outline" asChild>
             <Link to={`/security/parcels/${row.original.parcelId}`}>View</Link>
           </Button>
         </div>
       ),
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

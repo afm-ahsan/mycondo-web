@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -136,6 +136,7 @@ export function FlatOwnerListPage() {
           {row.original.status}
         </Badge>
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       // Single-action column (pending approval to switch to the standard kebab menu — see table audit).
@@ -145,13 +146,14 @@ export function FlatOwnerListPage() {
       cell: ({ row }) =>
         row.original.status === 'Active' ? (
           <RequirePermission permission="ownership.manage">
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <Button variant="outline" size="sm" onClick={() => setEndTarget(row.original)}>
                 End ownership
               </Button>
             </div>
           </RequirePermission>
         ) : null,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

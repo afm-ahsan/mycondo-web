@@ -21,7 +21,7 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
@@ -194,6 +194,7 @@ export function CylinderPurchaseListPage() {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.action,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => {
         const purchase = row.original;
         return (

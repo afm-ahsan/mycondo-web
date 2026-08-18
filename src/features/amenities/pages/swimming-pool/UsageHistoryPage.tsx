@@ -23,7 +23,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -126,6 +126,7 @@ export function UsageHistoryPage() {
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <PoolSessionStatusBadge status={row.original.status as PoolSessionStatus} />,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'operator',
