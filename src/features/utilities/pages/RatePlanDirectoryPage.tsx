@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
@@ -67,16 +68,19 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
     {
       id: 'name',
       header: 'Name',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
     },
     {
       id: 'structure',
       header: 'Structure',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.structure,
     },
     {
       id: 'amount',
       header: 'Amount',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         row.original.structure === 'Fixed' ? (
           <MoneyDisplay amount={row.original.fixedAmount} />
@@ -87,20 +91,25 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
     {
       id: 'effective',
       header: 'Effective',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${row.original.effectiveFrom} – ${row.original.effectiveTo ?? 'open'}`,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.isActive ? 'Active' : 'Inactive'} toneMap={statusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-          Manage
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
+            Manage
+          </Button>
+        </div>
       ),
     },
   ];

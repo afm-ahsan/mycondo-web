@@ -21,6 +21,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -84,41 +85,50 @@ export function PaymentListPage() {
     {
       id: 'flatId',
       header: 'Flat',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.flatId}</span>,
     },
     {
       id: 'amount',
       header: 'Amount',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.amount} className="font-medium" />,
     },
     {
       id: 'paymentMethod',
       header: 'Method',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => row.original.paymentMethod,
     },
     {
       id: 'referenceNumber',
       header: 'Reference',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => row.original.referenceNumber ?? '—',
     },
     {
       id: 'businessDate',
       accessorFn: (row) => row.businessDate,
       header: ({ column }) => <DataGridColumnHeader title="Date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.businessDate,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as PaymentStatus} toneMap={paymentStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={`/billing/payments/${row.original.paymentId}`}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/billing/payments/${row.original.paymentId}`}>View</Link>
+          </Button>
+        </div>
       ),
     },
   ];

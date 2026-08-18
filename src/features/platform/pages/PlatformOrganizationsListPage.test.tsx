@@ -69,7 +69,7 @@ describe('PlatformOrganizationsListPage', () => {
     renderWithProviders(<PlatformOrganizationsListPage />, { platformAuth: { user: superAdmin, isInitialized: true } });
 
     await screen.findByText('Akter Residence Park');
-    await user.click(screen.getByRole('button', { name: 'Actions' }));
+    await user.click(screen.getByRole('button', { name: /actions for akter residence park/i }));
     await user.click(await screen.findByRole('menuitem', { name: 'Suspend' }));
     await user.click(await screen.findByRole('button', { name: 'Suspend' }));
 

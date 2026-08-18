@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
@@ -67,16 +68,19 @@ export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
     {
       id: 'period',
       header: 'Period',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${row.original.periodStart} – ${row.original.periodEnd}`,
     },
     {
       id: 'readings',
       header: 'Previous → Present',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${row.original.previousReading} → ${row.original.presentReading}`,
     },
     {
       id: 'consumption',
       header: 'Consumption',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <div className="flex items-center gap-1.5">
           <span className="tabular-nums">{row.original.consumptionUnits}</span>
@@ -91,20 +95,25 @@ export function ReadingRegisterPage({ utilityType }: ReadingRegisterPageProps) {
     {
       id: 'readingDate',
       header: 'Reading date',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.readingDate,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as ReadingStatus} toneMap={readingStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={`/utilities/${utilityType.toLowerCase()}/readings/${row.original.readingId}`}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/utilities/${utilityType.toLowerCase()}/readings/${row.original.readingId}`}>View</Link>
+          </Button>
+        </div>
       ),
     },
   ];

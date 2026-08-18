@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { Ban, CheckCircle2, Pencil, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -12,6 +12,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Dialog,
@@ -72,11 +74,12 @@ export function EntryGateListPage() {
   }
 
   const columns: ColumnDef<GateDto>[] = [
-    { id: 'name', header: 'Name', cell: ({ row }) => row.original.name },
-    { id: 'code', header: 'Code', cell: ({ row }) => row.original.code },
+    { id: 'name', header: 'Name', size: DATA_GRID_COLUMN_SIZE.flexible, cell: ({ row }) => row.original.name },
+    { id: 'code', header: 'Code', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.code },
     {
       id: 'entry',
       header: 'Entry',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant={row.original.isEntryAllowed ? 'success' : 'secondary'} appearance="light">
           {row.original.isEntryAllowed ? 'Yes' : 'No'}
@@ -86,6 +89,7 @@ export function EntryGateListPage() {
     {
       id: 'exit',
       header: 'Exit',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant={row.original.isExitAllowed ? 'success' : 'secondary'} appearance="light">
           {row.original.isExitAllowed ? 'Yes' : 'No'}
@@ -95,6 +99,7 @@ export function EntryGateListPage() {
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant={row.original.isActive ? 'success' : 'secondary'} appearance="light">
           {row.original.isActive ? 'Active' : 'Inactive'}
@@ -104,21 +109,28 @@ export function EntryGateListPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <RequirePermission permission={PERMISSIONS.gate.manage}>
-          <div className="flex items-center gap-2 justify-end">
-            <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
-              Edit
-            </Button>
-            <Button
-              variant={row.original.isActive ? 'outline' : 'primary'}
-              size="sm"
-              onClick={() => handleToggleActive(row.original)}
-            >
-              {row.original.isActive ? 'Deactivate' : 'Activate'}
-            </Button>
-          </div>
-        </RequirePermission>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.name}`}
+          actions={[
+            {
+              key: 'edit',
+              label: 'Edit',
+              icon: <Pencil />,
+              onClick: () => setEditTarget(row.original),
+              permission: PERMISSIONS.gate.manage,
+            },
+            {
+              key: 'toggle-active',
+              label: row.original.isActive ? 'Deactivate' : 'Activate',
+              icon: row.original.isActive ? <Ban /> : <CheckCircle2 />,
+              onClick: () => handleToggleActive(row.original),
+              permission: PERMISSIONS.gate.manage,
+              variant: row.original.isActive ? 'destructive' : undefined,
+            },
+          ]}
+        />
       ),
     },
   ];

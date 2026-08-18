@@ -7,6 +7,7 @@ import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardTo
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -48,6 +49,7 @@ export function TenantRegistrationListPage() {
     {
       id: 'primaryFullName',
       header: 'Primary occupant',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => (
         <Link
           to={
@@ -61,15 +63,21 @@ export function TenantRegistrationListPage() {
         </Link>
       ),
     },
-    { id: 'occupancyType', header: 'Type', cell: ({ row }) => row.original.occupancyType },
+    { id: 'occupancyType', header: 'Type', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.occupancyType },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <StatusBadge status={row.original.status as TenantRegistrationStatus} toneMap={tenantRegistrationStatusToneMap} />
       ),
     },
-    { id: 'moveIn', header: 'Expected move-in', cell: ({ row }) => row.original.moveInExpectedDate ?? '—' },
+    {
+      id: 'moveIn',
+      header: 'Expected move-in',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => row.original.moveInExpectedDate ?? '—',
+    },
   ];
 
   const total = data ? Number(data.total) : 0;

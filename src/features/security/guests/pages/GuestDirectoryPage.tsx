@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -135,17 +136,20 @@ export function GuestDirectoryPage() {
       id: 'fullName',
       accessorFn: (row) => row.fullName,
       header: ({ column }) => <DataGridColumnHeader title="Guest name" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => <span className="font-medium">{row.original.fullName}</span>,
     },
     {
       id: 'phone',
       accessorFn: (row) => row.phone,
       header: ({ column }) => <DataGridColumnHeader title="Mobile" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => row.original.phone,
     },
     {
       id: 'identity',
       header: 'Identity document',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) =>
         row.original.identityDocumentType
           ? `${row.original.identityDocumentType}: ${row.original.identityDocumentNumberMasked ?? '—'}`
@@ -154,6 +158,7 @@ export function GuestDirectoryPage() {
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <StatusBadge status={row.original.isBlocked ? 'Blocked' : 'Active'} toneMap={statusToneMap} />
       ),
@@ -161,27 +166,30 @@ export function GuestDirectoryPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.visitor.blockManage}>
-          {row.original.isBlocked ? (
-            <Button
-              size="sm"
-              variant="outline"
-              disabled={isUnblocking}
-              onClick={() => handleUnblock(row.original.guestProfileId)}
-            >
-              Unblock
-            </Button>
-          ) : (
-            <Button
-              size="sm"
-              variant="destructive"
-              disabled={isBlocking}
-              onClick={() => setBlockTarget(row.original)}
-            >
-              Block
-            </Button>
-          )}
+          <div className="flex justify-end">
+            {row.original.isBlocked ? (
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={isUnblocking}
+                onClick={() => handleUnblock(row.original.guestProfileId)}
+              >
+                Unblock
+              </Button>
+            ) : (
+              <Button
+                size="sm"
+                variant="destructive"
+                disabled={isBlocking}
+                onClick={() => setBlockTarget(row.original)}
+              >
+                Block
+              </Button>
+            )}
+          </div>
         </RequirePermission>
       ),
     },

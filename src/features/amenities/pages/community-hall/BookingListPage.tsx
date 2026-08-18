@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -113,6 +114,7 @@ export function BookingListPage() {
     {
       id: 'reference',
       header: ({ column }) => <DataGridColumnHeader title="Reference" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Link to={row.original.bookingId} className="font-mono text-xs text-primary hover:underline">
           {row.original.bookingId.slice(0, 8)}
@@ -122,39 +124,47 @@ export function BookingListPage() {
     {
       id: 'hall',
       header: 'Hall',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => facilityNameById[row.original.facilityId] ?? '—',
     },
     {
       id: 'eventDate',
       header: ({ column }) => <DataGridColumnHeader title="Event date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatDate(row.original.startAtUtc),
     },
     {
       id: 'time',
       header: 'Start / End',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${formatTimeOfDay(row.original.startAtUtc)} – ${formatTimeOfDay(row.original.endAtUtc)}`,
     },
-    { id: 'eventType', header: 'Event type', cell: ({ row }) => row.original.eventType },
-    { id: 'guests', header: 'Guests', cell: ({ row }) => row.original.expectedGuestCount },
-    { id: 'charge', header: 'Charge', cell: ({ row }) => <MoneyDisplay amount={row.original.bookingChargeAmount} /> },
-    { id: 'deposit', header: 'Deposit', cell: ({ row }) => <MoneyDisplay amount={row.original.depositAmount} /> },
+    { id: 'eventType', header: 'Event type', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.eventType },
+    { id: 'guests', header: 'Guests', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.expectedGuestCount },
+    { id: 'charge', header: 'Charge', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <MoneyDisplay amount={row.original.bookingChargeAmount} /> },
+    { id: 'deposit', header: 'Deposit', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <MoneyDisplay amount={row.original.depositAmount} /> },
     {
       id: 'paymentStatus',
       header: 'Payment',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <PaymentStatusBadge booking={row.original} />,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <BookingStatusBadge status={row.original.status as BookingStatus} />,
     },
     {
       id: 'actions',
-      header: 'Actions',
+      header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={row.original.bookingId}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={row.original.bookingId}>View</Link>
+          </Button>
+        </div>
       ),
     },
   ];

@@ -1,18 +1,14 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { MoreHorizontal } from 'lucide-react';
+import { Eye, Pencil, ShieldCheck, Ban, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
@@ -96,12 +92,19 @@ export function UsersPage() {
   }
 
   const columns: ColumnDef<UserSummaryDto>[] = [
-    { id: 'fullName', header: 'Full name', cell: ({ row }) => row.original.fullName },
-    { id: 'email', header: 'Email', cell: ({ row }) => row.original.email },
-    { id: 'phoneNumber', header: 'Mobile', cell: ({ row }) => row.original.phoneNumber ?? '—' },
+    { id: 'fullName', header: 'Full name', size: DATA_GRID_COLUMN_SIZE.flexible, cell: ({ row }) => row.original.fullName },
+    {
+      id: 'email',
+      header: 'Email',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => <span title={row.original.email}>{row.original.email}</span>,
+    },
+    { id: 'phoneNumber', header: 'Mobile', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.phoneNumber ?? '—' },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <StatusBadge status={row.original.isActive ? 'Active' : 'Disabled'} toneMap={userStatusToneMap} />
       ),
@@ -109,38 +112,32 @@ export function UsersPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => {
         const user = row.original;
         const target: DialogTarget = { userId: user.userId, fullName: user.fullName };
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" mode="icon" size="sm" aria-label={`Actions for ${user.fullName}`}>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setViewTarget(target)}>View</DropdownMenuItem>
-              <RequirePermission permission="user.update">
-                <DropdownMenuItem onClick={() => setEditTarget(target)}>Edit</DropdownMenuItem>
-              </RequirePermission>
-              <DropdownMenuItem onClick={() => setRolesTarget(target)}>Roles / Permissions</DropdownMenuItem>
-              <RequirePermission permission="user.disable">
-                <DropdownMenuItem
-                  variant="destructive"
-                  onClick={() =>
-                    setPendingStatusChange({
-                      userId: user.userId,
-                      fullName: user.fullName,
-                      type: user.isActive ? 'disable' : 'enable',
-                    })
-                  }
-                >
-                  {user.isActive ? 'Disable' : 'Enable'}
-                </DropdownMenuItem>
-              </RequirePermission>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <RowActionsMenu
+            ariaLabel={`Actions for ${user.fullName}`}
+            actions={[
+              { key: 'view', label: 'View', icon: <Eye />, onClick: () => setViewTarget(target) },
+              { key: 'edit', label: 'Edit', icon: <Pencil />, onClick: () => setEditTarget(target), permission: 'user.update' },
+              { key: 'roles', label: 'Roles / Permissions', icon: <ShieldCheck />, onClick: () => setRolesTarget(target) },
+              {
+                key: 'toggleStatus',
+                label: user.isActive ? 'Disable' : 'Enable',
+                icon: user.isActive ? <Ban /> : <CheckCircle2 />,
+                onClick: () =>
+                  setPendingStatusChange({
+                    userId: user.userId,
+                    fullName: user.fullName,
+                    type: user.isActive ? 'disable' : 'enable',
+                  }),
+                permission: 'user.disable',
+                variant: user.isActive ? 'destructive' : undefined,
+              },
+            ]}
+          />
         );
       },
     },

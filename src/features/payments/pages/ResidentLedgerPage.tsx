@@ -24,6 +24,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -99,11 +100,13 @@ export function ResidentLedgerPage() {
       header: ({ column }) => (
         <DataGridColumnHeader title="Date" column={column} />
       ),
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.businessDate,
     },
     {
       id: 'source',
       header: 'Source',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (
         <Badge variant="secondary" appearance="light">
           {ledgerReferenceTypeLabel(row.original.referenceType)}
@@ -113,11 +116,19 @@ export function ResidentLedgerPage() {
     {
       id: 'description',
       header: 'Description',
-      cell: ({ row }) => row.original.description,
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) =>
+        row.original.description ? (
+          <span title={row.original.description}>{row.original.description}</span>
+        ) : (
+          '—'
+        ),
     },
     {
       id: 'debit',
       header: 'Debit',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         row.original.direction === 'Debit' ? (
           <MoneyDisplay amount={row.original.amount} />
@@ -128,6 +139,7 @@ export function ResidentLedgerPage() {
     {
       id: 'credit',
       header: 'Credit',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         row.original.direction === 'Credit' ? (
           <MoneyDisplay amount={row.original.amount} />

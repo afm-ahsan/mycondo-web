@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -96,30 +97,40 @@ export function UsageHistoryPage() {
     {
       id: 'date',
       header: ({ column }) => <DataGridColumnHeader title="Date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatDate(row.original.entryAtUtc),
     },
-    { id: 'personType', header: 'Resident/Guest', cell: ({ row }) => row.original.personType },
+    { id: 'personType', header: 'Resident/Guest', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.personType },
     {
       id: 'flat',
       header: 'Building/Flat',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.flatId.slice(0, 8)}</span>,
     },
-    { id: 'entry', header: 'Entry', cell: ({ row }) => formatTimeOfDay(row.original.entryAtUtc) },
-    { id: 'exit', header: 'Exit', cell: ({ row }) => formatTimeOfDay(row.original.exitAtUtc) },
+    { id: 'entry', header: 'Entry', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatTimeOfDay(row.original.entryAtUtc) },
+    { id: 'exit', header: 'Exit', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatTimeOfDay(row.original.exitAtUtc) },
     {
       id: 'duration',
       header: 'Duration',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatDuration(row.original.entryAtUtc, row.original.exitAtUtc),
     },
-    { id: 'fee', header: 'Fee', cell: ({ row }) => (row.original.guestFeeAmount != null ? <MoneyDisplay amount={row.original.guestFeeAmount} /> : '—') },
+    {
+      id: 'fee',
+      header: 'Fee',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => (row.original.guestFeeAmount != null ? <MoneyDisplay amount={row.original.guestFeeAmount} /> : '—'),
+    },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <PoolSessionStatusBadge status={row.original.status as PoolSessionStatus} />,
     },
     {
       id: 'operator',
       header: 'Operator',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (
         <span className="font-mono text-xs">
           {(row.original.checkedOutBy ?? row.original.checkedInBy)?.slice(0, 8) ?? '—'}

@@ -18,6 +18,7 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -192,12 +193,13 @@ export function GeneratorMaintenancePage() {
   }
 
   const scheduleColumns: ColumnDef<GeneratorMaintenanceScheduleDto>[] = [
-    { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
-    { id: 'dueDate', header: 'Due date', cell: ({ row }) => (row.original.nextDueDate ? formatDate(row.original.nextDueDate) : '—') },
-    { id: 'dueHours', header: 'Due hour meter', cell: ({ row }) => row.original.nextDueHourMeterReading ?? '—' },
+    { id: 'generator', header: 'Generator', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
+    { id: 'dueDate', header: 'Due date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => (row.original.nextDueDate ? formatDate(row.original.nextDueDate) : '—') },
+    { id: 'dueHours', header: 'Due hour meter', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.nextDueHourMeterReading ?? '—' },
     {
       id: 'due',
       header: 'Due status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => {
         const isDue = dueByScheduleId.get(row.original.generatorMaintenanceScheduleId);
         if (isDue === undefined) return '—';
@@ -215,44 +217,83 @@ export function GeneratorMaintenancePage() {
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <Badge variant={row.original.isActive ? 'primary' : 'secondary'} appearance="light">{row.original.isActive ? 'Active' : 'Inactive'}</Badge>,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-          <Button size="sm" variant="outline" onClick={() => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId)}>
-            Complete
-          </Button>
+          <div className="flex justify-end">
+            <Button size="sm" variant="outline" onClick={() => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId)}>
+              Complete
+            </Button>
+          </div>
         </RequirePermission>
       ),
     },
   ];
 
   const serviceColumns: ColumnDef<GeneratorServiceRecordDto>[] = [
-    { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
-    { id: 'date', header: 'Date', cell: ({ row }) => formatDate(row.original.performedAtUtc) },
-    { id: 'description', header: 'Description', cell: ({ row }) => row.original.description },
-    { id: 'cost', header: 'Cost', cell: ({ row }) => (row.original.cost != null ? <MoneyDisplay amount={row.original.cost} /> : '—') },
+    { id: 'generator', header: 'Generator', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
+    { id: 'date', header: 'Date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDate(row.original.performedAtUtc) },
+    {
+      id: 'description',
+      header: 'Description',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const description = row.original.description;
+        return <span title={description}>{description}</span>;
+      },
+    },
+    { id: 'cost', header: 'Cost', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => (row.original.cost != null ? <MoneyDisplay amount={row.original.cost} /> : '—') },
   ];
 
   const breakdownColumns: ColumnDef<GeneratorBreakdownRecordDto>[] = [
-    { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
-    { id: 'reported', header: 'Reported', cell: ({ row }) => formatDateTime(row.original.reportedAtUtc) },
-    { id: 'description', header: 'Description', cell: ({ row }) => row.original.description },
-    { id: 'downtimeStart', header: 'Downtime start', cell: ({ row }) => formatDateTime(row.original.downtimeStartUtc) },
-    { id: 'downtimeEnd', header: 'Downtime end', cell: ({ row }) => (row.original.downtimeEndUtc ? formatDateTime(row.original.downtimeEndUtc) : '—') },
-    { id: 'resolution', header: 'Resolution', cell: ({ row }) => row.original.resolution ?? '—' },
+    { id: 'generator', header: 'Generator', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
+    { id: 'reported', header: 'Reported', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDateTime(row.original.reportedAtUtc) },
+    {
+      id: 'description',
+      header: 'Description',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const description = row.original.description;
+        return <span title={description}>{description}</span>;
+      },
+    },
+    { id: 'downtimeStart', header: 'Downtime start', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDateTime(row.original.downtimeStartUtc) },
+    {
+      id: 'downtimeEnd',
+      header: 'Downtime end',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => (row.original.downtimeEndUtc ? formatDateTime(row.original.downtimeEndUtc) : '—'),
+    },
+    {
+      id: 'resolution',
+      header: 'Resolution',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const resolution = row.original.resolution;
+        return resolution ? <span title={resolution}>{resolution}</span> : '—';
+      },
+    },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         !row.original.downtimeEndUtc ? (
           <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-            <Button size="sm" variant="outline" onClick={() => setResolvingBreakdownId(row.original.generatorBreakdownRecordId)}>
-              Resolve
-            </Button>
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => setResolvingBreakdownId(row.original.generatorBreakdownRecordId)}>
+                Resolve
+              </Button>
+            </div>
           </RequirePermission>
         ) : null,
     },

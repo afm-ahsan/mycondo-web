@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon } from 'lucide-react';
+import { Ban, CheckCircle2, PlusIcon, RotateCcw } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
@@ -9,14 +9,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
@@ -26,8 +23,10 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { formatDate } from '@/lib/helpers';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { hasPlatformPermission } from '@/lib/auth/platformPermissions';
 import { PLATFORM_PERMISSIONS } from '@/lib/auth/platformPermissionKeys';
 import { RequirePlatformPermission } from '@/lib/auth/RequirePlatformPermission';
+import { useAppSelector } from '@/store/hooks';
 import {
   useActivateOrganizationMutation,
   useListOrganizationsQuery,
@@ -50,6 +49,7 @@ type PendingAction =
   | null;
 
 export function PlatformOrganizationsListPage() {
+  const platformUser = useAppSelector((s) => s.platformAuth.user);
   const [filters, setFilters] = useUrlFilters(ORGANIZATIONS_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -110,6 +110,7 @@ export function PlatformOrganizationsListPage() {
     {
       id: 'name',
       header: 'Organization',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => (
         <>
           <Link to={`/platform/organizations/${row.original.tenantId}`} className="font-medium hover:underline">
@@ -122,11 +123,13 @@ export function PlatformOrganizationsListPage() {
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as OrganizationStatus} toneMap={organizationStatusToneMap} />,
     },
     {
       id: 'administrator',
       header: 'Administrator',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) =>
         row.original.primaryAdministratorFullName ? (
           <div className="text-sm">
@@ -140,11 +143,13 @@ export function PlatformOrganizationsListPage() {
     {
       id: 'createdAtUtc',
       header: 'Created',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <span className="text-sm">{formatDate(row.original.createdAtUtc)}</span>,
     },
     {
       id: 'modules',
       header: 'Modules',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant="secondary" appearance="light">
           {row.original.enabledModuleCount}
@@ -154,49 +159,43 @@ export function PlatformOrganizationsListPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => {
         const org = row.original;
-        const hasAction = org.status === 'Active' || org.status === 'PendingActivation' || org.status === 'Suspended';
-        if (!hasAction) return null;
-
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Actions
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              {org.status === 'Active' && (
-                <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.suspend}>
-                  <DropdownMenuItem
-                    variant="destructive"
-                    onClick={() => setPendingAction({ type: 'suspend', organizationId: org.tenantId, organizationName: org.name })}
-                  >
-                    Suspend
-                  </DropdownMenuItem>
-                </RequirePlatformPermission>
-              )}
-              {org.status === 'PendingActivation' && (
-                <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.activate}>
-                  <DropdownMenuItem
-                    onClick={() => setPendingAction({ type: 'activate', organizationId: org.tenantId, organizationName: org.name })}
-                  >
-                    Activate
-                  </DropdownMenuItem>
-                </RequirePlatformPermission>
-              )}
-              {org.status === 'Suspended' && (
-                <RequirePlatformPermission permission={PLATFORM_PERMISSIONS.organization.reactivate}>
-                  <DropdownMenuItem
-                    onClick={() => setPendingAction({ type: 'reactivate', organizationId: org.tenantId, organizationName: org.name })}
-                  >
-                    Reactivate
-                  </DropdownMenuItem>
-                </RequirePlatformPermission>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <RowActionsMenu
+            ariaLabel={`Actions for ${org.name}`}
+            actions={[
+              {
+                key: 'suspend',
+                label: 'Suspend',
+                icon: <Ban />,
+                variant: 'destructive',
+                onClick: () => setPendingAction({ type: 'suspend', organizationId: org.tenantId, organizationName: org.name }),
+                hidden:
+                  org.status !== 'Active' ||
+                  !hasPlatformPermission(platformUser, PLATFORM_PERMISSIONS.organization.suspend),
+              },
+              {
+                key: 'activate',
+                label: 'Activate',
+                icon: <CheckCircle2 />,
+                onClick: () => setPendingAction({ type: 'activate', organizationId: org.tenantId, organizationName: org.name }),
+                hidden:
+                  org.status !== 'PendingActivation' ||
+                  !hasPlatformPermission(platformUser, PLATFORM_PERMISSIONS.organization.activate),
+              },
+              {
+                key: 'reactivate',
+                label: 'Reactivate',
+                icon: <RotateCcw />,
+                onClick: () => setPendingAction({ type: 'reactivate', organizationId: org.tenantId, organizationName: org.name }),
+                hidden:
+                  org.status !== 'Suspended' ||
+                  !hasPlatformPermission(platformUser, PLATFORM_PERMISSIONS.organization.reactivate),
+              },
+            ]}
+          />
         );
       },
     },
@@ -264,7 +263,10 @@ export function PlatformOrganizationsListPage() {
               </CardHeading>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />

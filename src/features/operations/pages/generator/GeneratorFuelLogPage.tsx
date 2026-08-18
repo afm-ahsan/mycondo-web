@@ -20,6 +20,7 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -89,12 +90,21 @@ export function GeneratorFuelLogPage() {
   }
 
   const columns: ColumnDef<GeneratorFuelReceiptDto>[] = [
-    { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
-    { id: 'date', header: 'Date', cell: ({ row }) => formatDate(row.original.receivedAtUtc) },
-    { id: 'quantity', header: 'Quantity', cell: ({ row }) => formatNumber(row.original.quantity) },
-    { id: 'cost', header: 'Cost', cell: ({ row }) => (row.original.cost != null ? <MoneyDisplay amount={row.original.cost} /> : '—') },
-    { id: 'supplier', header: 'Supplier', cell: ({ row }) => row.original.supplier ?? '—' },
-    { id: 'remarks', header: 'Remarks', cell: ({ row }) => row.original.remarks ?? '—' },
+    { id: 'generator', header: 'Generator', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
+    { id: 'date', header: 'Date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDate(row.original.receivedAtUtc) },
+    { id: 'quantity', header: 'Quantity', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatNumber(row.original.quantity) },
+    { id: 'cost', header: 'Cost', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => (row.original.cost != null ? <MoneyDisplay amount={row.original.cost} /> : '—') },
+    { id: 'supplier', header: 'Supplier', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.supplier ?? '—' },
+    {
+      id: 'remarks',
+      header: 'Remarks',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const remarks = row.original.remarks;
+        return remarks ? <span title={remarks}>{remarks}</span> : '—';
+      },
+    },
   ];
 
   const total = data ? Number(data.total) : 0;

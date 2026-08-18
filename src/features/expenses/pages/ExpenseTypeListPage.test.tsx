@@ -96,10 +96,11 @@ describe('ExpenseTypeListPage', () => {
 
     await screen.findByText('Cleaning');
     const row = screen.getByText('Cleaning').closest('tr')!;
-    await user.click(within(row).getByRole('button', { name: /deactivate/i }));
+    await user.click(within(row).getByRole('button', { name: /actions for cleaning/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^deactivate$/i }));
 
     await waitFor(() => {
-      expect(within(row).getByRole('button', { name: /^activate$/i })).toBeInTheDocument();
+      expect(within(row).getByText('Inactive')).toBeInTheDocument();
     });
   });
 });

@@ -106,7 +106,8 @@ describe('ExpenseListPage', () => {
     renderWithProviders(<ExpenseListPage />, { auth: { user: adminUser, isInitialized: true } });
 
     await screen.findByText('Monthly cleaning');
-    await user.click(screen.getByRole('button', { name: /^void$/i }));
+    await user.click(screen.getByRole('button', { name: /actions for monthly cleaning/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^void$/i }));
 
     const alert = await screen.findByRole('alertdialog');
     await user.type(within(alert).getByLabelText('Reason'), 'Recorded in error');

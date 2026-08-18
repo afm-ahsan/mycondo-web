@@ -83,7 +83,8 @@ describe('BuildingListPage', () => {
 
     await screen.findByText('Aisha Tower');
     const row = screen.getByText('Aisha Tower').closest('tr')!;
-    await user.click(within(row).getByRole('button', { name: /^edit$/i }));
+    await user.click(within(row).getByRole('button', { name: /actions for aisha tower/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^edit$/i }));
 
     const dialog = await screen.findByRole('dialog');
     expect(dialog.className).toMatch(/max-h-\[85vh\]/);
@@ -129,7 +130,8 @@ describe('BuildingListPage', () => {
 
     await screen.findByText('Aisha Tower');
     const row = screen.getByText('Aisha Tower').closest('tr')!;
-    await user.click(within(row).getByRole('button', { name: /^edit$/i }));
+    await user.click(within(row).getByRole('button', { name: /actions for aisha tower/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^edit$/i }));
 
     const dialog = await screen.findByRole('dialog');
     await within(dialog).findByText(/click to upload an image/i);
@@ -147,7 +149,8 @@ describe('BuildingListPage', () => {
 
     await screen.findByText('Aisha Tower');
     const row = screen.getByText('Aisha Tower').closest('tr')!;
-    await user.click(within(row).getByRole('button', { name: /deactivate/i }));
+    await user.click(within(row).getByRole('button', { name: /actions for aisha tower/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^deactivate$/i }));
 
     const dialog = await screen.findByRole('alertdialog');
     await user.click(within(dialog).getByRole('button', { name: /^deactivate$/i }));
