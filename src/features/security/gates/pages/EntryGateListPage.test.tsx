@@ -141,10 +141,15 @@ describe('EntryGateListPage', () => {
 
     await chooseOption(user, 'Select a building', 'Tower A (A)');
     const row = (await screen.findByText('Main Gate')).closest('tr')!;
-    await user.click(within(row).getByRole('button', { name: /deactivate/i }));
+    await user.click(within(row).getByRole('button', { name: /actions for main gate/i }));
+    const menu = await screen.findByRole('menu');
+    await user.click(within(menu).getByRole('menuitem', { name: 'Deactivate' }));
+    await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
 
     await waitFor(() => {
-      expect(within(row).getByRole('button', { name: /^activate$/i })).toBeInTheDocument();
+      expect(active).toBe(false);
     });
+    await user.click(within(row).getByRole('button', { name: /actions for main gate/i }));
+    expect(await screen.findByRole('menuitem', { name: 'Activate' })).toBeInTheDocument();
   }, 15000);
 });

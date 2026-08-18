@@ -7,7 +7,7 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { AlertCircle, Plus, Users } from 'lucide-react';
+import { AlertCircle, CheckCircle2, CircleDollarSign, Plus, Users, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -21,6 +21,8 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -166,51 +168,65 @@ export function CylinderPurchaseListPage() {
   }
 
   const columns: ColumnDef<CylinderPurchaseDto>[] = [
-    { id: 'date', header: 'Date', cell: ({ row }) => formatDate(row.original.purchaseDate) },
-    { id: 'supplier', header: 'Supplier', cell: ({ row }) => supplierNameById[row.original.supplierId] ?? '—' },
-    { id: 'invoice', header: 'Invoice', cell: ({ row }) => row.original.invoiceNumber },
-    { id: 'cylinderType', header: 'Cylinder type', cell: ({ row }) => row.original.cylinderType },
-    { id: 'quantity', header: 'Quantity', cell: ({ row }) => row.original.quantity },
-    { id: 'weight', header: 'Weight (kg)', cell: ({ row }) => formatNumber(row.original.cylinderWeightKg) },
-    { id: 'rate', header: 'Rate', cell: ({ row }) => <MoneyDisplay amount={row.original.ratePerCylinder} /> },
-    { id: 'totalKg', header: 'Total kg', cell: ({ row }) => formatNumber(row.original.totalKg) },
-    { id: 'unitPricePerKg', header: 'Unit price', cell: ({ row }) => <RatePerKg amount={row.original.unitPricePerKg} /> },
-    { id: 'grandTotal', header: 'Amount', cell: ({ row }) => <MoneyDisplay amount={row.original.grandTotal} /> },
+    { id: 'date', header: 'Date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDate(row.original.purchaseDate) },
+    { id: 'supplier', header: 'Supplier', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => supplierNameById[row.original.supplierId] ?? '—' },
+    { id: 'invoice', header: 'Invoice', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.invoiceNumber },
+    { id: 'cylinderType', header: 'Cylinder type', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.cylinderType },
+    { id: 'quantity', header: 'Quantity', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.quantity },
+    { id: 'weight', header: 'Weight (kg)', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatNumber(row.original.cylinderWeightKg) },
+    { id: 'rate', header: 'Rate', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <MoneyDisplay amount={row.original.ratePerCylinder} /> },
+    { id: 'totalKg', header: 'Total kg', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatNumber(row.original.totalKg) },
+    { id: 'unitPricePerKg', header: 'Unit price', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <RatePerKg amount={row.original.unitPricePerKg} /> },
+    { id: 'grandTotal', header: 'Amount', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <MoneyDisplay amount={row.original.grandTotal} /> },
     {
       id: 'paymentStatus',
       header: 'Payment',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.paymentStatus as CylinderPurchasePaymentStatus} toneMap={cylinderPurchasePaymentStatusToneMap} />,
     },
     {
       id: 'approvalStatus',
       header: 'Approval',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.approvalStatus as CylinderPurchaseApprovalStatus} toneMap={cylinderPurchaseApprovalStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => {
         const purchase = row.original;
         return (
-          <div className="flex gap-2">
-            {purchase.approvalStatus === 'PendingApproval' && (
-              <RequirePermission permission={PERMISSIONS.gasCylinder.approve}>
-                <Button size="sm" variant="outline" onClick={() => setApproveTarget(purchase)}>
-                  Approve
-                </Button>
-                <Button size="sm" variant="outline" onClick={() => setRejectingPurchaseId(purchase.cylinderPurchaseId)}>
-                  Reject
-                </Button>
-              </RequirePermission>
-            )}
-            {purchase.approvalStatus === 'Approved' && purchase.paymentStatus === 'Unpaid' && (
-              <RequirePermission permission={PERMISSIONS.gasCylinder.purchaseManage}>
-                <Button size="sm" variant="outline" onClick={() => setMarkPaidTarget(purchase)}>
-                  Mark Paid
-                </Button>
-              </RequirePermission>
-            )}
-          </div>
+          <RowActionsMenu
+            ariaLabel={`Actions for purchase ${purchase.invoiceNumber}`}
+            actions={[
+              {
+                key: 'approve',
+                label: 'Approve',
+                icon: <CheckCircle2 />,
+                onClick: () => setApproveTarget(purchase),
+                permission: PERMISSIONS.gasCylinder.approve,
+                hidden: purchase.approvalStatus !== 'PendingApproval',
+              },
+              {
+                key: 'reject',
+                label: 'Reject',
+                icon: <XCircle />,
+                onClick: () => setRejectingPurchaseId(purchase.cylinderPurchaseId),
+                permission: PERMISSIONS.gasCylinder.approve,
+                variant: 'destructive',
+                hidden: purchase.approvalStatus !== 'PendingApproval',
+              },
+              {
+                key: 'markPaid',
+                label: 'Mark Paid',
+                icon: <CircleDollarSign />,
+                onClick: () => setMarkPaidTarget(purchase),
+                permission: PERMISSIONS.gasCylinder.purchaseManage,
+                hidden: !(purchase.approvalStatus === 'Approved' && purchase.paymentStatus === 'Unpaid'),
+              },
+            ]}
+          />
         );
       },
     },

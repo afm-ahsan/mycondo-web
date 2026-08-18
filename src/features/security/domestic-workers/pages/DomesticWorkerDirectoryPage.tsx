@@ -32,6 +32,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { toUserMessage } from '@/api/errors';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DomesticWorkerFormDialog } from '../components/DomesticWorkerFormDialog';
 import { WorkerManageDialog } from '../components/WorkerManageDialog';
 import { useDomesticWorkers } from '../api/domesticWorkersApi';
@@ -100,22 +101,26 @@ export function DomesticWorkerDirectoryPage() {
       accessorFn: (row) => row.fullName,
       header: ({ column }) => <DataGridColumnHeader title="Name" column={column} />,
       cell: ({ row }) => <span className="font-medium">{row.original.fullName}</span>,
+      size: DATA_GRID_COLUMN_SIZE.flexible,
     },
     {
       id: 'phone',
       accessorFn: (row) => row.phone,
       header: ({ column }) => <DataGridColumnHeader title="Mobile" column={column} />,
       cell: ({ row }) => row.original.phone,
+      size: DATA_GRID_COLUMN_SIZE.medium,
     },
     {
       id: 'workerType',
       header: 'Type',
       cell: ({ row }) => row.original.workerType,
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'verificationStatus',
       header: 'Verification',
       cell: ({ row }) => row.original.verificationStatus,
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'status',
@@ -123,15 +128,19 @@ export function DomesticWorkerDirectoryPage() {
       cell: ({ row }) => (
         <StatusBadge status={row.original.status as 'Active' | 'Suspended' | 'Blocked'} toneMap={statusToneMap} />
       ),
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-          Manage
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
+            Manage
+          </Button>
+        </div>
       ),
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
   ];
 

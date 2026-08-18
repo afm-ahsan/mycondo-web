@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Building2, PlusIcon } from 'lucide-react';
+import { Ban, Building2, ExternalLink, Pencil, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
@@ -11,7 +11,9 @@ import type { BuildingDto } from '@/api/generated/mycondoApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Dialog,
@@ -51,6 +53,7 @@ import {
 const BUILDINGS_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function BuildingListPage() {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(BUILDINGS_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -94,30 +97,53 @@ export function BuildingListPage() {
   }
 
   const columns: ColumnDef<BuildingDto>[] = [
-    { id: 'name', header: 'Name', cell: ({ row }) => row.original.name },
-    { id: 'code', header: 'Code', cell: ({ row }) => row.original.code },
-    { id: 'address', header: 'Address', cell: ({ row }) => row.original.address ?? '—' },
+    { id: 'name', header: 'Name', size: DATA_GRID_COLUMN_SIZE.flexible, cell: ({ row }) => row.original.name },
+    { id: 'code', header: 'Code', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.code },
+    {
+      id: 'address',
+      header: 'Address',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const address = row.original.address ?? '—';
+        return <span title={address}>{address}</span>;
+      },
+    },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 justify-end">
-          <RequirePermission permission="property.view" buildingId={row.original.buildingId}>
-            <Button size="sm" variant="outline" asChild>
-              <Link to={`/admin/buildings/${row.original.buildingId}/flats`}>Flats</Link>
-            </Button>
-          </RequirePermission>
-          <RequirePermission permission="property.update" buildingId={row.original.buildingId}>
-            <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
-              Edit
-            </Button>
-          </RequirePermission>
-          <RequirePermission permission="property.delete" buildingId={row.original.buildingId}>
-            <Button variant="outline" size="sm" onClick={() => setDeactivateTarget(row.original)}>
-              Deactivate
-            </Button>
-          </RequirePermission>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.name}`}
+          actions={[
+            {
+              key: 'flats',
+              label: 'Flats',
+              icon: <ExternalLink />,
+              onClick: () => navigate(`/admin/buildings/${row.original.buildingId}/flats`),
+              permission: 'property.view',
+              buildingId: row.original.buildingId,
+            },
+            {
+              key: 'edit',
+              label: 'Edit',
+              icon: <Pencil />,
+              onClick: () => setEditTarget(row.original),
+              permission: 'property.update',
+              buildingId: row.original.buildingId,
+            },
+            {
+              key: 'deactivate',
+              label: 'Deactivate',
+              icon: <Ban />,
+              onClick: () => setDeactivateTarget(row.original),
+              permission: 'property.delete',
+              buildingId: row.original.buildingId,
+              variant: 'destructive',
+            },
+          ]}
+        />
       ),
     },
   ];

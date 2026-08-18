@@ -10,6 +10,7 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
@@ -70,16 +71,19 @@ export function CurrentlyPresentStaffPage() {
     {
       id: 'workDate',
       header: 'Date',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.workDate,
     },
     {
       id: 'shift',
       header: 'Shift',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatShift(row.original.scheduledStartUtc, row.original.scheduledEndUtc),
     },
     {
       id: 'checkIn',
       header: 'Clocked in at',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatTimeOfDay(row.original.checkInUtc),
     },
     {
@@ -90,6 +94,7 @@ export function CurrentlyPresentStaffPage() {
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: () => (
         <Badge variant="info" appearance="light">
           Present
@@ -99,12 +104,15 @@ export function CurrentlyPresentStaffPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (
-        <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-          <Button size="sm" variant="outline" onClick={() => setClockOutTarget(row.original)} disabled={isClockingOut}>
-            <LogOut /> Clock Out
-          </Button>
-        </RequirePermission>
+        <div className="flex justify-end">
+          <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
+            <Button size="sm" variant="outline" onClick={() => setClockOutTarget(row.original)} disabled={isClockingOut}>
+              <LogOut /> Clock Out
+            </Button>
+          </RequirePermission>
+        </div>
       ),
     },
   ];

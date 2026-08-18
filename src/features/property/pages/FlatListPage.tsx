@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Building2, PlusIcon } from 'lucide-react';
+import { Ban, Building2, Pencil, PlusIcon } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -11,7 +11,9 @@ import type { FlatDto } from '@/api/generated/mycondoApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Dialog,
@@ -129,36 +131,48 @@ export function FlatListPage() {
   }
 
   const columns: ColumnDef<FlatDto>[] = [
-    { id: 'flatNumber', header: 'Flat', cell: ({ row }) => row.original.flatNumber },
+    { id: 'flatNumber', header: 'Flat', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.flatNumber },
     ...(isGlobal
       ? [
           {
             id: 'building',
             header: 'Building',
+            size: DATA_GRID_COLUMN_SIZE.medium,
             cell: ({ row }: { row: { original: FlatDto } }) =>
               buildingNameById.get(row.original.buildingId) ?? '—',
           } satisfies ColumnDef<FlatDto>,
         ]
       : []),
-    { id: 'floorNumber', header: 'Floor', cell: ({ row }) => row.original.floorNumber ?? '—' },
-    { id: 'flatType', header: 'Type', cell: ({ row }) => row.original.flatType },
-    { id: 'areaSqFt', header: 'Area (sq ft)', cell: ({ row }) => row.original.areaSqFt ?? '—' },
+    { id: 'floorNumber', header: 'Floor', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.floorNumber ?? '—' },
+    { id: 'flatType', header: 'Type', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.flatType },
+    { id: 'areaSqFt', header: 'Area (sq ft)', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.areaSqFt ?? '—' },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex items-center gap-2 justify-end">
-          <RequirePermission permission="property.update" buildingId={row.original.buildingId}>
-            <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
-              Edit
-            </Button>
-          </RequirePermission>
-          <RequirePermission permission="property.delete" buildingId={row.original.buildingId}>
-            <Button variant="outline" size="sm" onClick={() => setDeactivateTarget(row.original)}>
-              Deactivate
-            </Button>
-          </RequirePermission>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for flat ${row.original.flatNumber}`}
+          actions={[
+            {
+              key: 'edit',
+              label: 'Edit',
+              icon: <Pencil />,
+              onClick: () => setEditTarget(row.original),
+              permission: 'property.update',
+              buildingId: row.original.buildingId,
+            },
+            {
+              key: 'deactivate',
+              label: 'Deactivate',
+              icon: <Ban />,
+              onClick: () => setDeactivateTarget(row.original),
+              permission: 'property.delete',
+              buildingId: row.original.buildingId,
+              variant: 'destructive',
+            },
+          ]}
+        />
       ),
     },
   ];

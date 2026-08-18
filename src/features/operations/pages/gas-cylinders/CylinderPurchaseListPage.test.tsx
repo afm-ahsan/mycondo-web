@@ -83,7 +83,9 @@ describe('CylinderPurchaseListPage', () => {
     );
 
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Approve' }));
+    const row = (await screen.findByText('INV-001')).closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /actions for purchase inv-001/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^approve$/i }));
 
     // Clicking the row action opens a confirmation — it must not fire immediately.
     expect(approveCalled).toBe(false);
@@ -107,7 +109,9 @@ describe('CylinderPurchaseListPage', () => {
     );
 
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Mark Paid' }));
+    const row = (await screen.findByText('INV-001')).closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /actions for purchase inv-001/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^mark paid$/i }));
 
     expect(markPaidCalled).toBe(false);
     const dialog = screen.getByRole('alertdialog');
@@ -127,7 +131,9 @@ describe('CylinderPurchaseListPage', () => {
     );
 
     const user = userEvent.setup();
-    await user.click(await screen.findByRole('button', { name: 'Reject' }));
+    const row = (await screen.findByText('INV-001')).closest('tr')!;
+    await user.click(within(row).getByRole('button', { name: /actions for purchase inv-001/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^reject$/i }));
     await user.type(screen.getByLabelText('Reason'), 'Price mismatch');
     await user.click(screen.getByRole('button', { name: 'Reject', hidden: false }));
 
@@ -143,7 +149,6 @@ describe('CylinderPurchaseListPage', () => {
     renderWithProviders(<CylinderPurchaseListPage />, { auth: { user: viewOnlyUser, isInitialized: true } });
 
     await screen.findByText('INV-001');
-    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /actions for purchase inv-001/i })).not.toBeInTheDocument();
   });
 });

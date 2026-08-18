@@ -69,7 +69,8 @@ describe('AttendanceRegisterPage', () => {
     expect(await screen.findByText('Md. Karim Sheikh')).toBeInTheDocument();
     expect(screen.getByText('Open')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: /clock out/i }));
+    await user.click(screen.getByRole('button', { name: /actions for md\. karim sheikh/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /clock out/i }));
 
     const dialog = await screen.findByRole('alertdialog');
     expect(within(dialog).getByText(/clock out this staff member/i)).toBeInTheDocument();
@@ -98,7 +99,8 @@ describe('AttendanceRegisterPage', () => {
     const user = userEvent.setup();
     renderWithProviders(<AttendanceRegisterPage />, { auth: { user: adminUser, isInitialized: true } });
 
-    await user.click(await screen.findByRole('button', { name: /clock out/i }));
+    await user.click(await screen.findByRole('button', { name: /actions for md\. karim sheikh/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /clock out/i }));
     const dialog = await screen.findByRole('alertdialog');
     await user.click(within(dialog).getByRole('button', { name: /cancel/i }));
 
@@ -124,7 +126,8 @@ describe('AttendanceRegisterPage', () => {
     renderWithProviders(<AttendanceRegisterPage />, { auth: { user: adminUser, isInitialized: true } });
 
     expect(await screen.findByText('Correction requested')).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: /^approve$/i }));
+    await user.click(screen.getByRole('button', { name: /actions for md\. karim sheikh/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^approve$/i }));
 
     const dialog = await screen.findByRole('alertdialog');
     expect(within(dialog).getByText(/approve this attendance correction/i)).toBeInTheDocument();
@@ -153,7 +156,8 @@ describe('AttendanceRegisterPage', () => {
     const user = userEvent.setup();
     renderWithProviders(<AttendanceRegisterPage />, { auth: { user: adminUser, isInitialized: true } });
 
-    await user.click(await screen.findByRole('button', { name: /^approve$/i }));
+    await user.click(await screen.findByRole('button', { name: /actions for md\. karim sheikh/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^approve$/i }));
     const dialog = await screen.findByRole('alertdialog');
     await user.click(within(dialog).getByRole('button', { name: /cancel/i }));
 
@@ -178,7 +182,8 @@ describe('AttendanceRegisterPage', () => {
     const user = userEvent.setup();
     renderWithProviders(<AttendanceRegisterPage />, { auth: { user: adminUser, isInitialized: true } });
 
-    await user.click(await screen.findByRole('button', { name: /correct/i }));
+    await user.click(await screen.findByRole('button', { name: /actions for md\. karim sheikh/i }));
+    await user.click(await screen.findByRole('menuitem', { name: /^correct$/i }));
     await user.type(screen.getByLabelText('Reason'), 'Missed the actual check-in time by an hour.');
     await user.click(screen.getByRole('button', { name: /submit request/i }));
 

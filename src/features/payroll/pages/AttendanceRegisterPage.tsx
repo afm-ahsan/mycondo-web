@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Check, LogOut, MessageSquareWarning } from 'lucide-react';
+import { CheckCircle2, LogOut, Wrench } from 'lucide-react';
 import { toast } from 'sonner';
 import { toUserMessage } from '@/api/errors';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
@@ -10,13 +10,14 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
-import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { ConfirmActionDialog } from '@/components/shared/ConfirmActionDialog';
 import { RequestCorrectionDialog } from '../components/RequestCorrectionDialog';
@@ -95,21 +96,25 @@ export function AttendanceRegisterPage() {
       id: 'workDate',
       accessorFn: (row) => row.workDate,
       header: ({ column }) => <DataGridColumnHeader title="Date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.workDate,
     },
     {
       id: 'shift',
       header: 'Shift',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatShift(row.original.scheduledStartUtc, row.original.scheduledEndUtc),
     },
     {
       id: 'checkIn',
       header: 'First in',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatTimeOfDay(row.original.checkInUtc),
     },
     {
       id: 'checkOut',
       header: 'Last out',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         row.original.checkOutUtc ? (
           formatTimeOfDay(row.original.checkOutUtc)
@@ -122,11 +127,13 @@ export function AttendanceRegisterPage() {
     {
       id: 'worked',
       header: 'Worked',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatWorkedDuration(row.original.checkInUtc, row.original.checkOutUtc),
     },
     {
       id: 'overtime',
       header: 'Overtime',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => formatOvertimeMinutes(row.original.overtimeMinutes),
     },
     {
@@ -155,32 +162,41 @@ export function AttendanceRegisterPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => {
         const record = row.original;
         return (
-          <div className="flex justify-end gap-1.5">
-            {!record.checkOutUtc && (
-              <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-                <Button size="sm" variant="outline" onClick={() => setClockOutTarget(record)} disabled={isClockingOut}>
-                  <LogOut /> Clock Out
-                </Button>
-              </RequirePermission>
-            )}
-            {!record.correctionRequested && (
-              <RequirePermission permission={PERMISSIONS.staffAttendance.correct}>
-                <Button size="sm" variant="outline" onClick={() => setCorrectionTarget(record)}>
-                  <MessageSquareWarning /> Correct
-                </Button>
-              </RequirePermission>
-            )}
-            {record.correctionRequested && !record.approvedBy && (
-              <RequirePermission permission={PERMISSIONS.staffAttendance.approve}>
-                <Button size="sm" onClick={() => setApproveTarget(record)} disabled={isApproving}>
-                  <Check /> Approve
-                </Button>
-              </RequirePermission>
-            )}
-          </div>
+          <RowActionsMenu
+            ariaLabel={`Actions for ${record.staffMemberFullName}`}
+            actions={[
+              {
+                key: 'clockOut',
+                label: 'Clock Out',
+                icon: <LogOut />,
+                onClick: () => setClockOutTarget(record),
+                permission: PERMISSIONS.staffAttendance.manage,
+                hidden: !!record.checkOutUtc,
+                disabled: isClockingOut,
+              },
+              {
+                key: 'correct',
+                label: 'Correct',
+                icon: <Wrench />,
+                onClick: () => setCorrectionTarget(record),
+                permission: PERMISSIONS.staffAttendance.correct,
+                hidden: record.correctionRequested,
+              },
+              {
+                key: 'approve',
+                label: 'Approve',
+                icon: <CheckCircle2 />,
+                onClick: () => setApproveTarget(record),
+                permission: PERMISSIONS.staffAttendance.approve,
+                hidden: !(record.correctionRequested && !record.approvedBy),
+                disabled: isApproving,
+              },
+            ]}
+          />
         );
       },
     },

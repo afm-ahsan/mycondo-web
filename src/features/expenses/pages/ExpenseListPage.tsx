@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { PlusIcon, Receipt } from 'lucide-react';
+import { Ban, Pencil, PlusIcon, Receipt } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -10,7 +10,9 @@ import type { ExpenseDto } from '@/api/generated/mycondoApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   AlertDialog,
@@ -96,14 +98,21 @@ export function ExpenseListPage() {
   }
 
   const columns: ColumnDef<ExpenseDto>[] = [
-    { id: 'expenseDate', header: 'Date', cell: ({ row }) => row.original.expenseDate },
-    { id: 'expenseType', header: 'Type', cell: ({ row }) => row.original.expenseTypeName },
-    { id: 'description', header: 'Description', cell: ({ row }) => row.original.description },
-    { id: 'payee', header: 'Payee', cell: ({ row }) => row.original.payee ?? '—' },
-    { id: 'amount', header: 'Amount', cell: ({ row }) => <MoneyDisplay amount={row.original.amount} /> },
+    { id: 'expenseDate', header: 'Date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.expenseDate },
+    { id: 'expenseType', header: 'Type', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.expenseTypeName },
+    {
+      id: 'description',
+      header: 'Description',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => <span title={row.original.description}>{row.original.description}</span>,
+    },
+    { id: 'payee', header: 'Payee', size: DATA_GRID_COLUMN_SIZE.flexible, cell: ({ row }) => row.original.payee ?? '—' },
+    { id: 'amount', header: 'Amount', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => <MoneyDisplay amount={row.original.amount} /> },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <StatusBadge status={row.original.status as 'Recorded' | 'Voided'} toneMap={expenseStatusToneMap} />
       ),
@@ -111,19 +120,31 @@ export function ExpenseListPage() {
     {
       id: 'actions',
       header: 'Action',
-      cell: ({ row }) =>
-        row.original.status === 'Recorded' ? (
-          <RequirePermission permission="expense.manage">
-            <div className="flex items-center gap-2 justify-end">
-              <Button variant="outline" size="sm" onClick={() => setEditTarget(row.original)}>
-                Edit
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => setVoidTarget(row.original)}>
-                Void
-              </Button>
-            </div>
-          </RequirePermission>
-        ) : null,
+      size: DATA_GRID_COLUMN_SIZE.action,
+      cell: ({ row }) => (
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.description}`}
+          actions={[
+            {
+              key: 'edit',
+              label: 'Edit',
+              icon: <Pencil />,
+              onClick: () => setEditTarget(row.original),
+              permission: 'expense.manage',
+              hidden: row.original.status !== 'Recorded',
+            },
+            {
+              key: 'void',
+              label: 'Void',
+              icon: <Ban />,
+              onClick: () => setVoidTarget(row.original),
+              permission: 'expense.manage',
+              variant: 'destructive',
+              hidden: row.original.status !== 'Recorded',
+            },
+          ]}
+        />
+      ),
     },
   ];
 

@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -112,28 +113,56 @@ export function GeneratorLogPage() {
   }
 
   const columns: ColumnDef<GeneratorSessionDto>[] = [
-    { id: 'generator', header: 'Generator', cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
-    { id: 'start', header: ({ column }) => <DataGridColumnHeader title="Start" column={column} />, cell: ({ row }) => formatDateTime(row.original.startAtUtc) },
-    { id: 'stop', header: 'Stop', cell: ({ row }) => (row.original.stopAtUtc ? formatDateTime(row.original.stopAtUtc) : '—') },
-    { id: 'runtime', header: 'Runtime (min)', cell: ({ row }) => row.original.runtimeMinutes ?? '—' },
-    { id: 'openingFuel', header: 'Opening fuel', cell: ({ row }) => formatNumber(row.original.openingFuelLevel) },
-    { id: 'closingFuel', header: 'Closing fuel', cell: ({ row }) => (row.original.closingFuelLevel != null ? formatNumber(row.original.closingFuelLevel) : '—') },
-    { id: 'fuelConsumed', header: 'Fuel consumed', cell: ({ row }) => (row.original.fuelConsumed != null ? formatNumber(row.original.fuelConsumed) : '—') },
-    { id: 'outageReason', header: 'Outage reason', cell: ({ row }) => row.original.outageReason ?? '—' },
+    { id: 'generator', header: 'Generator', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => generatorNameById[row.original.generatorId] ?? '—' },
+    {
+      id: 'start',
+      header: ({ column }) => <DataGridColumnHeader title="Start" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => formatDateTime(row.original.startAtUtc),
+    },
+    { id: 'stop', header: 'Stop', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => (row.original.stopAtUtc ? formatDateTime(row.original.stopAtUtc) : '—') },
+    { id: 'runtime', header: 'Runtime (min)', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.runtimeMinutes ?? '—' },
+    { id: 'openingFuel', header: 'Opening fuel', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatNumber(row.original.openingFuelLevel) },
+    {
+      id: 'closingFuel',
+      header: 'Closing fuel',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => (row.original.closingFuelLevel != null ? formatNumber(row.original.closingFuelLevel) : '—'),
+    },
+    {
+      id: 'fuelConsumed',
+      header: 'Fuel consumed',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => (row.original.fuelConsumed != null ? formatNumber(row.original.fuelConsumed) : '—'),
+    },
+    {
+      id: 'outageReason',
+      header: 'Outage reason',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const outageReason = row.original.outageReason;
+        return outageReason ? <span title={outageReason}>{outageReason}</span> : '—';
+      },
+    },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as GeneratorSessionStatus} toneMap={generatorSessionStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) =>
         row.original.status === 'Open' ? (
           <RequirePermission permission={PERMISSIONS.generator.operationManage}>
-            <Button size="sm" variant="outline" onClick={() => setStoppingSessionId(row.original.generatorSessionId)}>
-              Stop
-            </Button>
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => setStoppingSessionId(row.original.generatorSessionId)}>
+                Stop
+              </Button>
+            </div>
           </RequirePermission>
         ) : null,
     },

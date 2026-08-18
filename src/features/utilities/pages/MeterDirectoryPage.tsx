@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { LineChart, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { History, Plus, Settings2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { skipToken } from '@reduxjs/toolkit/query/react';
 import {
   Card,
@@ -14,7 +14,9 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -42,6 +44,7 @@ const METER_FILTER_DEFAULTS = { buildingId: '', page: '1', pageSize: '10' };
 /** Shared for Electricity/Gas — the caller (route) fixes utilityType; internal domain components,
  * queries, and dialogs are identical for both. */
 export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
+  const navigate = useNavigate();
   const [filters, setFilters] = useUrlFilters(METER_FILTER_DEFAULTS);
   const pagination: PaginationState = {
     pageIndex: Math.max(0, (Number(filters.page) || 1) - 1),
@@ -66,32 +69,43 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
     {
       id: 'meterNumber',
       header: 'Meter number',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => <span className="font-medium">{row.original.meterNumber}</span>,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as MeterStatus} toneMap={meterStatusToneMap} />,
     },
     {
       id: 'replacesMeterId',
       header: 'Replaces',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (row.original.replacesMeterId ? <span className="font-mono text-xs">{row.original.replacesMeterId}</span> : '—'),
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
-          <Button size="sm" variant="outline" asChild>
-            <Link to={`/utilities/${utilityType.toLowerCase()}/readings?meterId=${row.original.meterId}`}>
-              <LineChart /> Readings
-            </Link>
-          </Button>
-          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-            Manage
-          </Button>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for meter ${row.original.meterNumber}`}
+          actions={[
+            {
+              key: 'readings',
+              label: 'Readings',
+              icon: <History />,
+              onClick: () => navigate(`/utilities/${utilityType.toLowerCase()}/readings?meterId=${row.original.meterId}`),
+            },
+            {
+              key: 'manage',
+              label: 'Manage',
+              icon: <Settings2 />,
+              onClick: () => setManageTarget(row.original),
+            },
+          ]}
+        />
       ),
     },
   ];

@@ -17,6 +17,7 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
@@ -62,6 +63,7 @@ export function OutstandingInvoicesPage() {
       id: 'invoiceNumber',
       accessorFn: (row) => row.invoiceNumber,
       header: ({ column }) => <DataGridColumnHeader title="Invoice #" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.invoiceNumber}</div>
@@ -72,41 +74,50 @@ export function OutstandingInvoicesPage() {
     {
       id: 'period',
       header: 'Billing period',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => formatBillingPeriod(row.original.periodStart, row.original.periodEnd),
     },
     {
       id: 'flatId',
       header: 'Flat',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.flatId}</span>,
     },
     {
       id: 'dueDate',
       accessorFn: (row) => row.dueDate,
       header: ({ column }) => <DataGridColumnHeader title="Due date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.dueDate,
     },
     {
       id: 'totalAmount',
       header: 'Total',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.totalAmount} />,
     },
     {
       id: 'balance',
       header: 'Outstanding',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.balance} className="font-semibold" />,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as InvoiceStatus} toneMap={invoiceStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
+          </Button>
+        </div>
       ),
     },
   ];

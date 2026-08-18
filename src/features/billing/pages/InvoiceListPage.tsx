@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
@@ -60,6 +61,7 @@ export function InvoiceListPage() {
       id: 'invoiceNumber',
       accessorFn: (row) => row.invoiceNumber,
       header: ({ column }) => <DataGridColumnHeader title="Invoice #" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.invoiceNumber}</div>
@@ -70,51 +72,62 @@ export function InvoiceListPage() {
     {
       id: 'period',
       header: 'Billing period',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => formatBillingPeriod(row.original.periodStart, row.original.periodEnd),
     },
     {
       id: 'flatId',
       header: 'Flat',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.flatId}</span>,
     },
     {
       id: 'invoiceDate',
       accessorFn: (row) => row.invoiceDate,
       header: ({ column }) => <DataGridColumnHeader title="Invoice date" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.invoiceDate,
     },
     {
       id: 'dueDate',
       header: 'Due date',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.dueDate,
     },
     {
       id: 'totalAmount',
       header: 'Total',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.totalAmount} />,
     },
     {
       id: 'amountPaid',
       header: 'Paid',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.amountPaid} />,
     },
     {
       id: 'balance',
       header: 'Outstanding',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.balance} className="font-medium" />,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as InvoiceStatus} toneMap={invoiceStatusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
+          </Button>
+        </div>
       ),
     },
   ];

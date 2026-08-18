@@ -19,6 +19,7 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -138,15 +139,25 @@ export function CylinderStockPage() {
   }
 
   const columns: ColumnDef<CylinderStockMovementDto>[] = [
-    { id: 'date', header: 'Date', cell: ({ row }) => formatDateTime(row.original.occurredAtUtc) },
-    { id: 'cylinderType', header: 'Cylinder type', cell: ({ row }) => row.original.cylinderType },
+    { id: 'date', header: 'Date', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDateTime(row.original.occurredAtUtc) },
+    { id: 'cylinderType', header: 'Cylinder type', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.cylinderType },
     {
       id: 'movementType',
       header: 'Type',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.movementType as CylinderStockMovementType} toneMap={cylinderStockMovementTypeToneMap} />,
     },
-    { id: 'quantity', header: 'Quantity', cell: ({ row }) => row.original.quantity },
-    { id: 'reason', header: 'Reason', cell: ({ row }) => row.original.reason ?? '—' },
+    { id: 'quantity', header: 'Quantity', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.quantity },
+    {
+      id: 'reason',
+      header: 'Reason',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const reason = row.original.reason;
+        return reason ? <span title={reason}>{reason}</span> : '—';
+      },
+    },
   ];
 
   const total = movements ? Number(movements.total) : 0;
@@ -164,16 +175,17 @@ export function CylinderStockPage() {
   });
 
   const reconciliationColumns: ColumnDef<MonthlyCylinderReconciliationDto>[] = [
-    { id: 'period', header: 'Period', cell: ({ row }) => formatDate(row.original.periodMonth) },
-    { id: 'cylinderType', header: 'Cylinder type', cell: ({ row }) => row.original.cylinderType },
-    { id: 'opening', header: 'Opening', cell: ({ row }) => row.original.openingStock },
-    { id: 'received', header: 'Received', cell: ({ row }) => row.original.totalReceived },
-    { id: 'issued', header: 'Issued', cell: ({ row }) => row.original.totalIssued },
-    { id: 'emptyReturned', header: 'Empty returned', cell: ({ row }) => row.original.totalEmptyReturned },
-    { id: 'closing', header: 'Closing', cell: ({ row }) => row.original.closingStock },
+    { id: 'period', header: 'Period', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => formatDate(row.original.periodMonth) },
+    { id: 'cylinderType', header: 'Cylinder type', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.cylinderType },
+    { id: 'opening', header: 'Opening', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.openingStock },
+    { id: 'received', header: 'Received', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.totalReceived },
+    { id: 'issued', header: 'Issued', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.totalIssued },
+    { id: 'emptyReturned', header: 'Empty returned', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.totalEmptyReturned },
+    { id: 'closing', header: 'Closing', size: DATA_GRID_COLUMN_SIZE.compact, cell: ({ row }) => row.original.closingStock },
     {
       id: 'variance',
       header: 'Variance',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => {
         const variance = Number(row.original.varianceQuantity);
         const isMatched = variance === 0;

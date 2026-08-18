@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
-import { Link2, PlusIcon, Users } from 'lucide-react';
+import { Link2, Pencil, PlusIcon, Users, UserX } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -11,7 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
   Dialog,
@@ -21,12 +23,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   Form,
   FormControl,
   FormField,
@@ -35,6 +31,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
@@ -102,12 +99,19 @@ export function ResidentListPage() {
   }
 
   const columns: ColumnDef<ResidentDto>[] = [
-    { id: 'fullName', header: 'Full name', cell: ({ row }) => row.original.fullName },
-    { id: 'phone', header: 'Mobile', cell: ({ row }) => row.original.phone ?? '—' },
-    { id: 'email', header: 'Email', cell: ({ row }) => row.original.email ?? '—' },
+    { id: 'fullName', header: 'Full name', size: DATA_GRID_COLUMN_SIZE.flexible, cell: ({ row }) => row.original.fullName },
+    { id: 'phone', header: 'Mobile', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.phone ?? '—' },
+    {
+      id: 'email',
+      header: 'Email',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => <span title={row.original.email ?? undefined}>{row.original.email ?? '—'}</span>,
+    },
     {
       id: 'residentType',
       header: 'Type',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant="secondary" appearance="light">
           {RESIDENT_TYPE_LABELS[row.original.residentType] ?? row.original.residentType}
@@ -117,27 +121,29 @@ export function ResidentListPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm">
-              Actions
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <RequirePermission permission="resident.update">
-              <DropdownMenuItem onClick={() => setEditTarget(row.original)}>Edit</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setLinkTarget(row.original)}>
-                <Link2 className="me-1" /> Link to user
-              </DropdownMenuItem>
-            </RequirePermission>
-            <RequirePermission permission="resident.disable">
-              <DropdownMenuItem variant="destructive" onClick={() => handleDisable(row.original.residentId)}>
-                Disable
-              </DropdownMenuItem>
-            </RequirePermission>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.fullName}`}
+          actions={[
+            { key: 'edit', label: 'Edit', icon: <Pencil />, onClick: () => setEditTarget(row.original), permission: 'resident.update' },
+            {
+              key: 'link',
+              label: 'Link to user',
+              icon: <Link2 />,
+              onClick: () => setLinkTarget(row.original),
+              permission: 'resident.update',
+            },
+            {
+              key: 'disable',
+              label: 'Disable',
+              icon: <UserX />,
+              onClick: () => handleDisable(row.original.residentId),
+              permission: 'resident.disable',
+              variant: 'destructive',
+            },
+          ]}
+        />
       ),
     },
   ];
@@ -203,7 +209,10 @@ export function ResidentListPage() {
               </CardHeading>
             </CardHeader>
             <CardTable>
-              <DataGridTable />
+              <ScrollArea>
+                <DataGridTable />
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </CardTable>
             <CardFooter>
               <DataGridPagination />

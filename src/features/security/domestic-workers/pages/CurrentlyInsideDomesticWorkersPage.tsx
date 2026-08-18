@@ -10,6 +10,7 @@ import { toUserMessage } from '@/api/errors';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useUrlFilters } from '@/hooks/use-url-filters';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { useCurrentlyInsideAccessSessions } from '../api/domesticWorkersApi';
 import type { AccessSessionDto } from '@/api/generated/mycondoApi';
 
@@ -21,27 +22,36 @@ const columns: ColumnDef<AccessSessionDto>[] = [
     accessorFn: (row) => row.hostFlatId,
     header: ({ column }) => <DataGridColumnHeader title="Host flat" column={column} />,
     cell: ({ row }) => row.original.hostFlatId ?? '—',
+    size: DATA_GRID_COLUMN_SIZE.medium,
   },
   {
     id: 'entryGateId',
     header: 'Entry gate',
     cell: ({ row }) => row.original.entryGateId,
+    size: DATA_GRID_COLUMN_SIZE.medium,
   },
   {
     id: 'entryAtUtc',
     accessorFn: (row) => row.entryAtUtc,
     header: ({ column }) => <DataGridColumnHeader title="Entry time" column={column} />,
     cell: ({ row }) => formatDateTime(row.original.entryAtUtc),
+    size: DATA_GRID_COLUMN_SIZE.compact,
   },
   {
     id: 'remarks',
     header: 'Remarks',
-    cell: ({ row }) => row.original.remarks ?? '—',
+    cell: ({ row }) => {
+      const remarks = row.original.remarks;
+      return remarks ? <span title={remarks}>{remarks}</span> : '—';
+    },
+    size: DATA_GRID_COLUMN_SIZE.flexible,
+    meta: { cellClassName: 'truncate' },
   },
   {
     id: 'checkedInBy',
     header: 'Checked in by',
     cell: ({ row }) => row.original.checkedInBy ?? '—',
+    size: DATA_GRID_COLUMN_SIZE.flexible,
   },
 ];
 

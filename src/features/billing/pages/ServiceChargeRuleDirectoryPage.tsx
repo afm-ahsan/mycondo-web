@@ -26,6 +26,7 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -110,6 +111,7 @@ export function ServiceChargeRuleDirectoryPage() {
       id: 'name',
       accessorFn: (row) => row.name,
       header: ({ column }) => <DataGridColumnHeader title="Name" column={column} />,
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => (
         <div>
           <div className="font-medium">{row.original.name}</div>
@@ -120,40 +122,49 @@ export function ServiceChargeRuleDirectoryPage() {
     {
       id: 'calculationMethod',
       header: 'Method',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.calculationMethod,
     },
     {
       id: 'rate',
       header: 'Rate',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <MoneyDisplay amount={row.original.rate} />,
     },
     {
       id: 'unitTypeFilter',
       header: 'Unit type',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.unitTypeFilter ?? 'All types',
     },
     {
       id: 'frequency',
       header: 'Frequency',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => row.original.frequency,
     },
     {
       id: 'effective',
       header: 'Effective',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${row.original.effectiveFrom} – ${row.original.effectiveTo ?? 'open'}`,
     },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={ruleDisplayStatus(row.original)} toneMap={statusToneMap} />,
     },
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
-          Manage
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
+            Manage
+          </Button>
+        </div>
       ),
     },
   ];

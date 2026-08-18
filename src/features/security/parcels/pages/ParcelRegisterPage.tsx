@@ -73,49 +73,69 @@ export function ParcelRegisterPage() {
     {
       id: 'reference',
       header: 'Reference / Tracking',
-      cell: ({ row }) => (
-        <div>
-          <div className="font-medium">{row.original.parcelReference ?? row.original.trackingNumber ?? '—'}</div>
-          {row.original.courierProvider && (
-            <div className="text-muted-foreground text-xs">{row.original.courierProvider}</div>
-          )}
-        </div>
-      ),
+      cell: ({ row }) => {
+        const reference = row.original.parcelReference ?? row.original.trackingNumber ?? '—';
+        return (
+          <div className="min-w-0">
+            <div className="font-medium truncate" title={reference}>
+              {reference}
+            </div>
+            {row.original.courierProvider && (
+              <div className="text-muted-foreground truncate text-xs" title={row.original.courierProvider}>
+                {row.original.courierProvider}
+              </div>
+            )}
+          </div>
+        );
+      },
+      size: DATA_GRID_COLUMN_SIZE.flexible,
     },
     {
       id: 'senderName',
       header: 'Sender',
-      cell: ({ row }) => row.original.senderName ?? '—',
+      cell: ({ row }) => {
+        const sender = row.original.senderName;
+        return sender ? <span title={sender}>{sender}</span> : '—';
+      },
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
     },
     {
       id: 'recipientFlatId',
       header: 'Flat',
       cell: ({ row }) => <span className="font-mono text-xs">{row.original.recipientFlatId}</span>,
+      size: DATA_GRID_COLUMN_SIZE.medium,
     },
     {
       id: 'parcelType',
       header: 'Type',
       cell: ({ row }) => `${row.original.parcelType} (${row.original.packageCount})`,
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'receivedAtUtc',
       accessorFn: (row) => row.receivedAtUtc,
       header: ({ column }) => <DataGridColumnHeader title="Received" column={column} />,
       cell: ({ row }) => new Date(row.original.receivedAtUtc).toLocaleString(),
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'status',
       header: 'Status',
       cell: ({ row }) => <StatusBadge status={row.original.status as ParcelStatus} toneMap={statusToneMap} />,
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
     {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <Button size="sm" variant="outline" asChild>
-          <Link to={`/security/parcels/${row.original.parcelId}`}>View</Link>
-        </Button>
+        <div className="flex justify-end">
+          <Button size="sm" variant="outline" asChild>
+            <Link to={`/security/parcels/${row.original.parcelId}`}>View</Link>
+          </Button>
+        </div>
       ),
+      size: DATA_GRID_COLUMN_SIZE.compact,
     },
   ];
 

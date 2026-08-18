@@ -6,8 +6,8 @@ import {
   type Updater,
   useReactTable,
 } from '@tanstack/react-table';
-import { ClipboardList, LogIn, Plus, Users as UsersIcon } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { ClipboardList, History, LogIn, Plus, Users as UsersIcon } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Card,
   CardFooter,
@@ -22,6 +22,8 @@ import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -29,7 +31,6 @@ import { SearchInput } from '@/components/shared/SearchInput';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
-import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { toUserMessage } from '@/api/errors';
 import { ClockInDialog } from '../components/ClockInDialog';
@@ -45,6 +46,7 @@ const activeToneMap: StatusBadgeMap<'Active' | 'Inactive'> = {
 const ROSTER_FILTER_DEFAULTS = { search: '', page: '1', pageSize: '10' };
 
 export function StaffRosterPage() {
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [createOpen, setCreateOpen] = useState(false);
   useEffect(() => {
@@ -103,6 +105,7 @@ export function StaffRosterPage() {
     {
       id: 'role',
       header: 'Role',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => row.original.role,
     },
     {
@@ -114,6 +117,7 @@ export function StaffRosterPage() {
     {
       id: 'isActive',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <StatusBadge status={row.original.isActive ? 'Active' : 'Inactive'} toneMap={activeToneMap} />
       ),
@@ -121,21 +125,29 @@ export function StaffRosterPage() {
     {
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.action,
       cell: ({ row }) => (
-        <div className="flex justify-end gap-2">
-          <RequirePermission permission={PERMISSIONS.staffAttendance.view}>
-            <Button size="sm" variant="outline" asChild>
-              <Link to={`/security/staff-attendance/records?staffMemberId=${row.original.staffMemberId}`}>
-                Records
-              </Link>
-            </Button>
-          </RequirePermission>
-          <RequirePermission permission={PERMISSIONS.staffAttendance.manage}>
-            <Button size="sm" onClick={() => setClockInTarget(row.original)} disabled={!row.original.isActive}>
-              <LogIn /> Clock In
-            </Button>
-          </RequirePermission>
-        </div>
+        <RowActionsMenu
+          ariaLabel={`Actions for ${row.original.fullName}`}
+          actions={[
+            {
+              key: 'records',
+              label: 'Records',
+              icon: <History />,
+              onClick: () =>
+                navigate(`/security/staff-attendance/records?staffMemberId=${row.original.staffMemberId}`),
+              permission: PERMISSIONS.staffAttendance.view,
+            },
+            {
+              key: 'clockIn',
+              label: 'Clock In',
+              icon: <LogIn />,
+              onClick: () => setClockInTarget(row.original),
+              permission: PERMISSIONS.staffAttendance.manage,
+              disabled: !row.original.isActive,
+            },
+          ]}
+        />
       ),
     },
   ];

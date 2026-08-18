@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -96,22 +97,39 @@ export function FlatOwnerListPage() {
     {
       id: 'owner',
       header: 'Owner',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => (
         <button type="button" className="text-primary hover:underline text-left" onClick={() => setDetailTarget(row.original)}>
           {row.original.ownerFullName}
         </button>
       ),
     },
-    { id: 'contact', header: 'Contact', cell: ({ row }) => row.original.ownerEmail ?? row.original.ownerPhone ?? '—' },
+    {
+      id: 'contact',
+      header: 'Contact',
+      size: DATA_GRID_COLUMN_SIZE.flexible,
+      meta: { cellClassName: 'truncate' },
+      cell: ({ row }) => {
+        const contact = row.original.ownerEmail ?? row.original.ownerPhone ?? '—';
+        return <span title={contact}>{contact}</span>;
+      },
+    },
     {
       id: 'flat',
       header: 'Flat',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) => `${row.original.flatNumber} — ${row.original.buildingName}`,
     },
-    { id: 'startDate', header: 'Since', cell: ({ row }) => row.original.startDate },
+    {
+      id: 'startDate',
+      header: 'Since',
+      size: DATA_GRID_COLUMN_SIZE.compact,
+      cell: ({ row }) => row.original.startDate,
+    },
     {
       id: 'status',
       header: 'Status',
+      size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <Badge variant={row.original.status === 'Active' ? 'success' : 'secondary'} appearance="light">
           {row.original.status}
@@ -119,14 +137,18 @@ export function FlatOwnerListPage() {
       ),
     },
     {
+      // Single-action column (pending approval to switch to the standard kebab menu — see table audit).
       id: 'actions',
       header: 'Action',
+      size: DATA_GRID_COLUMN_SIZE.medium,
       cell: ({ row }) =>
         row.original.status === 'Active' ? (
           <RequirePermission permission="ownership.manage">
-            <Button variant="outline" size="sm" onClick={() => setEndTarget(row.original)}>
-              End ownership
-            </Button>
+            <div className="flex justify-end">
+              <Button variant="outline" size="sm" onClick={() => setEndTarget(row.original)}>
+                End ownership
+              </Button>
+            </div>
           </RequirePermission>
         ) : null,
     },

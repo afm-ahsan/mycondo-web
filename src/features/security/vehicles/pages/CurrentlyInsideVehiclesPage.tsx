@@ -3,6 +3,7 @@ import { Card, CardFooter, CardTable } from '@/components/ui/card';
 import { formatDateTime } from '@/lib/helpers';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
+import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -20,27 +21,36 @@ const columns: ColumnDef<AccessSessionDto>[] = [
     id: 'hostFlatId',
     accessorFn: (row) => row.hostFlatId,
     header: ({ column }) => <DataGridColumnHeader title="Host flat" column={column} />,
+    size: DATA_GRID_COLUMN_SIZE.medium,
     cell: ({ row }) => row.original.hostFlatId ?? '—',
   },
   {
     id: 'entryGateId',
     header: 'Entry gate',
+    size: DATA_GRID_COLUMN_SIZE.medium,
     cell: ({ row }) => row.original.entryGateId,
   },
   {
     id: 'entryAtUtc',
     accessorFn: (row) => row.entryAtUtc,
     header: ({ column }) => <DataGridColumnHeader title="Entry time" column={column} />,
+    size: DATA_GRID_COLUMN_SIZE.compact,
     cell: ({ row }) => formatDateTime(row.original.entryAtUtc),
   },
   {
     id: 'remarks',
     header: 'Remarks',
-    cell: ({ row }) => row.original.remarks ?? '—',
+    size: DATA_GRID_COLUMN_SIZE.flexible,
+    meta: { cellClassName: 'truncate' },
+    cell: ({ row }) => {
+      const remarks = row.original.remarks;
+      return remarks ? <span title={remarks}>{remarks}</span> : '—';
+    },
   },
   {
     id: 'checkedInBy',
     header: 'Checked in by',
+    size: DATA_GRID_COLUMN_SIZE.medium,
     cell: ({ row }) => row.original.checkedInBy ?? '—',
   },
 ];
