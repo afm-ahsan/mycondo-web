@@ -94,7 +94,7 @@ export function CurrentOccupancyPage() {
                   ) : (
                     (data?.items ?? []).map((session) => (
                       <TableRow key={session.poolSessionId}>
-                        <TableCell className="font-mono text-xs">{session.flatId.slice(0, 8)}</TableCell>
+                        <TableCell>{session.flatDisplayName}</TableCell>
                         <TableCell>{session.personType}</TableCell>
                         <TableCell>{session.ageCategory}</TableCell>
                         <TableCell>{formatTimeOfDay(session.entryAtUtc)}</TableCell>

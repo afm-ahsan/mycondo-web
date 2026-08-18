@@ -1,5 +1,12 @@
 // formatBdt moved to src/lib/helpers.ts (UX-3) — import it from there now.
 
+// Single source of truth for the facility-type business label — used by both filter/create-form
+// dropdowns and every read view (settings table) so the wording can't drift between them.
+export const FACILITY_TYPE_LABELS: Record<'CommunityHall' | 'SwimmingPool', string> = {
+  CommunityHall: 'Community Hall',
+  SwimmingPool: 'Swimming Pool',
+};
+
 export function formatTimeOfDay(iso: string | null | undefined): string {
   if (!iso) return '—';
   return new Date(iso).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });

@@ -28,6 +28,7 @@ import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { toUserMessage } from '@/api/errors';
+import { formatDate } from '@/lib/helpers';
 import { RatePlanManageDialog } from '../components/RatePlanManageDialog';
 import { useRatePlans } from '../api/ratePlansApi';
 import type { UtilityType } from '../lib/constants';
@@ -92,7 +93,7 @@ export function RatePlanDirectoryPage({ utilityType }: RatePlanDirectoryPageProp
       id: 'effective',
       header: 'Effective',
       size: DATA_GRID_COLUMN_SIZE.medium,
-      cell: ({ row }) => `${row.original.effectiveFrom} – ${row.original.effectiveTo ?? 'open'}`,
+      cell: ({ row }) => `${formatDate(row.original.effectiveFrom)} – ${row.original.effectiveTo ? formatDate(row.original.effectiveTo) : 'open'}`,
     },
     {
       id: 'status',

@@ -97,12 +97,19 @@ export function timeAgo(date: Date | string): string {
 
 const DATE_ONLY_PATTERN = /^\d{4}-\d{2}-\d{2}$/;
 
-/** Standard MyCondo date-only display, e.g. "August 18, 2026". Safe against null/undefined/invalid input.
- * A bare "YYYY-MM-DD" string is parsed as local midnight rather than UTC midnight, so the calendar day
- * shown never shifts backward/forward depending on the viewer's timezone offset from UTC. */
+/** Parses a bare "YYYY-MM-DD" string as local midnight rather than UTC midnight, so calendar-day
+ * reads (getFullYear/getMonth/getDate) and display never shift backward/forward depending on the
+ * viewer's timezone offset from UTC. Non-date-only input passes straight to `new Date(...)`. Use this
+ * (not `new Date(...)` directly) anywhere a date-only value needs calendar-day arithmetic, not just
+ * final display — formatDate below is the display-only convenience wrapper around it. */
+export function parseDateOnly(input: Date | string | number): Date {
+  return typeof input === 'string' && DATE_ONLY_PATTERN.test(input) ? new Date(`${input}T00:00:00`) : new Date(input);
+}
+
+/** Standard MyCondo date-only display, e.g. "August 18, 2026". Safe against null/undefined/invalid input. */
 export function formatDate(input: Date | string | number | null | undefined): string {
   if (input === null || input === undefined || input === '') return '—';
-  const date = typeof input === 'string' && DATE_ONLY_PATTERN.test(input) ? new Date(`${input}T00:00:00`) : new Date(input);
+  const date = parseDateOnly(input);
   if (Number.isNaN(date.getTime())) return '—';
   return date.toLocaleDateString('en-US', {
     month: 'long',

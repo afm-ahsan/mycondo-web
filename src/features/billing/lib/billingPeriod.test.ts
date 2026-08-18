@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { formatBillingPeriod } from './billingPeriod';
 
 describe('formatBillingPeriod', () => {
@@ -16,5 +16,27 @@ describe('formatBillingPeriod', () => {
 
   it('shows both bounds for a single-day range (e.g. a utility reading period)', () => {
     expect(formatBillingPeriod('2026-08-15', '2026-08-15')).toBe('Aug 15 – Aug 15, 2026');
+  });
+
+  // A bare "YYYY-MM-DD" boundary must anchor to local midnight, not UTC midnight — otherwise a
+  // viewer west of UTC sees `new Date('2026-08-01')` read back as July 31 local time, shifting the
+  // whole-month collapse (and the displayed day) back by one.
+  describe('is not affected by the viewer timezone (bare date-only boundaries)', () => {
+    let originalTz: string | undefined;
+    beforeEach(() => {
+      originalTz = process.env.TZ;
+      process.env.TZ = 'America/Los_Angeles';
+    });
+    afterEach(() => {
+      process.env.TZ = originalTz;
+    });
+
+    it('still collapses a full calendar month to "Month Year"', () => {
+      expect(formatBillingPeriod('2026-08-01', '2026-08-31')).toBe('August 2026');
+    });
+
+    it('still shows the correct (non-shifted) start day for a partial range', () => {
+      expect(formatBillingPeriod('2026-08-01', '2026-08-20')).toBe('Aug 1 – Aug 20, 2026');
+    });
   });
 });

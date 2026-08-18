@@ -19359,6 +19359,7 @@
           "poolSessionId",
           "facilityId",
           "flatId",
+          "flatDisplayName",
           "personType",
           "ageCategory",
           "accompaniedBySessionId",
@@ -19367,7 +19368,9 @@
           "guestFeeAmount",
           "safetyAcknowledgedAtUtc",
           "checkedInBy",
+          "checkedInByDisplayName",
           "checkedOutBy",
+          "checkedOutByDisplayName",
           "overrideReason",
           "status"
         ],
@@ -19384,6 +19387,9 @@
           "flatId": {
             "type": "string",
             "format": "uuid"
+          },
+          "flatDisplayName": {
+            "type": "string"
           },
           "personType": {
             "type": "string"
@@ -19432,12 +19438,21 @@
             ],
             "format": "uuid"
           },
+          "checkedInByDisplayName": {
+            "type": "string"
+          },
           "checkedOutBy": {
             "type": [
               "null",
               "string"
             ],
             "format": "uuid"
+          },
+          "checkedOutByDisplayName": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "overrideReason": {
             "type": [

@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
+import { formatDate } from '@/lib/helpers';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { useDeactivateRatePlan, useEndRatePlanEffectivePeriod } from '../api/ratePlansApi';
@@ -108,7 +109,7 @@ export function RatePlanManageDialog({ ratePlan, onOpenChange }: RatePlanManageD
                 </div>
                 <div>
                   <div className="text-muted-foreground text-xs">Effective</div>
-                  <div>{ratePlan.effectiveFrom} – {ratePlan.effectiveTo ?? 'open'}</div>
+                  <div>{formatDate(ratePlan.effectiveFrom)} – {ratePlan.effectiveTo ? formatDate(ratePlan.effectiveTo) : 'open'}</div>
                 </div>
               </div>
 

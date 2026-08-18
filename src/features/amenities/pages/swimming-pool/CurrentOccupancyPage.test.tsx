@@ -38,6 +38,7 @@ function session(overrides: Partial<Record<string, unknown>> = {}) {
     poolSessionId: 'session-1',
     facilityId: 'pool-1',
     flatId: 'flat-12345678',
+    flatDisplayName: 'AISHA A8',
     personType: 'Resident',
     ageCategory: 'Adult',
     accompaniedBySessionId: null,
@@ -46,7 +47,9 @@ function session(overrides: Partial<Record<string, unknown>> = {}) {
     guestFeeAmount: null,
     safetyAcknowledgedAtUtc: null,
     checkedInBy: 'user-1',
+    checkedInByDisplayName: 'Ahsan Uddin',
     checkedOutBy: null,
+    checkedOutByDisplayName: null,
     overrideReason: null,
     status: 'CheckedIn',
     ...overrides,
@@ -84,6 +87,9 @@ describe('CurrentOccupancyPage', () => {
 
     const user = userEvent.setup();
     renderWithProviders(<CurrentOccupancyPage />, { auth: { user: operatorUser, isInitialized: true } });
+
+    expect(await screen.findByText('AISHA A8')).toBeInTheDocument();
+    expect(screen.queryByText(/flat-12345678/)).not.toBeInTheDocument();
 
     await user.click(await screen.findByRole('button', { name: 'Check Out' }));
 

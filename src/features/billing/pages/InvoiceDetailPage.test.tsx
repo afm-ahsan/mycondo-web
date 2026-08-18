@@ -86,7 +86,7 @@ describe('InvoiceDetailPage', () => {
 
     expect(await screen.findByRole('heading', { name: 'INV-A-2026-000001' })).toBeInTheDocument();
     expect(screen.getByText('Monthly Maintenance (Maintenance)')).toBeInTheDocument();
-    expect(screen.getByText('FixedAmount')).toBeInTheDocument();
+    expect(screen.getByText('Fixed Amount')).toBeInTheDocument();
   }, 15000);
 
   it('shows Void only for a fully-unpaid Issued invoice, and sends an idempotency key when voiding', async () => {
