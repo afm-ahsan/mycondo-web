@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
 import { clearPlatformSessionHint, hasPlatformSessionHint, markPlatformSessionActive } from '@/features/platform/lib/platformSession';
+import { type AppFetchArgs, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
 import { ApiError, type ProblemDetails } from './errors';
@@ -40,14 +41,17 @@ const rawPlatformBaseQuery = fetchBaseQuery({
   },
 });
 
-export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
+export const platformBaseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, FetchBaseQueryError> =
   async (args, api, extraOptions) => {
-    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts)
-    // even though a 401 below can fan this out into up to three raw fetches (original, refresh, retry)
-    // — the counter must move once per RTK Query call, not once per underlying network round-trip.
-    beginHttpRequest();
+    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts
+    // and httpOperation.ts) even though a 401 below can fan this out into up to three raw fetches
+    // (original, refresh, retry) — the counter must move once per RTK Query call, not once per
+    // underlying network round-trip.
+    const operation = resolveHttpOperation(args);
+    const rawArgs = typeof args === 'string' ? args : stripOperation(args);
+    beginHttpRequest(operation);
     try {
-      let result = await rawPlatformBaseQuery(args, api, extraOptions);
+      let result = await rawPlatformBaseQuery(rawArgs, api, extraOptions);
 
       if (result.error?.status === 401) {
         if (!hasPlatformSessionHint()) {
@@ -69,7 +73,7 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unkno
           if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
             setPlatformAccessToken((refresh.data as { accessToken: string }).accessToken);
             markPlatformSessionActive();
-            result = await rawPlatformBaseQuery(args, api, extraOptions);
+            result = await rawPlatformBaseQuery(rawArgs, api, extraOptions);
           } else {
             setPlatformAccessToken(null);
             clearPlatformSessionHint();
@@ -92,7 +96,7 @@ export const platformBaseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unkno
 
       return result;
     } finally {
-      endHttpRequest();
+      endHttpRequest(operation);
     }
   };
 

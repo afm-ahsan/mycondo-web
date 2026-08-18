@@ -584,7 +584,7 @@ function FacilityFormDialog({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {isCreating || isUpdating ? 'Saving…' : 'Save'}
+                {isEdit ? (isUpdating ? 'Updating…' : 'Save') : isCreating ? 'Saving…' : 'Save'}
               </Button>
             </DialogFooter>
           </form>

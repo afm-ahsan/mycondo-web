@@ -50,6 +50,10 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: recordPaymentCommand,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        // Creates a new payment — the HTTP-method fallback (POST → save) already gets this right, but
+        // set explicitly since every idempotency-key endpoint below needs it (POST is forced by the
+        // header requirement regardless of real intent — see the "update" ones for why that matters).
+        operation: 'save',
       }),
       // RecordPaymentCommandHandler FIFO-allocates against outstanding invoices (Invoice.ApplyPayment)
       // and posts a CashOrBank/ResidentReceivable ledger entry in the same transaction — confirmed by
@@ -66,6 +70,9 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: reversePaymentRequest,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        // Corrects an existing payment — POST here is only the idempotency-key transport requirement,
+        // not a create; the HTTP-method fallback would wrongly say "Saving…" for a reversal.
+        operation: 'update',
       }),
       // A reversal changes the payment, every invoice its allocations touched, and the resident's
       // ledger/balance — invalidate all three, not just "Payments" (see UX-3 plan guardrail:
@@ -82,6 +89,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: generateInvoiceBatchCommand,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'save', // creates a new batch of invoices
       }),
       // GenerateInvoiceBatchCommandHandler posts a ResidentReceivable/AssociationRevenue ledger entry
       // per generated invoice — confirmed by reading the handler directly. Affects resident balances,
@@ -98,6 +106,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: voidInvoiceRequest,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // status transition on an existing invoice, not a create
       }),
       // VoidInvoiceCommandHandler posts a reversing AssociationRevenue/ResidentReceivable ledger
       // posting in the same call (confirmed by reading the handler directly) — affects the resident's
@@ -114,6 +123,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: recordOpeningBalanceCommand,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'save', // creates new ledger entries
       }),
       // RecordOpeningBalanceCommandHandler only touches ResidentAccount + ledger (ResidentReceivable/
       // OpeningBalanceEquity) — no Invoice involved, confirmed by reading the handler directly.
@@ -125,6 +135,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         url: `/api/v1/readings/${id}/bill`,
         method: 'POST',
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'save', // issues a new invoice from the reading
       }),
       // BillReadingCommandHandler reuses the exact same Invoice-issuance + ResidentReceivable ledger
       // posting as service-charge billing — confirmed by reading the handler directly.
@@ -140,6 +151,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: correctReadingRequest,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // corrects an existing reading
       }),
       // Correcting a reading that was Billed voids its invoice inline via a reversing
       // ResidentReceivable/AssociationRevenue ledger posting (confirmed by reading
@@ -156,6 +168,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         url: `/api/v1/facility-bookings/${id}/confirm-payment`,
         method: 'POST',
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // state transition on an existing booking
       }),
       // ConfirmBookingPaymentCommandHandler bills the booking-charge invoice (ResidentReceivable) and
       // posts the deposit-collection ledger entry in the same transaction — confirmed by reading the
@@ -172,6 +185,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: inspectBookingRequest,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // state transition on an existing booking
       }),
       // InspectBookingCommandHandler settles the held deposit (RefundableDepositsHeld ->
       // CashOrBank/AssociationRevenue) — confirmed by reading the handler directly. None of those
@@ -189,6 +203,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         method: 'POST',
         body: cancelBookingRequest,
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // status transition on an existing booking, not a delete
       }),
       // CancelBookingCommandHandler settles the held deposit the same way InspectBooking does
       // (RefundableDepositsHeld -> CashOrBank/AssociationRevenue only) — confirmed by reading the
@@ -201,6 +216,7 @@ export const idempotentApi = baseApi.injectEndpoints({
         url: `/api/v1/facility-bookings/${id}/mark-no-show`,
         method: 'POST',
         headers: { [IDEMPOTENCY_HEADER]: idempotencyKey },
+        operation: 'update', // state transition on an existing booking
       }),
       // MarkBookingNoShowCommandHandler settles the held deposit identically to Cancel's
       // within-deadline path (RefundableDepositsHeld -> CashOrBank/AssociationRevenue only) —

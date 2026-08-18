@@ -61,6 +61,62 @@ describe('GlobalHttpLoader', () => {
     expect(screen.getAllByRole('status', { name: 'Loading' })).toHaveLength(1);
   });
 
+  it.each([
+    ['load', 'Loading'],
+    ['save', 'Saving'],
+    ['update', 'Updating'],
+    ['delete', 'Deleting'],
+    ['search', 'Searching'],
+  ] as const)('shows "%s…" for a %s request', (operation, expectedText) => {
+    render(<GlobalHttpLoader />);
+
+    act(() => beginHttpRequest(operation));
+    const status = screen.getByRole('status', { name: expectedText });
+    expect(status).toHaveTextContent(`${expectedText}…`);
+
+    act(() => endHttpRequest(operation));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
+  it('shows "Updating…" (not "Loading…") when a mutation overlaps a background GET', () => {
+    render(<GlobalHttpLoader />);
+
+    act(() => {
+      beginHttpRequest('load');
+      beginHttpRequest('update');
+    });
+
+    expect(screen.getByRole('status', { name: 'Updating' })).toBeInTheDocument();
+    expect(screen.queryByRole('status', { name: 'Loading' })).not.toBeInTheDocument();
+  });
+
+  it('shows "Deleting…" (not "Updating…") when a delete overlaps an update', () => {
+    render(<GlobalHttpLoader />);
+
+    act(() => {
+      beginHttpRequest('update');
+      beginHttpRequest('delete');
+    });
+
+    expect(screen.getByRole('status', { name: 'Deleting' })).toBeInTheDocument();
+  });
+
+  it('falls back to the remaining operation once the higher-priority one settles', () => {
+    render(<GlobalHttpLoader />);
+
+    act(() => {
+      beginHttpRequest('load');
+      beginHttpRequest('update');
+    });
+    expect(screen.getByRole('status', { name: 'Updating' })).toBeInTheDocument();
+
+    act(() => endHttpRequest('update'));
+    expect(screen.getByRole('status', { name: 'Loading' })).toBeInTheDocument();
+
+    act(() => endHttpRequest('load'));
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
+
   it('renders a full-viewport overlay that does not opt out of pointer events (blocks clicks)', () => {
     render(<GlobalHttpLoader />);
 

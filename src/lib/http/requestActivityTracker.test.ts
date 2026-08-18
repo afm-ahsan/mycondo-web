@@ -3,8 +3,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import {
   beginHttpRequest,
   endHttpRequest,
+  getActiveHttpOperation,
   getActiveHttpRequestCount,
   resetHttpRequestActivityForTests,
+  useActiveHttpOperation,
   useIsHttpRequestActive,
 } from './requestActivityTracker';
 
@@ -65,5 +67,73 @@ describe('requestActivityTracker', () => {
     act(() => endHttpRequest());
     act(() => endHttpRequest());
     expect(getActiveHttpRequestCount()).toBe(0);
+  });
+});
+
+describe('operation-aware tracking', () => {
+  it('is null when idle and defaults a no-arg begin to load', () => {
+    expect(getActiveHttpOperation()).toBeNull();
+    const { result } = renderHook(() => useActiveHttpOperation());
+    expect(result.current).toBeNull();
+
+    act(() => beginHttpRequest());
+    expect(result.current).toBe('load');
+
+    act(() => endHttpRequest());
+    expect(result.current).toBeNull();
+  });
+
+  it('reports each operation correctly for a single in-flight request', () => {
+    for (const operation of ['load', 'save', 'update', 'delete', 'search'] as const) {
+      act(() => beginHttpRequest(operation));
+      expect(getActiveHttpOperation()).toBe(operation);
+      act(() => endHttpRequest(operation));
+      expect(getActiveHttpOperation()).toBeNull();
+    }
+  });
+
+  it('prioritizes update over a concurrent background load', () => {
+    act(() => {
+      beginHttpRequest('load');
+      beginHttpRequest('update');
+    });
+    expect(getActiveHttpOperation()).toBe('update');
+  });
+
+  it('prioritizes delete over a concurrent update', () => {
+    act(() => {
+      beginHttpRequest('update');
+      beginHttpRequest('delete');
+    });
+    expect(getActiveHttpOperation()).toBe('delete');
+  });
+
+  it('prioritizes update over save and search over load', () => {
+    act(() => {
+      beginHttpRequest('save');
+      beginHttpRequest('search');
+      beginHttpRequest('load');
+    });
+    expect(getActiveHttpOperation()).toBe('save');
+
+    act(() => endHttpRequest('save'));
+    expect(getActiveHttpOperation()).toBe('search');
+
+    act(() => endHttpRequest('search'));
+    expect(getActiveHttpOperation()).toBe('load');
+  });
+
+  it('falls back to the remaining operation once the higher-priority one finishes', () => {
+    act(() => {
+      beginHttpRequest('load');
+      beginHttpRequest('delete');
+    });
+    expect(getActiveHttpOperation()).toBe('delete');
+
+    act(() => endHttpRequest('delete'));
+    expect(getActiveHttpOperation()).toBe('load');
+
+    act(() => endHttpRequest('load'));
+    expect(getActiveHttpOperation()).toBeNull();
   });
 });

@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import type { BaseQueryFn, FetchArgs, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
+import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
+import { type AppFetchArgs, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
 import type { AuthResponse } from './generated/mycondoApi';
@@ -46,14 +47,20 @@ interface PartialAuthState {
 // Redux state, since that's what a mid-session token expiry means: there was an active session a
 // moment ago. A cold page load's session restore is a separate, explicit call (useSessionBootstrap),
 // not this automatic-retry path — there's no prior Redux state to read from yet on first load.
-export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> =
+export const baseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, FetchBaseQueryError> =
   async (args, api, extraOptions) => {
-    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts)
-    // even though a 401 below can fan this out into up to three raw fetches (original, refresh, retry)
-    // — the counter must move once per RTK Query call, not once per underlying network round-trip.
-    beginHttpRequest();
+    // Tracked as a single logical HTTP operation for the global loader (see requestActivityTracker.ts
+    // and httpOperation.ts) even though a 401 below can fan this out into up to three raw fetches
+    // (original, refresh, retry) — the counter must move once per RTK Query call, not once per
+    // underlying network round-trip.
+    const operation = resolveHttpOperation(args);
+    // Strip our own `operation` field before handing off to fetchBaseQuery — it isn't a real FetchArgs
+    // member, and fetchBaseQuery spreads unrecognized args straight into the RequestInit passed to
+    // fetch().
+    const rawArgs = typeof args === 'string' ? args : stripOperation(args);
+    beginHttpRequest(operation);
     try {
-      let result = await rawBaseQuery(args, api, extraOptions);
+      let result = await rawBaseQuery(rawArgs, api, extraOptions);
 
       if (result.error?.status === 401) {
         const tenantId = (api.getState() as PartialAuthState).auth?.user?.tenantId;
@@ -74,7 +81,7 @@ export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, Fetc
           // last login/reload — a role/permission grant change server-side (e.g. a newly-granted
           // permission) would never reach the permission-gated UI until a hard reload or re-login.
           api.dispatch(sessionRestored(toAuthUser(user)));
-          result = await rawBaseQuery(args, api, extraOptions);
+          result = await rawBaseQuery(rawArgs, api, extraOptions);
         } else {
           setAccessToken(null);
           api.dispatch(sessionEnded());
@@ -95,7 +102,7 @@ export const baseQueryWithRefresh: BaseQueryFn<string | FetchArgs, unknown, Fetc
 
       return result;
     } finally {
-      endHttpRequest();
+      endHttpRequest(operation);
     }
   };
 
