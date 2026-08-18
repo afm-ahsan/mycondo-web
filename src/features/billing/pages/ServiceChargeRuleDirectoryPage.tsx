@@ -26,7 +26,7 @@ import { DataGridTable } from '@/components/ui/data-grid-table';
 import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
 import { PageHeader } from '@/components/shared/PageHeader';
@@ -158,18 +158,20 @@ export function ServiceChargeRuleDirectoryPage() {
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={ruleDisplayStatus(row.original)} toneMap={statusToneMap} />,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
             Manage
           </Button>
         </div>
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

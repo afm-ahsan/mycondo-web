@@ -18,7 +18,7 @@ import { Label } from '@/components/ui/label';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { BuildingSelect } from '@/components/shared/BuildingSelect';
 import { FlatSelect } from '@/components/shared/FlatSelect';
 import { MoneyDisplay } from '@/components/shared/MoneyDisplay';
@@ -117,18 +117,20 @@ export function InvoiceListPage() {
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <StatusBadge status={row.original.status as InvoiceStatus} toneMap={invoiceStatusToneMap} />,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <Button size="sm" variant="outline" asChild>
             <Link to={`/billing/invoices/${row.original.invoiceId}`}>View</Link>
           </Button>
         </div>
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
@@ -76,6 +76,7 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
       id: 'status',
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => <StatusBadge status={row.original.status as MeterStatus} toneMap={meterStatusToneMap} />,
     },
     {
@@ -88,6 +89,7 @@ export function MeterDirectoryPage({ utilityType }: MeterDirectoryPageProps) {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.action,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <RowActionsMenu
           ariaLabel={`Actions for meter ${row.original.meterNumber}`}

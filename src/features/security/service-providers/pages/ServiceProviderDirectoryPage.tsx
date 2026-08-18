@@ -32,7 +32,7 @@ import { useUrlFilters } from '@/hooks/use-url-filters';
 import { toUserMessage } from '@/api/errors';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { ProviderManageDialog } from '../components/ProviderManageDialog';
 import { ServiceProviderFormDialog } from '../components/ServiceProviderFormDialog';
 import { useServiceProviders } from '../api/serviceProvidersApi';
@@ -139,18 +139,20 @@ export function ServiceProviderDirectoryPage() {
         <StatusBadge status={row.original.status as 'Active' | 'Suspended' | 'Blocked'} toneMap={statusToneMap} />
       ),
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
       header: 'Action',
       cell: ({ row }) => (
-        <div className="flex justify-end">
+        <div className="flex justify-center">
           <Button size="sm" variant="outline" onClick={() => setManageTarget(row.original)}>
             Manage
           </Button>
         </div>
       ),
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import {
@@ -165,6 +165,7 @@ export function VehicleDirectoryPage() {
       cell: ({ row }) => (
         <StatusBadge status={row.original.isBlocked ? 'Blocked' : 'Active'} toneMap={statusToneMap} />
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
@@ -172,7 +173,7 @@ export function VehicleDirectoryPage() {
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.vehicle.blockManage}>
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             {row.original.isBlocked ? (
               <Button
                 size="sm"
@@ -195,6 +196,7 @@ export function VehicleDirectoryPage() {
           </div>
         </RequirePermission>
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

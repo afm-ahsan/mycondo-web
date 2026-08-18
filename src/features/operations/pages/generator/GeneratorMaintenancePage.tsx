@@ -18,7 +18,7 @@ import {
   CardToolbar,
 } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -219,6 +219,7 @@ export function GeneratorMaintenancePage() {
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => <Badge variant={row.original.isActive ? 'primary' : 'secondary'} appearance="light">{row.original.isActive ? 'Active' : 'Inactive'}</Badge>,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
     {
       id: 'actions',
@@ -226,13 +227,14 @@ export function GeneratorMaintenancePage() {
       size: DATA_GRID_COLUMN_SIZE.compact,
       cell: ({ row }) => (
         <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-          <div className="flex justify-end">
+          <div className="flex justify-center">
             <Button size="sm" variant="outline" onClick={() => setCompletingScheduleId(row.original.generatorMaintenanceScheduleId)}>
               Complete
             </Button>
           </div>
         </RequirePermission>
       ),
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 
@@ -289,13 +291,14 @@ export function GeneratorMaintenancePage() {
       cell: ({ row }) =>
         !row.original.downtimeEndUtc ? (
           <RequirePermission permission={PERMISSIONS.generator.maintenanceManage}>
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <Button size="sm" variant="outline" onClick={() => setResolvingBreakdownId(row.original.generatorBreakdownRecordId)}>
                 Resolve
               </Button>
             </div>
           </RequirePermission>
         ) : null,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
     },
   ];
 

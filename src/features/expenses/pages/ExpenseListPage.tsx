@@ -10,7 +10,7 @@ import type { ExpenseDto } from '@/api/generated/mycondoApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { RowActionsMenu } from '@/components/ui/data-grid-row-actions';
 import { DataGridTable } from '@/components/ui/data-grid-table';
@@ -113,6 +113,7 @@ export function ExpenseListPage() {
       id: 'status',
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <StatusBadge status={row.original.status as 'Recorded' | 'Voided'} toneMap={expenseStatusToneMap} />
       ),
@@ -121,6 +122,7 @@ export function ExpenseListPage() {
       id: 'actions',
       header: 'Action',
       size: DATA_GRID_COLUMN_SIZE.action,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <RowActionsMenu
           ariaLabel={`Actions for ${row.original.description}`}

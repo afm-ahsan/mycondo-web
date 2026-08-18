@@ -7,7 +7,7 @@ import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardTo
 import { DataGrid } from '@/components/ui/data-grid';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { DataGridTable } from '@/components/ui/data-grid-table';
-import { DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
+import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { StatusBadge } from '@/components/ui/status-badge';
@@ -69,6 +69,7 @@ export function TenantRegistrationListPage() {
       id: 'status',
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
+      meta: DATA_GRID_COLUMN_ALIGN_CENTER,
       cell: ({ row }) => (
         <StatusBadge status={row.original.status as TenantRegistrationStatus} toneMap={tenantRegistrationStatusToneMap} />
       ),
