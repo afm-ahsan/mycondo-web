@@ -9,7 +9,7 @@ import { StatusBadge, type StatusBadgeMap } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/shared/PageHeader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { PageSkeleton } from '@/components/feedback/PageSkeleton';
-import { formatDateTime } from '@/lib/helpers';
+import { formatDateTime, formatLabel } from '@/lib/helpers';
 import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
 import { CloseParcelDialog } from '../components/CloseParcelDialog';
@@ -125,10 +125,10 @@ export function ParcelDetailPage() {
             <DetailRow label="Tracking number" value={parcel.trackingNumber ?? '—'} />
             <DetailRow label="Courier" value={parcel.courierProvider ?? '—'} />
             <DetailRow label="Sender" value={parcel.senderName ?? '—'} />
-            <DetailRow label="Recipient flat" value={<span className="font-mono text-xs">{parcel.recipientFlatId}</span>} />
-            <DetailRow label="Type" value={`${parcel.parcelType} (${parcel.packageCount} package${Number(parcel.packageCount) === 1 ? '' : 's'})`} />
+            <DetailRow label="Recipient flat" value={parcel.recipientFlatDisplayName} />
+            <DetailRow label="Type" value={`${formatLabel(parcel.parcelType)} (${parcel.packageCount} package${Number(parcel.packageCount) === 1 ? '' : 's'})`} />
             <DetailRow label="Storage location" value={parcel.storageLocation ?? '—'} />
-            <DetailRow label="Notification status" value={parcel.notificationStatus} />
+            <DetailRow label="Notification status" value={formatLabel(parcel.notificationStatus)} />
             <DetailRow label="Received at" value={formatDateTime(parcel.receivedAtUtc)} />
             {parcel.collectedAtUtc && <DetailRow label="Collected at" value={formatDateTime(parcel.collectedAtUtc)} />}
             {parcel.collectorName && <DetailRow label="Collected by" value={parcel.collectorName} />}
@@ -151,9 +151,11 @@ export function ParcelDetailPage() {
               <ol className="space-y-3">
                 {history.map((event) => (
                   <li key={event.parcelCustodyEventId} className="flex flex-col border-s-2 border-border ps-3">
-                    <span className="font-medium text-sm">{event.toStatus}</span>
+                    <span className="font-medium text-sm">
+                      {statusToneMap[event.toStatus as ParcelStatus]?.label ?? formatLabel(event.toStatus)}
+                    </span>
                     <span className="text-muted-foreground text-xs">{formatDateTime(event.occurredAtUtc)}</span>
-                    {event.performedBy && <span className="text-xs">By {event.performedBy}</span>}
+                    <span className="text-xs">By {event.performedByDisplayName}</span>
                     {event.notes && <span className="text-xs">{event.notes}</span>}
                   </li>
                 ))}

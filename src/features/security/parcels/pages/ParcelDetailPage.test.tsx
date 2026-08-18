@@ -20,6 +20,7 @@ function parcel(overrides: Partial<Record<string, unknown>> = {}) {
     trackingNumber: 'TRK-123',
     senderName: 'Daraz',
     recipientFlatId: 'flat-1',
+    recipientFlatDisplayName: 'A A8',
     recipientResidentId: null,
     parcelType: 'Package',
     packageCount: 1,
@@ -38,10 +39,14 @@ function parcel(overrides: Partial<Record<string, unknown>> = {}) {
   };
 }
 
-function renderDetailPage(user: AuthUser, initialParcel: ReturnType<typeof parcel>) {
+function renderDetailPage(
+  user: AuthUser,
+  initialParcel: ReturnType<typeof parcel>,
+  custodyHistory: Record<string, unknown>[] = [],
+) {
   server.use(
     http.get(`${API_BASE}/api/v1/parcels/parcel-1`, () => HttpResponse.json(initialParcel)),
-    http.get(`${API_BASE}/api/v1/parcels/parcel-1/custody-history`, () => HttpResponse.json([])),
+    http.get(`${API_BASE}/api/v1/parcels/parcel-1/custody-history`, () => HttpResponse.json(custodyHistory)),
   );
 
   const store = createStore({ auth: { user, isInitialized: true } });
@@ -107,4 +112,31 @@ describe('ParcelDetailPage', () => {
     const escalateOption = await screen.findByText(/requires parcel\.escalate/i);
     expect(escalateOption.closest('[role="option"]')).toHaveAttribute('aria-disabled', 'true');
   }, 15000);
+
+  it('shows a human-readable recipient flat name and never a raw GUID', async () => {
+    renderDetailPage(frontDeskUser, parcel({ recipientFlatDisplayName: 'AISHA A8' }));
+
+    expect(await screen.findByRole('heading', { name: 'PKG-001' })).toBeInTheDocument();
+    expect(await screen.findByText('AISHA A8')).toBeInTheDocument();
+    expect(screen.queryByText('flat-1')).not.toBeInTheDocument();
+  });
+
+  it('shows a humanized custody-history status and the resolved actor name, not a raw id', async () => {
+    renderDetailPage(frontDeskUser, parcel(), [
+      {
+        parcelCustodyEventId: 'event-1',
+        parcelId: 'parcel-1',
+        toStatus: 'AwaitingCollection',
+        occurredAtUtc: '2026-08-18T05:57:00Z',
+        performedBy: '019fe966-93ce-79f6-81da-eb07e93ea17f',
+        performedByDisplayName: 'Ahsan Uddin',
+        notes: 'Resident notified',
+      },
+    ]);
+
+    expect(await screen.findByRole('heading', { name: 'PKG-001' })).toBeInTheDocument();
+    expect(await screen.findByText('Awaiting Collection')).toBeInTheDocument();
+    expect(await screen.findByText('By Ahsan Uddin')).toBeInTheDocument();
+    expect(screen.queryByText(/019fe966/)).not.toBeInTheDocument();
+  });
 });

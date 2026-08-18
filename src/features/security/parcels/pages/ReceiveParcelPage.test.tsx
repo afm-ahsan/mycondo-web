@@ -63,6 +63,7 @@ describe('ReceiveParcelPage', () => {
           trackingNumber: null,
           senderName: null,
           recipientFlatId: 'flat-1',
+          recipientFlatDisplayName: 'A 101',
           recipientResidentId: null,
           parcelType: 'Package',
           packageCount: 1,
