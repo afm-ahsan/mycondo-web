@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { generateUUID } from '@/lib/helpers';
 
 /**
  * One idempotency key per logical financial command instance (see src/api/idempotentEndpoints.ts —
@@ -15,7 +16,7 @@ import { useCallback, useState } from 'react';
  * response instead of re-executing the command.
  */
 export function useIdempotencyKey(): [string, () => void] {
-  const [key, setKey] = useState(() => crypto.randomUUID());
-  const reset = useCallback(() => setKey(crypto.randomUUID()), []);
+  const [key, setKey] = useState(() => generateUUID());
+  const reset = useCallback(() => setKey(generateUUID()), []);
   return [key, reset];
 }

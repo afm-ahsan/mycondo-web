@@ -1,6 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
+import { generateUUID } from '@/lib/helpers';
 import { type AppFetchArgs, isSilentHttpRequest, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
@@ -30,7 +31,7 @@ const rawBaseQuery = fetchBaseQuery({
       headers.set(ACCESS_TOKEN_HEADER, `Bearer ${accessToken}`);
     }
     if (!headers.has(CORRELATION_HEADER)) {
-      headers.set(CORRELATION_HEADER, crypto.randomUUID());
+      headers.set(CORRELATION_HEADER, generateUUID());
     }
     return headers;
   },

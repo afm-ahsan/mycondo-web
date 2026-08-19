@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { FileUpload, FileUploadListItem } from '@/components/ui/file-upload';
 import { useAttachmentsForOwner, useDeleteAttachment, useUploadAttachmentMutation } from '@/features/attachments/api/attachmentsApi';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { generateUUID } from '@/lib/helpers';
 import { useSetTenantRegistrationPrimaryPhoto, useTenantRegistration } from '../api/leasingApi';
 
 interface DocumentsStepProps {
@@ -47,7 +48,7 @@ export function DocumentsStep({ registrationId, onContinue, onBack }: DocumentsS
 
   function handleFiles(files: File[]) {
     setError(null);
-    const entries: PendingUpload[] = files.map((file) => ({ localId: crypto.randomUUID(), file, status: 'uploading' }));
+    const entries: PendingUpload[] = files.map((file) => ({ localId: generateUUID(), file, status: 'uploading' }));
     setPending((prev) => [...prev, ...entries]);
     for (const entry of entries) {
       void uploadOne(entry);

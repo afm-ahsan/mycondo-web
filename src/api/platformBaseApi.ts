@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import type { BaseQueryFn, FetchBaseQueryError } from '@reduxjs/toolkit/query/react';
 import { env } from '@/lib/env';
 import { clearPlatformSessionHint, hasPlatformSessionHint, markPlatformSessionActive } from '@/features/platform/lib/platformSession';
+import { generateUUID } from '@/lib/helpers';
 import { type AppFetchArgs, isSilentHttpRequest, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
 import { platformSessionEnded } from '@/store/slices/platformAuthSlice';
@@ -35,7 +36,7 @@ const rawPlatformBaseQuery = fetchBaseQuery({
       headers.set(ACCESS_TOKEN_HEADER, `Bearer ${platformAccessToken}`);
     }
     if (!headers.has(CORRELATION_HEADER)) {
-      headers.set(CORRELATION_HEADER, crypto.randomUUID());
+      headers.set(CORRELATION_HEADER, generateUUID());
     }
     return headers;
   },

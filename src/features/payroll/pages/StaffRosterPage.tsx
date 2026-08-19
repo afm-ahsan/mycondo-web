@@ -32,6 +32,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
 import { useUrlFilters } from '@/hooks/use-url-filters';
 import { PERMISSIONS } from '@/lib/auth/permissionKeys';
+import { RequirePermission } from '@/lib/auth/RequirePermission';
 import { toUserMessage } from '@/api/errors';
 import { ClockInDialog } from '../components/ClockInDialog';
 import { StaffMemberFormDialog } from '../components/StaffMemberFormDialog';

@@ -5,6 +5,7 @@ import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
 import { FileUpload, FileUploadListItem } from '@/components/ui/file-upload';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
+import { generateUUID } from '@/lib/helpers';
 import { useAttachmentsForOwner, useDeleteAttachment, useUploadAttachmentMutation } from '../api/attachmentsApi';
 
 interface PendingUpload {
@@ -74,7 +75,7 @@ export function AttachmentUploadPanel({
     }
 
     const accepted = files.filter((f) => !oversized.includes(f));
-    const entries: PendingUpload[] = accepted.map((file) => ({ localId: crypto.randomUUID(), file, status: 'uploading' }));
+    const entries: PendingUpload[] = accepted.map((file) => ({ localId: generateUUID(), file, status: 'uploading' }));
     setPending((prev) => [...prev, ...entries]);
     for (const entry of entries) {
       void uploadOne(entry);
