@@ -42,6 +42,7 @@ function setUpMocks() {
     http.get(`${API_BASE}/api/v1/properties/buildings`, () =>
       HttpResponse.json({ items: [{ buildingId: 'b-1', name: 'Tower A', code: 'TA' }], page: 1, pageSize: 100, totalCount: 1 }),
     ),
+    http.get(`${API_BASE}/api/v1/finance/funds`, () => HttpResponse.json([])),
     http.post(`${API_BASE}/api/v1/expenses`, () =>
       HttpResponse.json({ ...baseExpenses[0], expenseId: 'exp-new', description: 'New expense' }),
     ),

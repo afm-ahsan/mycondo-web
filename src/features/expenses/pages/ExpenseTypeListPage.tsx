@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
-import type { ExpenseTypeDto } from '@/api/generated/mycondoApi';
+import { useGetApiV1ExpenseCategoriesActiveQuery, type ExpenseTypeDto } from '@/api/generated/mycondoApi';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
@@ -234,6 +234,7 @@ export function ExpenseTypeListPage() {
 }
 
 const expenseTypeSchema = z.object({
+  expenseCategoryId: z.string().min(1, { message: 'Category is required.' }),
   name: z.string().min(1, { message: 'Name is required.' }).max(100),
   code: z.string().min(1, { message: 'Code is required.' }).max(20),
   description: z.string().max(500).optional().or(z.literal('')),
@@ -255,12 +256,14 @@ function ExpenseTypeFormDialog({
 }) {
   const [createExpenseType, { isLoading: isCreating }] = useCreateExpenseType();
   const [updateExpenseType, { isLoading: isUpdating }] = useUpdateExpenseType();
+  const { data: categories } = useGetApiV1ExpenseCategoriesActiveQuery();
   const isEditing = Boolean(expenseType);
   const isLoading = isCreating || isUpdating;
 
   const form = useForm<ExpenseTypeSchemaType>({
     resolver: zodResolver(expenseTypeSchema),
     defaultValues: {
+      expenseCategoryId: expenseType?.expenseCategoryId ?? '',
       name: expenseType?.name ?? '',
       code: expenseType?.code ?? '',
       description: expenseType?.description ?? '',
@@ -274,6 +277,7 @@ function ExpenseTypeFormDialog({
         await updateExpenseType({
           id: expenseType.expenseTypeId,
           updateExpenseTypeRequest: {
+            expenseCategoryId: values.expenseCategoryId,
             name: values.name, code: values.code, description: values.description || null,
             displayOrder: Number(values.displayOrder),
           },
@@ -281,7 +285,8 @@ function ExpenseTypeFormDialog({
         toast.success('Expense type updated.');
       } else {
         await createExpenseType({
-          createExpenseTypeCommand: {
+          createExpenseTypeRequest: {
+            expenseCategoryId: values.expenseCategoryId,
             name: values.name, code: values.code, description: values.description || null,
             displayOrder: Number(values.displayOrder),
           },
@@ -310,6 +315,30 @@ function ExpenseTypeFormDialog({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="expenseCategoryId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categories?.map((c) => (
+                        <SelectItem key={c.expenseCategoryId} value={c.expenseCategoryId}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="name"

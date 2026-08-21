@@ -37,8 +37,11 @@ function setUpMocks() {
       const items = baseTypes.map((t) => (t.expenseTypeId === 'type-1' ? { ...t, isActive: type1Active } : t));
       return HttpResponse.json({ items, page: 1, pageSize: 10, total: items.length });
     }),
+    http.get(`${API_BASE}/api/v1/expense-categories/active`, () =>
+      HttpResponse.json([{ expenseCategoryId: 'cat-1', name: 'Utilities', code: 'UTIL', description: null, isActive: true, displayOrder: 1 }]),
+    ),
     http.post(`${API_BASE}/api/v1/expense-types`, () =>
-      HttpResponse.json({ expenseTypeId: 'type-new', name: 'Generator Fuel', code: 'FUEL', description: null, isActive: true, displayOrder: 3 }),
+      HttpResponse.json({ expenseTypeId: 'type-new', expenseCategoryId: 'cat-1', expenseCategoryName: 'Utilities', name: 'Generator Fuel', code: 'FUEL', description: null, isActive: true, displayOrder: 3 }),
     ),
     http.post(`${API_BASE}/api/v1/expense-types/:id/deactivate`, () => {
       type1Active = false;
@@ -79,7 +82,10 @@ describe('ExpenseTypeListPage', () => {
     await screen.findByText('Cleaning');
     await user.click(screen.getByRole('button', { name: /add expense type/i }));
 
-    await screen.findByRole('dialog');
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByText('Select a category').closest('button')!);
+    await user.click(await screen.findByRole('option', { name: 'Utilities' }));
+
     await user.type(screen.getByLabelText('Name'), 'Generator Fuel');
     await user.type(screen.getByLabelText('Code'), 'FUEL');
     await user.click(screen.getByRole('button', { name: /create expense type/i }));

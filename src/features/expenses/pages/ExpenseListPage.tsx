@@ -6,9 +6,10 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { toUserMessage } from '@/api/errors';
-import type { ExpenseDto } from '@/api/generated/mycondoApi';
+import { useGetApiV1FinanceFundsQuery, type ExpenseDto } from '@/api/generated/mycondoApi';
 import { Button } from '@/components/ui/button';
 import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
@@ -270,7 +271,9 @@ export function ExpenseListPage() {
 const expenseSchema = z.object({
   buildingId: z.string().min(1, { message: 'Building is required.' }),
   expenseTypeId: z.string().min(1, { message: 'Expense type is required.' }),
+  fundId: z.string().optional().or(z.literal('')),
   expenseDate: z.string().min(1, { message: 'Expense date is required.' }),
+  accountingDate: z.string().optional().or(z.literal('')),
   description: z.string().min(1, { message: 'Description is required.' }).max(500),
   payee: z.string().max(200).optional().or(z.literal('')),
   referenceNumber: z.string().max(100).optional().or(z.literal('')),
@@ -278,6 +281,7 @@ const expenseSchema = z.object({
     (v) => !Number.isNaN(Number(v)) && Number(v) > 0,
     { message: 'Amount must be greater than zero.' },
   ),
+  isPaid: z.boolean(),
   paymentMethod: z.enum(['Cash', 'Cheque', 'BankTransfer', 'MobileMoney', 'Other']),
   notes: z.string().max(1000).optional().or(z.literal('')),
 });
@@ -295,6 +299,7 @@ function ExpenseFormDialog({
   const [createExpense, { isLoading: isCreating }] = useCreateExpense();
   const [updateExpense, { isLoading: isUpdating }] = useUpdateExpense();
   const { data: activeTypes } = useActiveExpenseTypes();
+  const { data: funds } = useGetApiV1FinanceFundsQuery();
   const isEditing = Boolean(expense);
   const isLoading = isCreating || isUpdating;
 
@@ -303,11 +308,14 @@ function ExpenseFormDialog({
     defaultValues: {
       buildingId: expense?.buildingId ?? '',
       expenseTypeId: expense?.expenseTypeId ?? '',
+      fundId: expense?.fundId ?? '',
       expenseDate: expense?.expenseDate ?? new Date().toISOString().slice(0, 10),
+      accountingDate: expense?.accountingDate ?? '',
       description: expense?.description ?? '',
       payee: expense?.payee ?? '',
       referenceNumber: expense?.referenceNumber ?? '',
       amount: expense ? String(expense.amount) : '',
+      isPaid: expense?.isPaid ?? false,
       paymentMethod: (expense?.paymentMethod as ExpenseSchemaType['paymentMethod']) ?? 'Cash',
       notes: expense?.notes ?? '',
     },
@@ -317,11 +325,14 @@ function ExpenseFormDialog({
     const payload = {
       buildingId: values.buildingId,
       expenseTypeId: values.expenseTypeId,
+      fundId: values.fundId || null,
       expenseDate: values.expenseDate,
+      accountingDate: values.accountingDate || null,
       description: values.description,
       payee: values.payee || null,
       referenceNumber: values.referenceNumber || null,
       amount: Number(values.amount),
+      isPaid: values.isPaid,
       paymentMethod: values.paymentMethod,
       notes: values.notes || null,
     };
@@ -331,7 +342,7 @@ function ExpenseFormDialog({
         await updateExpense({ id: expense.expenseId, updateExpenseRequest: payload }).unwrap();
         toast.success('Expense updated.');
       } else {
-        await createExpense({ createExpenseCommand: payload }).unwrap();
+        await createExpense({ createExpenseRequest: payload }).unwrap();
         toast.success('Expense recorded.');
       }
       form.reset();
@@ -393,6 +404,31 @@ function ExpenseFormDialog({
             />
             <FormField
               control={form.control}
+              name="fundId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Fund (optional)</FormLabel>
+                  <Select value={field.value || 'none'} onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="none">No fund</SelectItem>
+                      {funds?.filter((f) => f.isActive).map((f) => (
+                        <SelectItem key={f.fundId} value={f.fundId}>
+                          {f.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
               name="expenseDate"
               render={({ field }) => (
                 <FormItem>
@@ -400,6 +436,23 @@ function ExpenseFormDialog({
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="accountingDate"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Accounting date (optional)</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <p className="text-muted-foreground text-xs">
+                    Defaults to the expense date. Set this to post the expense into a different ledger
+                    period (e.g. a voucher dated in a closed period).
+                  </p>
                   <FormMessage />
                 </FormItem>
               )}
@@ -477,6 +530,23 @@ function ExpenseFormDialog({
                     </SelectContent>
                   </Select>
                   <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="isPaid"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start gap-2 space-y-0">
+                  <FormControl>
+                    <Checkbox checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                  <div className="space-y-0.5">
+                    <FormLabel className="font-normal">Paid immediately</FormLabel>
+                    <p className="text-muted-foreground text-xs">
+                      Leave unchecked to record this as an unpaid payable (Accounts Payable) until settled.
+                    </p>
+                  </div>
                 </FormItem>
               )}
             />
