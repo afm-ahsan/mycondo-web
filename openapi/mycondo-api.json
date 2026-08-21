@@ -2757,6 +2757,200 @@
         }
       }
     },
+    "/api/v1/expense-categories": {
+      "get": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "in": "query",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfExpenseCategoryDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Expenses"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExpenseCategoryCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseCategoryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-categories/active": {
+      "get": {
+        "tags": [
+          "Expenses"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExpenseCategoryDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-categories/{id}": {
+      "put": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExpenseCategoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseCategoryDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expense-categories/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/expense-categories/{id}/activate": {
+      "post": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
     "/api/v1/expense-types": {
       "get": {
         "tags": [
@@ -2823,7 +3017,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateExpenseTypeCommand"
+                "$ref": "#/components/schemas/CreateExpenseTypeRequest"
               }
             }
           },
@@ -2974,6 +3168,14 @@
             }
           },
           {
+            "name": "fundId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
             "name": "status",
             "in": "query",
             "schema": {
@@ -3042,7 +3244,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateExpenseCommand"
+                "$ref": "#/components/schemas/CreateExpenseRequest"
               }
             }
           },
@@ -3159,6 +3361,66 @@
         "responses": {
           "204": {
             "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/expenses/{id}/approve": {
+      "post": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/expenses/{id}/pay": {
+      "post": {
+        "tags": [
+          "Expenses"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseDto"
+                }
+              }
+            }
           }
         }
       }
@@ -6076,6 +6338,213 @@
         }
       }
     },
+    "/api/v1/fines": {
+      "post": {
+        "tags": [
+          "Fines"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessFineCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Fines"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "flatId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfInvoiceDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fines/{id}": {
+      "get": {
+        "tags": [
+          "Fines"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDetailDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fines/{id}/waive": {
+      "post": {
+        "tags": [
+          "Fines"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WaiveFineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/fines/{id}/reverse": {
+      "post": {
+        "tags": [
+          "Fines"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseFineRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvoiceDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/reports/financial/summary": {
       "get": {
         "tags": [
@@ -6153,6 +6622,1753 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ReceivablesAgeingReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/trial-balance": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TrialBalanceReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/general-ledger": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "chartOfAccountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fundId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "referenceType",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneralLedgerReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/account-ledger/{chartOfAccountId}": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "chartOfAccountId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLedgerReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/fund-position": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FundPositionReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/financial-position": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialPositionReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/cash-flow": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashFlowReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/overview": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialOverviewReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/income-expense": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncomeExpenseReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/cash-bank-position": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CashBankPositionReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/service-charge-collection": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ServiceChargeCollectionReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/gas-collection": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GasCollectionReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/fines": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FineReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/outstanding-dues": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OutstandingDuesReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/resident-statement/{flatId}": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "flatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResidentFinancialStatementReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/flat-statement/{flatId}": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "flatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fromDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FlatFinancialStatementReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/expense-summary": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseSummaryReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/expense-by-category": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseByCategoryReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/expense-by-type": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseByTypeReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/expense-trend": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseTrendReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/fixed-deposit-portfolio": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "asOfDate",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositPortfolioReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reports/finance/fixed-deposit-interest": {
+      "get": {
+        "tags": [
+          "Finance Reports"
+        ],
+        "parameters": [
+          {
+            "name": "fromDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "toDate",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositInterestReportDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/accounts": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ChartOfAccountDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChartOfAccountCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChartOfAccountDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/account-mappings": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountMappingDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetAccountMappingCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountMappingDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/funds": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FundDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFundCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FundDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-years": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinancialYearDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFinancialYearCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialYearDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-years/{id}/close": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialYearDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-years/{id}/reopen": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialYearDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/accounting-periods": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "financialYearId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccountingPeriodDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountingPeriodCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountingPeriodDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/accounting-periods/{id}/close": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountingPeriodDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/accounting-periods/{id}/reopen": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountingPeriodDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-accounts": {
+      "get": {
+        "tags": [
+          "Banking"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinancialAccountDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFinancialAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialAccountDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-accounts/{id}": {
+      "put": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFinancialAccountRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialAccountDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-accounts/{id}/activate": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/financial-accounts/{id}/deactivate": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "No Content"
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits": {
+      "get": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fundId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "fundingFinancialAccountId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagedResultOfFixedDepositDto"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlaceFixedDepositRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}": {
+      "get": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositDetailDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}/renew": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RenewFixedDepositRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}/withdraw": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithdrawFixedDepositRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}/void": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VoidFixedDepositRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}/interest/accruals": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFixedDepositInterestAccrualRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositInterestAccrualDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/fixed-deposits/{id}/interest/receipts": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecordFixedDepositInterestReceiptRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FixedDepositInterestReceiptDto"
                 }
               }
             }
@@ -10782,7 +12998,8 @@
       "AccountBalanceDto": {
         "required": [
           "flatId",
-          "balance"
+          "balance",
+          "advanceBalance"
         ],
         "type": "object",
         "properties": {
@@ -10797,6 +13014,221 @@
               "string"
             ],
             "format": "double"
+          },
+          "advanceBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "AccountingPeriodDto": {
+        "required": [
+          "accountingPeriodId",
+          "financialYearId",
+          "name",
+          "startDate",
+          "endDate",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "accountingPeriodId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "financialYearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "AccountLedgerLineDto": {
+        "required": [
+          "entryId",
+          "postingId",
+          "businessDate",
+          "description",
+          "referenceType",
+          "referenceId",
+          "flatId",
+          "direction",
+          "amount",
+          "runningBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "referenceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referenceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "flatId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "runningBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "AccountLedgerReportDto": {
+        "required": [
+          "metadata",
+          "chartOfAccountId",
+          "chartOfAccountCode",
+          "chartOfAccountName",
+          "normalBalance",
+          "openingBalance",
+          "lines",
+          "closingBalance",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "chartOfAccountCode": {
+            "type": "string"
+          },
+          "chartOfAccountName": {
+            "type": "string"
+          },
+          "normalBalance": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountLedgerLineDto"
+            }
+          },
+          "closingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "AccountMappingDto": {
+        "required": [
+          "accountMappingId",
+          "postingRole",
+          "chartOfAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "accountMappingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postingRole": {
+            "type": "string"
+          },
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -10991,6 +13423,36 @@
               "string"
             ],
             "format": "double"
+          }
+        }
+      },
+      "AssessFineCommand": {
+        "required": [
+          "flatId",
+          "amount",
+          "reason",
+          "businessDate"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
           }
         }
       },
@@ -11847,6 +14309,219 @@
           }
         }
       },
+      "CashBankAccountLineDto": {
+        "required": [
+          "financialAccountId",
+          "name",
+          "accountType",
+          "bankName",
+          "branchName",
+          "accountNumber",
+          "balance"
+        ],
+        "type": "object",
+        "properties": {
+          "financialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accountNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "balance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "CashBankPositionReportDto": {
+        "required": [
+          "metadata",
+          "accounts",
+          "totalBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CashBankAccountLineDto"
+            }
+          },
+          "totalBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "CashFlowReportDto": {
+        "required": [
+          "metadata",
+          "openingCashBalance",
+          "operatingInflow",
+          "operatingOutflow",
+          "netOperating",
+          "investingInflow",
+          "investingOutflow",
+          "netInvesting",
+          "netChangeInCash",
+          "closingCashBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "openingCashBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "operatingInflow": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "operatingOutflow": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "netOperating": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "investingInflow": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "investingOutflow": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "netInvesting": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "netChangeInCash": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "closingCashBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "CashPositionDto": {
+        "required": [
+          "cashInHand",
+          "bankBalance",
+          "mobileFinancialServiceBalance",
+          "availableLiquidFunds"
+        ],
+        "type": "object",
+        "properties": {
+          "cashInHand": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "bankBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "mobileFinancialServiceBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "availableLiquidFunds": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Cash/Bank holdings broken down by `FinancialAccountType` (Template 4) — precise labels\r\n            only, per Template 5's requirement, never an ambiguous merged \"Total In-Hand\"."
+      },
       "ChangePasswordCommand": {
         "required": [
           "currentPassword",
@@ -11859,6 +14534,50 @@
           },
           "newPassword": {
             "type": "string"
+          }
+        }
+      },
+      "ChartOfAccountDto": {
+        "required": [
+          "chartOfAccountId",
+          "code",
+          "name",
+          "category",
+          "normalBalance",
+          "parentAccountId",
+          "isSystemAccount",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "normalBalance": {
+            "type": "string"
+          },
+          "parentAccountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "isSystemAccount": {
+            "type": "boolean"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -12251,6 +14970,32 @@
           }
         }
       },
+      "CollectionPerformanceDto": {
+        "required": [
+          "billed",
+          "collected"
+        ],
+        "type": "object",
+        "properties": {
+          "billed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "collected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Billed and Collected for the report's collection window — permanently distinct figures,\r\n            never merged into one \"revenue\" number (Template 5's core rule)."
+      },
       "CollectParcelRequest": {
         "required": [
           "collectorName",
@@ -12383,6 +15128,32 @@
           }
         }
       },
+      "CreateAccountingPeriodCommand": {
+        "required": [
+          "financialYearId",
+          "name",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "financialYearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "CreateBlackoutDateRequest": {
         "required": [
           "dateFrom",
@@ -12453,6 +15224,37 @@
           }
         }
       },
+      "CreateChartOfAccountCommand": {
+        "required": [
+          "code",
+          "name",
+          "category",
+          "normalBalance",
+          "parentAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "normalBalance": {
+            "type": "string"
+          },
+          "parentAccountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        }
+      },
       "CreateDomesticWorkerAssignmentRequest": {
         "required": [
           "flatId",
@@ -12501,30 +15303,81 @@
           }
         }
       },
-      "CreateExpenseCommand": {
+      "CreateExpenseCategoryCommand": {
+        "required": [
+          "name",
+          "code",
+          "description",
+          "displayOrder"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "CreateExpenseRequest": {
         "required": [
           "buildingId",
           "expenseTypeId",
+          "fundId",
           "expenseDate",
+          "accountingDate",
           "description",
           "payee",
           "referenceNumber",
           "amount",
+          "isPaid",
           "paymentMethod",
           "notes"
         ],
         "type": "object",
         "properties": {
           "buildingId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "expenseTypeId": {
             "type": "string",
             "format": "uuid"
           },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "expenseDate": {
             "type": "string",
+            "format": "date"
+          },
+          "accountingDate": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date"
           },
           "description": {
@@ -12550,6 +15403,9 @@
             ],
             "format": "double"
           },
+          "isPaid": {
+            "type": "boolean"
+          },
           "paymentMethod": {
             "type": "string"
           },
@@ -12561,8 +15417,9 @@
           }
         }
       },
-      "CreateExpenseTypeCommand": {
+      "CreateExpenseTypeRequest": {
         "required": [
+          "expenseCategoryId",
           "name",
           "code",
           "description",
@@ -12570,6 +15427,10 @@
         ],
         "type": "object",
         "properties": {
+          "expenseCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "name": {
             "type": "string"
           },
@@ -12707,6 +15568,78 @@
           }
         }
       },
+      "CreateFinancialAccountRequest": {
+        "required": [
+          "name",
+          "accountType",
+          "bankName",
+          "branchName",
+          "accountNumber",
+          "fundId",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accountNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "CreateFinancialYearCommand": {
+        "required": [
+          "name",
+          "startDate",
+          "endDate"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
       "CreateFlatOwnershipCommand": {
         "required": [
           "residentId",
@@ -12778,6 +15711,28 @@
           },
           "flatType": {
             "type": "string"
+          }
+        }
+      },
+      "CreateFundCommand": {
+        "required": [
+          "code",
+          "name",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -13805,6 +16760,211 @@
           }
         }
       },
+      "ExpenseByCategoryLineDto": {
+        "required": [
+          "expenseCategoryId",
+          "categoryName",
+          "totalAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "expenseCategoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "totalAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseByCategoryReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseByCategoryLineDto"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseByTypeLineDto": {
+        "required": [
+          "expenseTypeId",
+          "typeName",
+          "expenseCategoryId",
+          "categoryName",
+          "count",
+          "totalAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "expenseTypeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "typeName": {
+            "type": "string"
+          },
+          "expenseCategoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseByTypeReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseByTypeLineDto"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseCategoryDto": {
+        "required": [
+          "expenseCategoryId",
+          "name",
+          "code",
+          "description",
+          "isActive",
+          "displayOrder"
+        ],
+        "type": "object",
+        "properties": {
+          "expenseCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "ExpenseCompositionLineDto": {
+        "required": [
+          "expenseCategoryId",
+          "categoryName",
+          "amount",
+          "percentageOfTotal"
+        ],
+        "type": "object",
+        "properties": {
+          "expenseCategoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "categoryName": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "percentageOfTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "ExpenseDto": {
         "required": [
           "expenseId",
@@ -13812,15 +16972,26 @@
           "buildingName",
           "expenseTypeId",
           "expenseTypeName",
+          "expenseCategoryId",
+          "expenseCategoryName",
+          "fundId",
+          "fundName",
           "expenseDate",
+          "accountingDate",
           "description",
           "payee",
           "referenceNumber",
           "amount",
+          "isPaid",
           "paymentMethod",
           "notes",
           "status",
           "voidReason",
+          "financialAccountId",
+          "postingId",
+          "paymentPostingId",
+          "reversalPostingId",
+          "paymentReversalPostingId",
           "createdBy",
           "createdAtUtc",
           "updatedAtUtc"
@@ -13832,11 +17003,17 @@
             "format": "uuid"
           },
           "buildingId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "buildingName": {
-            "type": "string"
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "expenseTypeId": {
             "type": "string",
@@ -13845,7 +17022,37 @@
           "expenseTypeName": {
             "type": "string"
           },
+          "expenseCategoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "expenseCategoryName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "fundName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
           "expenseDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountingDate": {
             "type": "string",
             "format": "date"
           },
@@ -13872,6 +17079,9 @@
             ],
             "format": "double"
           },
+          "isPaid": {
+            "type": "boolean"
+          },
           "paymentMethod": {
             "type": "string"
           },
@@ -13889,6 +17099,41 @@
               "null",
               "string"
             ]
+          },
+          "financialAccountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "postingId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "paymentPostingId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "reversalPostingId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "paymentReversalPostingId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
           },
           "createdBy": {
             "type": [
@@ -13910,9 +17155,142 @@
           }
         }
       },
+      "ExpenseStatusBreakdownDto": {
+        "required": [
+          "status",
+          "count",
+          "totalAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseSummaryReportDto": {
+        "required": [
+          "metadata",
+          "ledgerTotal",
+          "sourceRecordTotal",
+          "isReconciled",
+          "byStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "ledgerTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "sourceRecordTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "isReconciled": {
+            "type": "boolean"
+          },
+          "byStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseStatusBreakdownDto"
+            }
+          }
+        },
+        "description": "decimal ExpenseSummaryReportDto.LedgerTotal is the authoritative figure — net debit activity on the tenant's\r\n        OperatingExpense ledger account for the period. decimal ExpenseSummaryReportDto.SourceRecordTotal is a current-snapshot\r\n        cross-check (sum of `Expense.Amount` for expenses whose *current* Status is Posted/Paid) and can\r\n        legitimately diverge from decimal ExpenseSummaryReportDto.LedgerTotal when an expense originally posted in this period\r\n        was later voided in a *different* period — the reversal lands in the period it was actually posted,\r\n        same real double-entry behavior every ledger-authoritative report in this system follows, so that's\r\n        not a bug, it's exactly the signal bool ExpenseSummaryReportDto.IsReconciled exists to surface."
+      },
+      "ExpenseTrendMonthDto": {
+        "required": [
+          "year",
+          "month",
+          "totalAmount"
+        ],
+        "type": "object",
+        "properties": {
+          "year": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "month": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "totalAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "ExpenseTrendReportDto": {
+        "required": [
+          "metadata",
+          "months",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseTrendMonthDto"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "ExpenseTypeDto": {
         "required": [
           "expenseTypeId",
+          "expenseCategoryId",
+          "expenseCategoryName",
           "name",
           "code",
           "description",
@@ -13924,6 +17302,19 @@
           "expenseTypeId": {
             "type": "string",
             "format": "uuid"
+          },
+          "expenseCategoryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "expenseCategoryName": {
+            "type": [
+              "null",
+              "string"
+            ]
           },
           "name": {
             "type": "string"
@@ -14126,6 +17517,314 @@
           }
         }
       },
+      "FinanceReportMetadataDto": {
+        "required": [
+          "fromDate",
+          "toDate",
+          "asOfDate",
+          "scopeSummary",
+          "currency",
+          "accountingBasis",
+          "postedOnly",
+          "generatedAtUtc",
+          "generatedByUserId"
+        ],
+        "type": "object",
+        "properties": {
+          "fromDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "toDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "asOfDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "scopeSummary": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "accountingBasis": {
+            "type": "string"
+          },
+          "postedOnly": {
+            "type": "boolean"
+          },
+          "generatedAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "generatedByUserId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          }
+        },
+        "description": "Every Finance report response carries this so a rendered report is self-describing —\r\n            the Template 5 \"API Metadata\" requirement (period/scope/currency/basis/posted-only/generated\r\n            timestamp). bool FinanceReportMetadataDto.PostedOnly is always true: every figure here is derived from posted\r\n            `LedgerEntry` rows — there is no draft/unposted ledger state in this system."
+      },
+      "FinancialAccountDto": {
+        "required": [
+          "financialAccountId",
+          "name",
+          "accountType",
+          "bankName",
+          "branchName",
+          "accountNumber",
+          "chartOfAccountId",
+          "fundId",
+          "fundName",
+          "notes",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "financialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "accountType": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accountNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "fundName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FinancialOverviewReportDto": {
+        "required": [
+          "metadata",
+          "incomeTotal",
+          "expenseTotal",
+          "surplusDeficit",
+          "receivables",
+          "cashPosition",
+          "fixedDepositPrincipal",
+          "collectionPeriodFromDate",
+          "collectionPeriodToDate",
+          "collectionPerformance",
+          "expenseComposition"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "incomeTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "expenseTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "surplusDeficit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivables": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "cashPosition": {
+            "$ref": "#/components/schemas/CashPositionDto"
+          },
+          "fixedDepositPrincipal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "collectionPeriodFromDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "collectionPeriodToDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "collectionPerformance": {
+            "$ref": "#/components/schemas/CollectionPerformanceDto"
+          },
+          "expenseComposition": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseCompositionLineDto"
+            }
+          }
+        },
+        "description": "Composite dashboard figure. decimal FinancialOverviewReportDto.IncomeTotal/decimal FinancialOverviewReportDto.ExpenseTotal/\r\n            decimal FinancialOverviewReportDto.SurplusDeficit are cumulative-to-FinanceReportMetadataDto FinancialOverviewReportDto.Metadata's AsOfDate (same \"as of\" scope\r\n            as the Financial Position report's RetainedSurplusDeficit) — Surplus/Deficit is always Income minus\r\n            Expense, never Cash minus Expense. decimal FinancialOverviewReportDto.Receivables and CashPositionDto FinancialOverviewReportDto.CashPosition are also\r\n            as-of-date ledger balances. CollectionPerformanceDto FinancialOverviewReportDto.CollectionPerformance and IReadOnlyList&lt;ExpenseCompositionLineDto&gt; FinancialOverviewReportDto.ExpenseComposition\r\n            are instead scoped to [DateOnly FinancialOverviewReportDto.CollectionPeriodFromDate, DateOnly FinancialOverviewReportDto.CollectionPeriodToDate]\r\n            — a distinct period-flow window from the cumulative figures above, not a second truth for the same\r\n            question (they answer \"what happened this period,\" not \"what is the balance as of today\")."
+      },
+      "FinancialPositionLineDto": {
+        "required": [
+          "chartOfAccountId",
+          "code",
+          "name",
+          "balance"
+        ],
+        "type": "object",
+        "properties": {
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "balance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FinancialPositionReportDto": {
+        "required": [
+          "metadata",
+          "assets",
+          "liabilities",
+          "equity",
+          "retainedSurplusDeficit",
+          "totalLiabilitiesAndEquity"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "assets": {
+            "$ref": "#/components/schemas/FinancialPositionSectionDto"
+          },
+          "liabilities": {
+            "$ref": "#/components/schemas/FinancialPositionSectionDto"
+          },
+          "equity": {
+            "$ref": "#/components/schemas/FinancialPositionSectionDto"
+          },
+          "retainedSurplusDeficit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalLiabilitiesAndEquity": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FinancialPositionSectionDto": {
+        "required": [
+          "lines",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinancialPositionLineDto"
+            }
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "FinancialSummaryDto": {
         "required": [
           "fromDate",
@@ -14203,6 +17902,694 @@
         },
         "description": "TotalBilled and TotalCollected are period-flow values strictly within [FromDate, ToDate].\r\n            TotalOutstanding, UnpaidInvoiceCount, PartiallyPaidInvoiceCount, and OverdueInvoiceCount are\r\n            current-snapshot values as of DateOnly FinancialSummaryDto.AsOfDate, independent of the FromDate/ToDate window —\r\n            do not treat TotalOutstanding as constrained to the reporting period."
       },
+      "FinancialYearDto": {
+        "required": [
+          "financialYearId",
+          "name",
+          "startDate",
+          "endDate",
+          "status"
+        ],
+        "type": "object",
+        "properties": {
+          "financialYearId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          }
+        }
+      },
+      "FineReportDto": {
+        "required": [
+          "metadata",
+          "billed",
+          "billedInvoiceCount",
+          "collected",
+          "waived"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "billed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "billedInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "collected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "waived": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Billed/Collected/Waived stay permanently distinct fields — see\r\n            `IFinanceReportRepository.IncomeCollectionSummary`'s doc comment. decimal FineReportDto.Waived is\r\n            particularly relevant here: fines are the primary real-world use of `Invoice.Waive` (see that\r\n            method's \"e.g. a fine waiver\" doc comment). Deliberately carries no derived \"Outstanding\" figure —\r\n            see `ServiceChargeCollectionReportDto`'s doc comment for why."
+      },
+      "FixedDepositDetailDto": {
+        "required": [
+          "fixedDeposit",
+          "interestAccruals",
+          "interestReceipts"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDeposit": {
+            "$ref": "#/components/schemas/FixedDepositDto"
+          },
+          "interestAccruals": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FixedDepositInterestAccrualDto"
+            }
+          },
+          "interestReceipts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FixedDepositInterestReceiptDto"
+            }
+          }
+        }
+      },
+      "FixedDepositDto": {
+        "required": [
+          "fixedDepositId",
+          "certificateNumber",
+          "bankName",
+          "branchName",
+          "fundingFinancialAccountId",
+          "fundingFinancialAccountName",
+          "receivingFinancialAccountId",
+          "receivingFinancialAccountName",
+          "fundId",
+          "fundName",
+          "principal",
+          "interestRatePercent",
+          "calculationMethod",
+          "paymentFrequency",
+          "startDate",
+          "maturityDate",
+          "isMatured",
+          "expectedGrossInterest",
+          "expectedDeductionRatePercent",
+          "notes",
+          "status",
+          "predecessorFixedDepositId",
+          "successorFixedDepositId",
+          "totalInterestAccrued",
+          "totalInterestReceivedGross",
+          "outstandingInterestReceivable",
+          "voidReason"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDepositId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateNumber": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundingFinancialAccountName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "receivingFinancialAccountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "receivingFinancialAccountName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "fundName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "principal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "interestRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "calculationMethod": {
+            "type": "string"
+          },
+          "paymentFrequency": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "maturityDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "isMatured": {
+            "type": "boolean"
+          },
+          "expectedGrossInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "expectedDeductionRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "status": {
+            "type": "string"
+          },
+          "predecessorFixedDepositId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "successorFixedDepositId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "totalInterestAccrued": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalInterestReceivedGross": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "outstandingInterestReceivable": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "voidReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "FixedDepositInterestAccrualDto": {
+        "required": [
+          "fixedDepositInterestAccrualId",
+          "fixedDepositId",
+          "periodStart",
+          "periodEnd",
+          "accountingDate",
+          "grossAmount",
+          "notes",
+          "isReversed",
+          "createdAtUtc"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDepositInterestAccrualId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fixedDepositId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "grossAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isReversed": {
+            "type": "boolean"
+          },
+          "createdAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FixedDepositInterestLineDto": {
+        "required": [
+          "fixedDepositId",
+          "certificateNumber",
+          "accruedGrossForPeriod",
+          "receivedGrossForPeriod",
+          "receivedDeductionForPeriod",
+          "receivedNetForPeriod"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDepositId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateNumber": {
+            "type": "string"
+          },
+          "accruedGrossForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivedGrossForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivedDeductionForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivedNetForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FixedDepositInterestReceiptDto": {
+        "required": [
+          "fixedDepositInterestReceiptId",
+          "fixedDepositId",
+          "accountingDate",
+          "grossAmount",
+          "deductionAmount",
+          "netAmount",
+          "receivingFinancialAccountId",
+          "referenceNumber",
+          "notes",
+          "isReversed",
+          "createdAtUtc"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDepositInterestReceiptId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fixedDepositId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "accountingDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "grossAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "deductionAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "netAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isReversed": {
+            "type": "boolean"
+          },
+          "createdAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FixedDepositInterestReportDto": {
+        "required": [
+          "metadata",
+          "accruedGrossForPeriod",
+          "ledgerInterestIncomeForPeriod",
+          "isReconciled",
+          "receivedGrossForPeriod",
+          "receivedDeductionForPeriod",
+          "receivedNetForPeriod",
+          "outstandingAccruedNotReceivedAsOfToDate",
+          "byFixedDeposit"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "accruedGrossForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "ledgerInterestIncomeForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "isReconciled": {
+            "type": "boolean"
+          },
+          "receivedGrossForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivedDeductionForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivedNetForPeriod": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "outstandingAccruedNotReceivedAsOfToDate": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "byFixedDeposit": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FixedDepositInterestLineDto"
+            }
+          }
+        },
+        "description": "Template 4's accrual-first FD interest model, verified against the actual posting handlers\r\n            (not assumed): accrual posts \"Dr InterestReceivable / Cr FDInterestIncome\" (interest income is\r\n            recognized at accrual, gross), receipt posts \"Dr CashOrBank (net) [+ Dr InterestDeductionExpense\r\n            (deduction)] / Cr InterestReceivable (gross)\" — a receipt never touches FDInterestIncome. So the\r\n            true reconciliation identity is decimal FixedDepositInterestReportDto.AccruedGrossForPeriod == decimal FixedDepositInterestReportDto.LedgerInterestIncomeForPeriod,\r\n            not anything receipt-shaped — bool FixedDepositInterestReportDto.IsReconciled checks exactly that.\r\n            decimal FixedDepositInterestReportDto.OutstandingAccruedNotReceivedAsOfToDate is cumulative (all-time accrued minus all-time\r\n            received, as of `ToDate`) rather than period-bounded, since \"outstanding balance\" is inherently a\r\n            point-in-time concept — it mirrors the ledger's InterestReceivable account balance."
+      },
+      "FixedDepositPortfolioLineDto": {
+        "required": [
+          "fixedDepositId",
+          "certificateNumber",
+          "bankName",
+          "branchName",
+          "principal",
+          "interestRatePercent",
+          "startDate",
+          "maturityDate",
+          "status",
+          "totalAccruedInterest",
+          "totalReceivedInterest",
+          "outstandingAccruedInterest"
+        ],
+        "type": "object",
+        "properties": {
+          "fixedDepositId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certificateNumber": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "principal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "interestRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "maturityDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "type": "string"
+          },
+          "totalAccruedInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalReceivedInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "outstandingAccruedInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FixedDepositPortfolioReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "totalPrincipal",
+          "totalOutstandingAccruedInterest",
+          "activeCount"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FixedDepositPortfolioLineDto"
+            }
+          },
+          "totalPrincipal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalOutstandingAccruedInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "activeCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        },
+        "description": "decimal FixedDepositPortfolioReportDto.TotalPrincipal is `FixedDepositStatus.Active` principal only —\r\n        a Renewed instrument's principal now lives on its successor and a Withdrawn instrument's principal\r\n        is no longer Fixed Deposit money at all, so including either would double-count or misstate current\r\n        holdings (Template 4's \"Fixed Deposit != Spendable Cash\" distinction, kept internally consistent:\r\n        this figure never conflates historical instruments with current ones either)."
+      },
       "FlatDto": {
         "required": [
           "flatId",
@@ -14253,6 +18640,159 @@
               "string"
             ],
             "format": "uuid"
+          }
+        }
+      },
+      "FlatFinancialStatementLineDto": {
+        "required": [
+          "ledgerEntryId",
+          "postingId",
+          "businessDate",
+          "description",
+          "referenceType",
+          "referenceId",
+          "direction",
+          "amount",
+          "runningBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "ledgerEntryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "referenceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referenceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "runningBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FlatFinancialStatementReportDto": {
+        "required": [
+          "metadata",
+          "flatId",
+          "flatNumber",
+          "openingBalance",
+          "periodDebitTotal",
+          "periodCreditTotal",
+          "closingBalance",
+          "lines",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "periodDebitTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "periodCreditTotal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "closingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FlatFinancialStatementLineDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
           }
         }
       },
@@ -14385,6 +18925,141 @@
           }
         }
       },
+      "FundDto": {
+        "required": [
+          "fundId",
+          "code",
+          "name",
+          "description",
+          "isActive"
+        ],
+        "type": "object",
+        "properties": {
+          "fundId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "isActive": {
+            "type": "boolean"
+          }
+        }
+      },
+      "FundPositionLineDto": {
+        "required": [
+          "fundId",
+          "code",
+          "name",
+          "balance"
+        ],
+        "type": "object",
+        "properties": {
+          "fundId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "balance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "FundPositionReportDto": {
+        "required": [
+          "metadata",
+          "funds",
+          "totalBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "funds": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FundPositionLineDto"
+            }
+          },
+          "totalBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "GasCollectionReportDto": {
+        "required": [
+          "metadata",
+          "billed",
+          "billedInvoiceCount",
+          "collected",
+          "waived"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "billed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "billedInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "collected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "waived": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Billed/Collected/Waived stay permanently distinct fields — see\r\n            `IFinanceReportRepository.IncomeCollectionSummary`'s doc comment. Deliberately carries no\r\n            derived \"Outstanding\" figure — see `ServiceChargeCollectionReportDto`'s doc comment for why."
+      },
       "GasCylinderSupplierDto": {
         "required": [
           "gasCylinderSupplierId",
@@ -14476,6 +19151,143 @@
               "string"
             ],
             "format": "int32"
+          }
+        }
+      },
+      "GeneralLedgerLineDto": {
+        "required": [
+          "entryId",
+          "postingId",
+          "businessDate",
+          "description",
+          "referenceType",
+          "referenceId",
+          "chartOfAccountId",
+          "chartOfAccountCode",
+          "chartOfAccountName",
+          "flatId",
+          "fundId",
+          "direction",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "referenceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referenceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "chartOfAccountId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "chartOfAccountCode": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "chartOfAccountName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "flatId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "GeneralLedgerReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/GeneralLedgerLineDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
           }
         }
       },
@@ -15200,6 +20012,87 @@
         "type": "string",
         "format": "binary"
       },
+      "IncomeExpenseLineDto": {
+        "required": [
+          "chartOfAccountId",
+          "code",
+          "name",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "IncomeExpenseReportDto": {
+        "required": [
+          "metadata",
+          "incomeLines",
+          "totalIncome",
+          "expenseLines",
+          "totalExpense",
+          "surplusDeficit"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "incomeLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomeExpenseLineDto"
+            }
+          },
+          "totalIncome": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "expenseLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/IncomeExpenseLineDto"
+            }
+          },
+          "totalExpense": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "surplusDeficit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "InspectBookingRequest": {
         "required": [
           "notes",
@@ -15283,12 +20176,16 @@
           "subtotalAmount",
           "totalAmount",
           "amountPaid",
+          "waivedAmount",
           "balance",
           "status",
           "issuedAtUtc",
           "voidedAtUtc",
           "voidedBy",
-          "voidReason"
+          "voidReason",
+          "waivedAtUtc",
+          "waivedBy",
+          "waiveReason"
         ],
         "type": "object",
         "properties": {
@@ -15350,6 +20247,14 @@
             ],
             "format": "double"
           },
+          "waivedAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
           "balance": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
             "type": [
@@ -15380,6 +20285,26 @@
             "format": "uuid"
           },
           "voidReason": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "waivedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "waivedBy": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "waiveReason": {
             "type": [
               "null",
               "string"
@@ -16523,6 +21448,72 @@
           }
         }
       },
+      "OutstandingDuesLineDto": {
+        "required": [
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "outstandingBalance",
+          "openInvoiceCount"
+        ],
+        "type": "object",
+        "properties": {
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "outstandingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "openInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "OutstandingDuesReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "totalOutstanding"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OutstandingDuesLineDto"
+            }
+          },
+          "totalOutstanding": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "OwnerFlatOwnershipDto": {
         "required": [
           "flatOwnershipId",
@@ -17010,6 +22001,61 @@
           }
         }
       },
+      "PagedResultOfExpenseCategoryDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExpenseCategoryDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
       "PagedResultOfExpenseDto": {
         "required": [
           "items",
@@ -17133,6 +22179,61 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FacilityDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedResultOfFixedDepositDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FixedDepositDto"
             }
           },
           "page": {
@@ -19164,6 +24265,104 @@
           }
         }
       },
+      "PlaceFixedDepositRequest": {
+        "required": [
+          "certificateNumber",
+          "bankName",
+          "branchName",
+          "fundingFinancialAccountId",
+          "fundId",
+          "principal",
+          "interestRatePercent",
+          "calculationMethod",
+          "paymentFrequency",
+          "startDate",
+          "maturityDate",
+          "expectedGrossInterest",
+          "expectedDeductionRatePercent",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "certificateNumber": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": "string"
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "principal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "interestRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "calculationMethod": {
+            "type": "string"
+          },
+          "paymentFrequency": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "maturityDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "expectedGrossInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "expectedDeductionRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "PlatformAuthenticatedUserDto": {
         "required": [
           "platformUserId",
@@ -20090,6 +25289,99 @@
           }
         }
       },
+      "RecordFixedDepositInterestAccrualRequest": {
+        "required": [
+          "periodStart",
+          "periodEnd",
+          "accountingDate",
+          "grossAmount",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "periodStart": {
+            "type": "string",
+            "format": "date"
+          },
+          "periodEnd": {
+            "type": "string",
+            "format": "date"
+          },
+          "accountingDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "grossAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
+      "RecordFixedDepositInterestReceiptRequest": {
+        "required": [
+          "accountingDate",
+          "grossAmount",
+          "deductionAmount",
+          "receivingFinancialAccountId",
+          "referenceNumber",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "accountingDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "grossAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "deductionAmount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "receivingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "referenceNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "RecordFuelReceiptCommand": {
         "required": [
           "generatorId",
@@ -20742,6 +26034,92 @@
           }
         }
       },
+      "RenewFixedDepositRequest": {
+        "required": [
+          "newCertificateNumber",
+          "newBranchName",
+          "fundingFinancialAccountId",
+          "newPrincipal",
+          "newInterestRatePercent",
+          "newCalculationMethod",
+          "newPaymentFrequency",
+          "newStartDate",
+          "newMaturityDate",
+          "newExpectedGrossInterest",
+          "newExpectedDeductionRatePercent",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "newCertificateNumber": {
+            "type": "string"
+          },
+          "newBranchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "newPrincipal": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "newInterestRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "newCalculationMethod": {
+            "type": "string"
+          },
+          "newPaymentFrequency": {
+            "type": "string"
+          },
+          "newStartDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "newMaturityDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "newExpectedGrossInterest": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "newExpectedDeductionRatePercent": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "ReplaceMeterRequest": {
         "required": [
           "newMeterNumber"
@@ -21087,6 +26465,78 @@
           }
         }
       },
+      "ResidentFinancialStatementReportDto": {
+        "required": [
+          "metadata",
+          "flatId",
+          "flatNumber",
+          "openingBalance",
+          "lines",
+          "closingBalance",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "openingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResidentStatementLineDto"
+            }
+          },
+          "closingBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
       "ResidentHouseholdMemberDto": {
         "required": [
           "residentHouseholdMemberId",
@@ -21175,6 +26625,69 @@
           }
         }
       },
+      "ResidentStatementLineDto": {
+        "required": [
+          "entryId",
+          "postingId",
+          "businessDate",
+          "description",
+          "referenceType",
+          "referenceId",
+          "direction",
+          "amount",
+          "runningBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "postingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "businessDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "referenceType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "referenceId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "direction": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "runningBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "ResolveBreakdownRequest": {
         "required": [
           "resolution",
@@ -21198,6 +26711,17 @@
           "downtimeEndUtc": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ReverseFineRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
           }
         }
       },
@@ -21609,6 +27133,54 @@
           }
         }
       },
+      "ServiceChargeCollectionReportDto": {
+        "required": [
+          "metadata",
+          "billed",
+          "billedInvoiceCount",
+          "collected",
+          "waived"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "billed": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "billedInvoiceCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "collected": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "waived": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        },
+        "description": "Billed/Collected/Waived stay permanently distinct fields — see\r\n            `IFinanceReportRepository.IncomeCollectionSummary`'s doc comment. Never merge Billed and\r\n            Collected into a single \"revenue\" figure. Deliberately carries no derived \"Outstanding\" figure:\r\n            Billed and Collected are independent period-flow windows (Collected can settle an invoice billed in\r\n            an earlier period), so Billed - Collected here would not equal actual outstanding balance — that\r\n            figure belongs to the Receivable Ageing / Outstanding Dues reports, which compute it correctly from\r\n            each invoice's own `Balance`."
+      },
       "ServiceChargeRuleDto": {
         "required": [
           "serviceChargeRuleId",
@@ -21797,6 +27369,23 @@
             ]
           }
         }
+      },
+      "SetAccountMappingCommand": {
+        "required": [
+          "postingRole",
+          "chartOfAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "postingRole": {
+            "type": "string"
+          },
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "description": "Creates the mapping if the posting role has none yet, or remaps it if it does — the\r\n            account-mapping matrix's write side is idempotent-by-role rather than needing separate Create/Update\r\n            commands, since a tenant only ever wants \"this role points at this account\" as one operation."
       },
       "SetDomesticWorkerStatusRequest": {
         "required": [
@@ -22010,6 +27599,88 @@
           }
         }
       },
+      "TrialBalanceLineDto": {
+        "required": [
+          "chartOfAccountId",
+          "code",
+          "name",
+          "category",
+          "normalBalance",
+          "debit",
+          "credit"
+        ],
+        "type": "object",
+        "properties": {
+          "chartOfAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "normalBalance": {
+            "type": "string"
+          },
+          "debit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "credit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
+      "TrialBalanceReportDto": {
+        "required": [
+          "metadata",
+          "lines",
+          "totalDebit",
+          "totalCredit"
+        ],
+        "type": "object",
+        "properties": {
+          "metadata": {
+            "$ref": "#/components/schemas/FinanceReportMetadataDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TrialBalanceLineDto"
+            }
+          },
+          "totalDebit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "totalCredit": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "UpdateBuildingRequest": {
         "required": [
           "name",
@@ -22032,30 +27703,81 @@
           }
         }
       },
+      "UpdateExpenseCategoryRequest": {
+        "required": [
+          "name",
+          "code",
+          "description",
+          "displayOrder"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "displayOrder": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
       "UpdateExpenseRequest": {
         "required": [
           "buildingId",
           "expenseTypeId",
+          "fundId",
           "expenseDate",
+          "accountingDate",
           "description",
           "payee",
           "referenceNumber",
           "amount",
+          "isPaid",
           "paymentMethod",
           "notes"
         ],
         "type": "object",
         "properties": {
           "buildingId": {
-            "type": "string",
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "uuid"
           },
           "expenseTypeId": {
             "type": "string",
             "format": "uuid"
           },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
           "expenseDate": {
             "type": "string",
+            "format": "date"
+          },
+          "accountingDate": {
+            "type": [
+              "null",
+              "string"
+            ],
             "format": "date"
           },
           "description": {
@@ -22081,6 +27803,9 @@
             ],
             "format": "double"
           },
+          "isPaid": {
+            "type": "boolean"
+          },
           "paymentMethod": {
             "type": "string"
           },
@@ -22094,6 +27819,7 @@
       },
       "UpdateExpenseTypeRequest": {
         "required": [
+          "expenseCategoryId",
           "name",
           "code",
           "description",
@@ -22101,6 +27827,10 @@
         ],
         "type": "object",
         "properties": {
+          "expenseCategoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
           "name": {
             "type": "string"
           },
@@ -22226,6 +27956,53 @@
           },
           "blocksEntryIfAccountOverdue": {
             "type": "boolean"
+          }
+        }
+      },
+      "UpdateFinancialAccountRequest": {
+        "required": [
+          "name",
+          "bankName",
+          "branchName",
+          "accountNumber",
+          "fundId",
+          "notes"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "bankName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "branchName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "accountNumber": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "fundId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "notes": {
+            "type": [
+              "null",
+              "string"
+            ]
           }
         }
       },
@@ -23160,6 +28937,17 @@
           }
         }
       },
+      "VoidFixedDepositRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "VoidInvoiceRequest": {
         "required": [
           "reason"
@@ -23168,6 +28956,46 @@
         "properties": {
           "reason": {
             "type": "string"
+          }
+        }
+      },
+      "WaiveFineRequest": {
+        "required": [
+          "amount",
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
+      "WithdrawFixedDepositRequest": {
+        "required": [
+          "accountingDate",
+          "receivingFinancialAccountId"
+        ],
+        "type": "object",
+        "properties": {
+          "accountingDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "receivingFinancialAccountId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       }
@@ -23253,7 +29081,19 @@
       "name": "Invoices"
     },
     {
+      "name": "Fines"
+    },
+    {
       "name": "Financial Reports"
+    },
+    {
+      "name": "Finance Reports"
+    },
+    {
+      "name": "Finance"
+    },
+    {
+      "name": "Banking"
     },
     {
       "name": "Meters"

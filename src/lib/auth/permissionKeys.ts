@@ -158,4 +158,17 @@ export const PERMISSIONS = {
     // reading-status/meter-status aggregate reports, separate from utility.reading.view (per-meter).
     report: 'utility.report',
   },
+  // mycondo-api's PermissionCatalogue.cs — Finance Foundation & Posting Engine (Templates 1-5).
+  // journalView gates General Ledger / Account Ledger (raw journal browsing); reportView gates every
+  // other Template 5 report (Trial Balance, Fund/Financial Position, Cash Flow, Financial Overview,
+  // Income & Expense, Cash & Bank Position, collection reports, Outstanding Dues, Flat Financial
+  // Statement, Expense reports, Fixed Deposit reports). reportStatementOwnView is the self-service
+  // key for Resident Financial Statement's own-record access — a caller may hold this without
+  // reportView (Template 5's Resident Privacy rule: a generic report grant must never expose every
+  // resident's statement).
+  finance: {
+    journalView: 'finance.journal.view',
+    reportView: 'finance.report.view',
+    reportStatementOwnView: 'finance.report.statement.own.view',
+  },
 } as const;

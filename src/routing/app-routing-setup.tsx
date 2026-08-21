@@ -120,6 +120,33 @@ const ResidentLedgerPage = lazyPage(payments, 'ResidentLedgerPage');
 const FinancialSummaryReportPage = lazyPage(payments, 'FinancialSummaryReportPage');
 const ReceivablesAgeingReportPage = lazyPage(payments, 'ReceivablesAgeingReportPage');
 
+// Finance reporting (Template 5) — ledger-based reports, distinct from the Invoice/Payment-based
+// reports above. Routed under /finance/reports/* to match the existing /finance/expenses,
+// /finance/expense-types URL-prefix precedent (the expenses feature), even though those pages live
+// in a differently-named feature folder.
+const finance = () => import('@/features/finance');
+const TrialBalanceReportPage = lazyPage(finance, 'TrialBalanceReportPage');
+const GeneralLedgerReportPage = lazyPage(finance, 'GeneralLedgerReportPage');
+const AccountLedgerReportPage = lazyPage(finance, 'AccountLedgerReportPage');
+const FundPositionReportPage = lazyPage(finance, 'FundPositionReportPage');
+const FinancialPositionReportPage = lazyPage(finance, 'FinancialPositionReportPage');
+const CashFlowReportPage = lazyPage(finance, 'CashFlowReportPage');
+const FinancialOverviewReportPage = lazyPage(finance, 'FinancialOverviewReportPage');
+const IncomeExpenseReportPage = lazyPage(finance, 'IncomeExpenseReportPage');
+const CashBankPositionReportPage = lazyPage(finance, 'CashBankPositionReportPage');
+const ServiceChargeCollectionReportPage = lazyPage(finance, 'ServiceChargeCollectionReportPage');
+const GasCollectionReportPage = lazyPage(finance, 'GasCollectionReportPage');
+const FineReportPage = lazyPage(finance, 'FineReportPage');
+const OutstandingDuesReportPage = lazyPage(finance, 'OutstandingDuesReportPage');
+const ResidentFinancialStatementReportPage = lazyPage(finance, 'ResidentFinancialStatementReportPage');
+const FlatFinancialStatementReportPage = lazyPage(finance, 'FlatFinancialStatementReportPage');
+const ExpenseSummaryReportPage = lazyPage(finance, 'ExpenseSummaryReportPage');
+const ExpenseByCategoryReportPage = lazyPage(finance, 'ExpenseByCategoryReportPage');
+const ExpenseByTypeReportPage = lazyPage(finance, 'ExpenseByTypeReportPage');
+const ExpenseTrendReportPage = lazyPage(finance, 'ExpenseTrendReportPage');
+const FixedDepositPortfolioReportPage = lazyPage(finance, 'FixedDepositPortfolioReportPage');
+const FixedDepositInterestReportPage = lazyPage(finance, 'FixedDepositInterestReportPage');
+
 // Utilities
 const utilities = () => import('@/features/utilities');
 const MeterDirectoryPage = lazyPage(utilities, 'MeterDirectoryPage');
@@ -819,6 +846,175 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.report.financialView} fallback={<AccessDeniedNotice />}>
                 <ReceivablesAgeingReportPage />
+              </RequirePermission>
+            }
+          />
+          {/* Finance reporting (Template 5). General Ledger / Account Ledger reuse
+              finance.journalView (reserved for cross-account journal browsing since Template 1); most
+              others use finance.reportView. Resident Financial Statement carries no RequirePermission
+              wrapper — it only needs to sit inside the outer <RequireAuth> tree above, matching the
+              backend's auth-only endpoint gate, because GetResidentFinancialStatementReportQueryHandler
+              enforces its own two-tier check (finance.reportView for any flat, or the self-service
+              finance.reportStatementOwnView for the caller's own flat only) — a route-level single-
+              permission gate would incorrectly lock out legitimate self-service callers. */}
+          <Route
+            path="/finance/reports/trial-balance"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <TrialBalanceReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/general-ledger"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.journalView} fallback={<AccessDeniedNotice />}>
+                <GeneralLedgerReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/account-ledger"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.journalView} fallback={<AccessDeniedNotice />}>
+                <AccountLedgerReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/fund-position"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FundPositionReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/financial-position"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FinancialPositionReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/cash-flow"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <CashFlowReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/overview"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FinancialOverviewReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/income-expense"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <IncomeExpenseReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/cash-bank-position"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <CashBankPositionReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/service-charge-collection"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <ServiceChargeCollectionReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/gas-collection"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <GasCollectionReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/fines"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FineReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/outstanding-dues"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <OutstandingDuesReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route path="/finance/reports/resident-statement" element={<ResidentFinancialStatementReportPage />} />
+          <Route
+            path="/finance/reports/flat-statement"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FlatFinancialStatementReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/expense-summary"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <ExpenseSummaryReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/expense-by-category"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <ExpenseByCategoryReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/expense-by-type"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <ExpenseByTypeReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/expense-trend"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <ExpenseTrendReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/fixed-deposit-portfolio"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FixedDepositPortfolioReportPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/reports/fixed-deposit-interest"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FixedDepositInterestReportPage />
               </RequirePermission>
             }
           />
