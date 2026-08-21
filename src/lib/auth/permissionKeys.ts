@@ -170,5 +170,24 @@ export const PERMISSIONS = {
     journalView: 'finance.journal.view',
     reportView: 'finance.report.view',
     reportStatementOwnView: 'finance.report.statement.own.view',
+    // Template 6 (Governance, Reconciliation & Production Readiness).
+    periodManage: 'finance.period.manage',
+    periodClose: 'finance.period.close',
+    periodReopen: 'finance.period.reopen',
+    reconciliationView: 'finance.reconciliation.view',
+    reconciliationManage: 'finance.reconciliation.manage',
+    reconciliationReconcile: 'finance.reconciliation.reconcile',
+    // Template 4 (Banking, Fixed Deposits & Interest) — BankingEndpoints.cs.
+    bankAccountView: 'finance.bankaccount.view',
+    bankAccountManage: 'finance.bankaccount.manage',
+    fixedDepositView: 'finance.fixeddeposit.view',
+    fixedDepositPlace: 'finance.fixeddeposit.place',
+    fixedDepositManage: 'finance.fixeddeposit.manage',
+    fixedDepositInterestRecord: 'finance.fixeddeposit.interest.record',
+  },
+  // mycondo-api's PermissionCatalogue — generic audit-record visibility (Template 6 wires the Finance
+  // audit log to this same key rather than introducing a Finance-specific one).
+  audit: {
+    view: 'audit.view',
   },
 } as const;

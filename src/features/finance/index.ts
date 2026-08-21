@@ -22,3 +22,13 @@ export { ExpenseByTypeReportPage } from './pages/ExpenseByTypeReportPage';
 export { ExpenseTrendReportPage } from './pages/ExpenseTrendReportPage';
 export { FixedDepositPortfolioReportPage } from './pages/FixedDepositPortfolioReportPage';
 export { FixedDepositInterestReportPage } from './pages/FixedDepositInterestReportPage';
+
+// Banking (Template 4)
+export { FinancialAccountsPage } from './pages/FinancialAccountsPage';
+export { FixedDepositsPage } from './pages/FixedDepositsPage';
+
+// Governance (Template 6)
+export { AccountingPeriodsPage } from './pages/AccountingPeriodsPage';
+export { BankReconciliationPage } from './pages/BankReconciliationPage';
+export { FinancialIntegrityDashboardPage } from './pages/FinancialIntegrityDashboardPage';
+export { FinanceAuditLogPage } from './pages/FinanceAuditLogPage';
