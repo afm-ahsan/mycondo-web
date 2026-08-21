@@ -146,6 +146,10 @@ const ExpenseByTypeReportPage = lazyPage(finance, 'ExpenseByTypeReportPage');
 const ExpenseTrendReportPage = lazyPage(finance, 'ExpenseTrendReportPage');
 const FixedDepositPortfolioReportPage = lazyPage(finance, 'FixedDepositPortfolioReportPage');
 const FixedDepositInterestReportPage = lazyPage(finance, 'FixedDepositInterestReportPage');
+const AccountingPeriodsPage = lazyPage(finance, 'AccountingPeriodsPage');
+const BankReconciliationPage = lazyPage(finance, 'BankReconciliationPage');
+const FinancialIntegrityDashboardPage = lazyPage(finance, 'FinancialIntegrityDashboardPage');
+const FinanceAuditLogPage = lazyPage(finance, 'FinanceAuditLogPage');
 
 // Utilities
 const utilities = () => import('@/features/utilities');
@@ -1015,6 +1019,43 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
                 <FixedDepositInterestReportPage />
+              </RequirePermission>
+            }
+          />
+          {/* Governance, Reconciliation & Production Readiness (Template 6). Accounting Periods gates
+              on periodManage (matches the backend's finance.period.manage list/create endpoint gate —
+              close/reopen/soft-close are separately permission-checked per action inside the page
+              itself); Bank Reconciliation and the Integrity Dashboard/Audit Log are similarly
+              action-level-gated inside their own pages, this route only requires the base view grant. */}
+          <Route
+            path="/finance/accounting-periods"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.periodManage} fallback={<AccessDeniedNotice />}>
+                <AccountingPeriodsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/bank-reconciliation"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reconciliationView} fallback={<AccessDeniedNotice />}>
+                <BankReconciliationPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/integrity-dashboard"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
+                <FinancialIntegrityDashboardPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/audit-log"
+            element={
+              <RequirePermission permission={PERMISSIONS.audit.view} fallback={<AccessDeniedNotice />}>
+                <FinanceAuditLogPage />
               </RequirePermission>
             }
           />
