@@ -27,7 +27,6 @@ import {
   ShieldAlert,
   ShieldCheck,
   ShieldUser,
-  Tag,
   UserCog,
   Wallet,
   Users,
@@ -233,16 +232,13 @@ export const MENU_SIDEBAR: MenuConfig = [
     ],
   },
   {
-    title: 'Expense Types',
-    icon: Tag,
-    path: '/finance/expense-types',
-    permission: 'expensetype.view',
-  },
-  {
     title: 'Expenses',
     icon: Receipt,
-    path: '/finance/expenses',
-    permission: 'expense.view',
+    children: [
+      { title: 'Expense Categories', path: '/finance/expense-categories', permission: 'expensecategory.view' },
+      { title: 'Expense Types', path: '/finance/expense-types', permission: 'expensetype.view' },
+      { title: 'Expenses', path: '/finance/expenses', permission: 'expense.view' },
+    ],
   },
   {
     title: 'Resident Ledger',
@@ -255,14 +251,140 @@ export const MENU_SIDEBAR: MenuConfig = [
     icon: BarChart3,
     children: [
       {
-        title: 'Financial Summary',
-        path: '/billing/reports/financial-summary',
-        permission: PERMISSIONS.report.financialView,
+        title: 'Billing & Collections',
+        children: [
+          {
+            title: 'Financial Summary',
+            path: '/billing/reports/financial-summary',
+            permission: PERMISSIONS.report.financialView,
+          },
+          {
+            title: 'Receivables Ageing',
+            path: '/billing/reports/receivables-ageing',
+            permission: PERMISSIONS.report.financialView,
+          },
+          {
+            title: 'Service Charge Collection',
+            path: '/finance/reports/service-charge-collection',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Gas Collection',
+            path: '/finance/reports/gas-collection',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          { title: 'Fines', path: '/finance/reports/fines', permission: PERMISSIONS.finance.reportView },
+          {
+            title: 'Outstanding Dues',
+            path: '/finance/reports/outstanding-dues',
+            permission: PERMISSIONS.finance.reportView,
+          },
+        ],
       },
       {
-        title: 'Receivables Ageing',
-        path: '/billing/reports/receivables-ageing',
-        permission: PERMISSIONS.report.financialView,
+        title: 'Ledgers & Position',
+        children: [
+          {
+            title: 'Trial Balance',
+            path: '/finance/reports/trial-balance',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'General Ledger',
+            path: '/finance/reports/general-ledger',
+            permission: PERMISSIONS.finance.journalView,
+          },
+          {
+            title: 'Account Ledger',
+            path: '/finance/reports/account-ledger',
+            permission: PERMISSIONS.finance.journalView,
+          },
+          {
+            title: 'Fund Position',
+            path: '/finance/reports/fund-position',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Financial Position',
+            path: '/finance/reports/financial-position',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          { title: 'Cash Flow', path: '/finance/reports/cash-flow', permission: PERMISSIONS.finance.reportView },
+          {
+            title: 'Financial Overview',
+            path: '/finance/reports/overview',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Income & Expense',
+            path: '/finance/reports/income-expense',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Cash & Bank Position',
+            path: '/finance/reports/cash-bank-position',
+            permission: PERMISSIONS.finance.reportView,
+          },
+        ],
+      },
+      {
+        title: 'Expense Reports',
+        children: [
+          {
+            title: 'Expense Summary',
+            path: '/finance/reports/expense-summary',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Expense by Category',
+            path: '/finance/reports/expense-by-category',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Expense by Type',
+            path: '/finance/reports/expense-by-type',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Expense Trend',
+            path: '/finance/reports/expense-trend',
+            permission: PERMISSIONS.finance.reportView,
+          },
+        ],
+      },
+      {
+        title: 'Fixed Deposit Reports',
+        children: [
+          {
+            title: 'FD Portfolio',
+            path: '/finance/reports/fixed-deposit-portfolio',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'FD Interest',
+            path: '/finance/reports/fixed-deposit-interest',
+            permission: PERMISSIONS.finance.reportView,
+          },
+        ],
+      },
+      {
+        title: 'Statements',
+        children: [
+          // Gated here on reportView (broader than the route's auth-only guard) so this admin-facing
+          // Finance nav only surfaces the item for report-viewing roles; residents' own-statement
+          // self-service access (reportStatementOwnView) has no menu entry point today and is
+          // unaffected — see GetResidentFinancialStatementReportQueryHandler's two-tier check.
+          {
+            title: 'Resident Financial Statement',
+            path: '/finance/reports/resident-statement',
+            permission: PERMISSIONS.finance.reportView,
+          },
+          {
+            title: 'Flat Financial Statement',
+            path: '/finance/reports/flat-statement',
+            permission: PERMISSIONS.finance.reportView,
+          },
+        ],
       },
     ],
   },

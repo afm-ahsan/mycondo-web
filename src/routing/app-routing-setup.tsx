@@ -206,6 +206,7 @@ const FlatOwnerListPage = lazyPage(residents, 'FlatOwnerListPage');
 const FlatOwnerRegistrationWizardPage = lazyPage(residents, 'FlatOwnerRegistrationWizardPage');
 
 const expenses = () => import('@/features/expenses');
+const ExpenseCategoryListPage = lazyPage(expenses, 'ExpenseCategoryListPage');
 const ExpenseTypeListPage = lazyPage(expenses, 'ExpenseTypeListPage');
 const ExpenseListPage = lazyPage(expenses, 'ExpenseListPage');
 
@@ -516,6 +517,14 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission="ownership.manage" fallback={<AccessDeniedNotice />}>
                 <FlatOwnerRegistrationWizardPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/expense-categories"
+            element={
+              <RequirePermission permission="expensecategory.view" fallback={<AccessDeniedNotice />}>
+                <ExpenseCategoryListPage />
               </RequirePermission>
             }
           />
