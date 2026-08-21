@@ -146,6 +146,8 @@ const ExpenseByTypeReportPage = lazyPage(finance, 'ExpenseByTypeReportPage');
 const ExpenseTrendReportPage = lazyPage(finance, 'ExpenseTrendReportPage');
 const FixedDepositPortfolioReportPage = lazyPage(finance, 'FixedDepositPortfolioReportPage');
 const FixedDepositInterestReportPage = lazyPage(finance, 'FixedDepositInterestReportPage');
+const FinancialAccountsPage = lazyPage(finance, 'FinancialAccountsPage');
+const FixedDepositsPage = lazyPage(finance, 'FixedDepositsPage');
 const AccountingPeriodsPage = lazyPage(finance, 'AccountingPeriodsPage');
 const BankReconciliationPage = lazyPage(finance, 'BankReconciliationPage');
 const FinancialIntegrityDashboardPage = lazyPage(finance, 'FinancialIntegrityDashboardPage');
@@ -1019,6 +1021,26 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.finance.reportView} fallback={<AccessDeniedNotice />}>
                 <FixedDepositInterestReportPage />
+              </RequirePermission>
+            }
+          />
+          {/* Banking, Fixed Deposits & Interest (Template 4). Financial Accounts gates on the base
+              bankaccount.view grant; edit/create/activate/deactivate are separately gated inside the
+              page itself. Fixed Deposits similarly gates its list/detail on fixeddeposit.view, with
+              place/renew/withdraw/void/interest-record each action-level-gated inside the page. */}
+          <Route
+            path="/finance/financial-accounts"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.bankAccountView} fallback={<AccessDeniedNotice />}>
+                <FinancialAccountsPage />
+              </RequirePermission>
+            }
+          />
+          <Route
+            path="/finance/fixed-deposits"
+            element={
+              <RequirePermission permission={PERMISSIONS.finance.fixedDepositView} fallback={<AccessDeniedNotice />}>
+                <FixedDepositsPage />
               </RequirePermission>
             }
           />

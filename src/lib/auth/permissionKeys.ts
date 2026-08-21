@@ -177,6 +177,13 @@ export const PERMISSIONS = {
     reconciliationView: 'finance.reconciliation.view',
     reconciliationManage: 'finance.reconciliation.manage',
     reconciliationReconcile: 'finance.reconciliation.reconcile',
+    // Template 4 (Banking, Fixed Deposits & Interest) — BankingEndpoints.cs.
+    bankAccountView: 'finance.bankaccount.view',
+    bankAccountManage: 'finance.bankaccount.manage',
+    fixedDepositView: 'finance.fixeddeposit.view',
+    fixedDepositPlace: 'finance.fixeddeposit.place',
+    fixedDepositManage: 'finance.fixeddeposit.manage',
+    fixedDepositInterestRecord: 'finance.fixeddeposit.interest.record',
   },
   // mycondo-api's PermissionCatalogue — generic audit-record visibility (Template 6 wires the Finance
   // audit log to this same key rather than introducing a Finance-specific one).

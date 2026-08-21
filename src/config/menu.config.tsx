@@ -21,6 +21,7 @@ import {
   Lightbulb,
   Package,
   PartyPopper,
+  PiggyBank,
   Plug,
   Receipt,
   ShieldAlert,
@@ -262,6 +263,24 @@ export const MENU_SIDEBAR: MenuConfig = [
         title: 'Receivables Ageing',
         path: '/billing/reports/receivables-ageing',
         permission: PERMISSIONS.report.financialView,
+      },
+    ],
+  },
+  {
+    title: 'Banking',
+    icon: Landmark,
+    children: [
+      {
+        title: 'Financial Accounts',
+        icon: Landmark,
+        path: '/finance/financial-accounts',
+        permission: PERMISSIONS.finance.bankAccountView,
+      },
+      {
+        title: 'Fixed Deposits',
+        icon: PiggyBank,
+        path: '/finance/fixed-deposits',
+        permission: PERMISSIONS.finance.fixedDepositView,
       },
     ],
   },
