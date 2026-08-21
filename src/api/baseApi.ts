@@ -4,6 +4,7 @@ import { env } from '@/lib/env';
 import { generateUUID } from '@/lib/helpers';
 import { type AppFetchArgs, isSilentHttpRequest, resolveHttpOperation, stripOperation } from '@/lib/http/httpOperation';
 import { beginHttpRequest, endHttpRequest } from '@/lib/http/requestActivityTracker';
+import { clearPersistedTenantId } from '@/features/auth/lib/tenantSession';
 import { sessionEnded, sessionRestored, toAuthUser } from '@/store/slices/authSlice';
 import type { AuthResponse } from './generated/mycondoApi';
 import { ApiError, type ProblemDetails } from './errors';
@@ -43,6 +44,24 @@ interface PartialAuthState {
   auth?: { user?: { tenantId?: string } | null };
 }
 
+// Coalesces concurrent 401s into a single in-flight refresh call — without this, two RTK Query
+// requests that both hit a 401 in the same tick would each POST /auth/refresh independently, racing
+// to consume/rotate the single mycondo_rt cookie (the loser gets a spurious failure).
+let pendingRefresh: Promise<Awaited<ReturnType<typeof rawBaseQuery>>> | null = null;
+
+function refreshOnce(
+  tenantId: string,
+  api: Parameters<typeof rawBaseQuery>[1],
+  extraOptions: Parameters<typeof rawBaseQuery>[2],
+): Promise<Awaited<ReturnType<typeof rawBaseQuery>>> {
+  pendingRefresh ??= Promise.resolve(
+    rawBaseQuery({ url: '/api/v1/auth/refresh', method: 'POST', body: { tenantId } }, api, extraOptions),
+  ).finally(() => {
+    pendingRefresh = null;
+  });
+  return pendingRefresh;
+}
+
 // Wraps the fetch base query: on 401 attempt a single refresh, then retry. The refresh call needs a
 // tenantId (RefreshRequest — the token itself comes from the cookie) — read the last-known tenant from
 // Redux state, since that's what a mid-session token expiry means: there was an active session a
@@ -67,13 +86,7 @@ export const baseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, F
       if (result.error?.status === 401) {
         const tenantId = (api.getState() as PartialAuthState).auth?.user?.tenantId;
 
-        const refresh = tenantId
-          ? await rawBaseQuery(
-              { url: '/api/v1/auth/refresh', method: 'POST', body: { tenantId } },
-              api,
-              extraOptions,
-            )
-          : { data: undefined };
+        const refresh = tenantId ? await refreshOnce(tenantId, api, extraOptions) : { data: undefined };
 
         if (refresh.data && typeof refresh.data === 'object' && 'accessToken' in refresh.data) {
           const { accessToken: newAccessToken, user } = refresh.data as AuthResponse;
@@ -86,6 +99,12 @@ export const baseQueryWithRefresh: BaseQueryFn<string | AppFetchArgs, unknown, F
           result = await rawBaseQuery(rawArgs, api, extraOptions);
         } else {
           setAccessToken(null);
+          // Without this, a stale tenantId survives in sessionStorage past this session's actual end
+          // (the refresh cookie is gone/invalid server-side even though this tab didn't call
+          // logout). The next reload's useSessionBootstrap would then read that stale id and POST
+          // /auth/refresh with no valid cookie attached, producing a 400 "Refresh Token must not be
+          // empty" instead of the expected silent "no session" outcome.
+          clearPersistedTenantId();
           api.dispatch(sessionEnded());
         }
       }

@@ -7,6 +7,7 @@ import { useAppSelector } from '@/store/hooks';
 import { setAccessToken } from '@/api/baseApi';
 import { useMyProfile } from '@/features/auth/api/authApi';
 import type { AuthUser } from '@/store/slices/authSlice';
+import { persistTenantId, readPersistedTenantId } from '@/features/auth/lib/tenantSession';
 
 const API_BASE = 'https://localhost:7219';
 
@@ -40,6 +41,7 @@ function Harness() {
 
 afterEach(() => {
   setAccessToken(null);
+  sessionStorage.clear();
 });
 
 describe('baseQueryWithRefresh — silent 401 refresh mid-session', () => {
@@ -81,5 +83,67 @@ describe('baseQueryWithRefresh — silent 401 refresh mid-session', () => {
       expect(store.getState().auth.user?.permissions).toEqual(['expensetype.view']);
     });
     expect(meCallCount).toBe(2);
+  });
+
+  it('clears the persisted tenantId when a mid-session refresh is rejected (expired/revoked cookie)', async () => {
+    // Reproduces the reported "RefreshToken must not be empty" 400: without clearing this, a stale
+    // tenantId survives past this session's actual end, and the *next* reload's useSessionBootstrap
+    // would read it and call /auth/refresh with no valid cookie attached.
+    persistTenantId(staleUser.tenantId);
+    setAccessToken('stale-access-token');
+
+    server.use(
+      http.get(`${API_BASE}/api/v1/auth/me`, () =>
+        HttpResponse.json({ title: 'Unauthorized', status: 401, detail: 'Access token expired.' }, { status: 401 }),
+      ),
+      http.post(`${API_BASE}/api/v1/auth/refresh`, () =>
+        HttpResponse.json({ title: 'Forbidden', status: 403, detail: 'Invalid or expired refresh token.' }, { status: 403 }),
+      ),
+    );
+
+    const { store } = renderWithProviders(<Harness />, {
+      auth: { user: staleUser, isInitialized: true },
+    });
+
+    await waitFor(() => {
+      expect(store.getState().auth.user).toBeNull();
+    });
+    expect(readPersistedTenantId()).toBeNull();
+  });
+
+  it('coalesces concurrent 401s into a single /auth/refresh call', async () => {
+    setAccessToken('stale-access-token');
+
+    let refreshCallCount = 0;
+    server.use(
+      http.get(`${API_BASE}/api/v1/auth/me`, () =>
+        HttpResponse.json({ title: 'Unauthorized', status: 401, detail: 'Access token expired.' }, { status: 401 }),
+      ),
+      http.post(`${API_BASE}/api/v1/auth/refresh`, () => {
+        refreshCallCount += 1;
+        return HttpResponse.json({
+          accessToken: 'fresh-access-token',
+          accessTokenExpiresAtUtc: new Date().toISOString(),
+          user: refreshedUserDto,
+        });
+      }),
+    );
+
+    function ConcurrentHarness() {
+      useMyProfile();
+      useMyProfile();
+      return null;
+    }
+
+    renderWithProviders(<ConcurrentHarness />, {
+      auth: { user: staleUser, isInitialized: true },
+    });
+
+    await waitFor(() => {
+      expect(refreshCallCount).toBeGreaterThan(0);
+    });
+    // A brief settle so a second, un-coalesced refresh call (the bug) would have had time to fire.
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    expect(refreshCallCount).toBe(1);
   });
 });
