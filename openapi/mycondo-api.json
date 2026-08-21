@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://localhost:7219/"
+      "url": "https://127.0.0.1:7219/"
     }
   ],
   "paths": {
@@ -201,6 +201,25 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/ResidentHouseholdMemberDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/integrity-dashboard": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinancialIntegrityDashboardDto"
                 }
               }
             }
@@ -7856,6 +7875,36 @@
         }
       }
     },
+    "/api/v1/finance/accounting-periods/{id}/soft-close": {
+      "post": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountingPeriodDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/finance/accounting-periods/{id}/close": {
       "post": {
         "tags": [
@@ -7909,6 +7958,43 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AccountingPeriodDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/audit-log": {
+      "get": {
+        "tags": [
+          "Finance"
+        ],
+        "parameters": [
+          {
+            "name": "take",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "pattern": "^-?(?:0|[1-9]\\d*)$",
+              "type": [
+                "integer",
+                "string"
+              ],
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FinanceAuditLogEntryDto"
+                  }
                 }
               }
             }
@@ -8369,6 +8455,275 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FixedDepositInterestReceiptDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-reconciliations": {
+      "get": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "financialAccountId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BankReconciliationDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartBankReconciliationCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReconciliationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-reconciliations/{id}": {
+      "get": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReconciliationDetailDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-reconciliations/{id}/complete": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankReconciliationDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-statement-lines": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddBankStatementLineCommand"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankStatementLineDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-statement-lines/{id}/match": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MatchStatementLineLedgerEntryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankStatementLineDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-statement-lines/{id}/exclude": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExcludeStatementLineReasonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankStatementLineDto"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/finance/bank-statement-lines/{id}/adjust": {
+      "post": {
+        "tags": [
+          "Banking"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddReconciliationAdjustmentRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BankStatementLineDto"
                 }
               }
             }
@@ -13232,6 +13587,36 @@
           }
         }
       },
+      "AddBankStatementLineCommand": {
+        "required": [
+          "bankReconciliationId",
+          "transactionDate",
+          "description",
+          "amount"
+        ],
+        "type": "object",
+        "properties": {
+          "bankReconciliationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "AddHouseholdMemberRequest": {
         "required": [
           "fullName",
@@ -13374,6 +13759,21 @@
               "null",
               "string"
             ]
+          }
+        }
+      },
+      "AddReconciliationAdjustmentRequest": {
+        "required": [
+          "otherSideRole",
+          "description"
+        ],
+        "type": "object",
+        "properties": {
+          "otherSideRole": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
           }
         }
       },
@@ -13861,6 +14261,138 @@
           }
         },
         "description": "The public wire shape of Register/Login/Refresh — everything AuthTokensDto carries except the\r\nrefresh token, which never leaves the server as a JSON field (see RefreshTokenCookie)."
+      },
+      "BankReconciliationDetailDto": {
+        "required": [
+          "reconciliation",
+          "lines"
+        ],
+        "type": "object",
+        "properties": {
+          "reconciliation": {
+            "$ref": "#/components/schemas/BankReconciliationDto"
+          },
+          "lines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BankStatementLineDto"
+            }
+          }
+        }
+      },
+      "BankReconciliationDto": {
+        "required": [
+          "bankReconciliationId",
+          "financialAccountId",
+          "statementDate",
+          "statementBalance",
+          "openingLedgerBalance",
+          "status",
+          "reconciledAtUtc"
+        ],
+        "type": "object",
+        "properties": {
+          "bankReconciliationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "financialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "statementBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "openingLedgerBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "status": {
+            "type": "string"
+          },
+          "reconciledAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "BankStatementLineDto": {
+        "required": [
+          "bankStatementLineId",
+          "bankReconciliationId",
+          "transactionDate",
+          "description",
+          "amount",
+          "status",
+          "matchedLedgerEntryId",
+          "adjustmentPostingId",
+          "resolutionNotes"
+        ],
+        "type": "object",
+        "properties": {
+          "bankStatementLineId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "bankReconciliationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "transactionDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "status": {
+            "type": "string"
+          },
+          "matchedLedgerEntryId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "adjustmentPostingId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "resolutionNotes": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
       },
       "BatchItemOutcomeDto": {
         "required": [
@@ -16760,6 +17292,17 @@
           }
         }
       },
+      "ExcludeStatementLineReasonRequest": {
+        "required": [
+          "reason"
+        ],
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string"
+          }
+        }
+      },
       "ExpenseByCategoryLineDto": {
         "required": [
           "expenseCategoryId",
@@ -17517,6 +18060,63 @@
           }
         }
       },
+      "FinanceAuditLogEntryDto": {
+        "required": [
+          "financeAuditLogEntryId",
+          "occurredAtUtc",
+          "actorUserId",
+          "action",
+          "targetType",
+          "targetId",
+          "metadata",
+          "correlationId"
+        ],
+        "type": "object",
+        "properties": {
+          "financeAuditLogEntryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAtUtc": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "actorUserId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "action": {
+            "type": "string"
+          },
+          "targetType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "targetId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "metadata": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "correlationId": {
+            "type": [
+              "null",
+              "string"
+            ]
+          }
+        }
+      },
       "FinanceReportMetadataDto": {
         "required": [
           "fromDate",
@@ -17649,6 +18249,63 @@
             "type": "boolean"
           }
         }
+      },
+      "FinancialIntegrityDashboardDto": {
+        "required": [
+          "unbalancedPostingsCount",
+          "duplicateLogicalPostingsCount",
+          "closedPeriodViolationsCount",
+          "staleUnreconciledBankItemsCount",
+          "staleUnreceivedInterestAccrualsCount",
+          "isHealthy"
+        ],
+        "type": "object",
+        "properties": {
+          "unbalancedPostingsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "duplicateLogicalPostingsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "closedPeriodViolationsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "staleUnreconciledBankItemsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "staleUnreceivedInterestAccrualsCount": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "isHealthy": {
+            "type": "boolean"
+          }
+        },
+        "description": "Every count is expected to be zero — see `IFinanceIntegrityRepository`'s doc comment.\r\n            bool FinancialIntegrityDashboardDto.IsHealthy is true only when every data-integrity count (not the operational-backlog\r\n            counts, which are expected to be non-zero in normal day-to-day use) is zero."
       },
       "FinancialOverviewReportDto": {
         "required": [
@@ -20507,6 +21164,18 @@
         "properties": {
           "damageNote": {
             "type": "string"
+          }
+        }
+      },
+      "MatchStatementLineLedgerEntryRequest": {
+        "required": [
+          "ledgerEntryId"
+        ],
+        "type": "object",
+        "properties": {
+          "ledgerEntryId": {
+            "type": "string",
+            "format": "uuid"
           }
         }
       },
@@ -27469,6 +28138,32 @@
           }
         }
       },
+      "StartBankReconciliationCommand": {
+        "required": [
+          "financialAccountId",
+          "statementDate",
+          "statementBalance"
+        ],
+        "type": "object",
+        "properties": {
+          "financialAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "statementDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "statementBalance": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?$",
+            "type": [
+              "number",
+              "string"
+            ],
+            "format": "double"
+          }
+        }
+      },
       "StartGeneratorSessionCommand": {
         "required": [
           "generatorId",
@@ -29012,6 +29707,9 @@
       "name": "Residents"
     },
     {
+      "name": "Finance"
+    },
+    {
       "name": "Tenant Registrations"
     },
     {
@@ -29088,9 +29786,6 @@
     },
     {
       "name": "Finance Reports"
-    },
-    {
-      "name": "Finance"
     },
     {
       "name": "Banking"
