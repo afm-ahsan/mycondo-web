@@ -1,10 +1,17 @@
 import '@testing-library/jest-dom/vitest';
 import 'vitest-axe/extend-expect';
+import { configure } from '@testing-library/react';
 import { afterAll, afterEach, beforeAll, expect } from 'vitest';
 import * as axeMatchers from 'vitest-axe/matchers';
 import { server } from './server';
 
 expect.extend(axeMatchers);
+
+// Testing Library's own findBy*/waitFor retry window (default 1000ms) is independent of Vitest's
+// testTimeout and was the actual cause of sporadic full-suite failures (Template 6 test-infrastructure
+// investigation) — under real CPU load, a genuinely-passing assertion can still lose the race against
+// this fixed window well before Vitest's own timeout would fire.
+configure({ asyncUtilTimeout: 5000 });
 
 beforeAll(() => server.listen({ onUnhandledRequest: 'error' }));
 afterEach(() => server.resetHandlers());

@@ -15,5 +15,15 @@ export default defineConfig({
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
     css: true,
+    testTimeout: 10000,
+    // Running every jsdom environment at full CPU-core concurrency causes sporadic
+    // 5s-timeout failures under load (Template 6 test-infrastructure investigation) —
+    // capping the worker pool trades a little wall-clock time for a deterministic run.
+    poolOptions: {
+      threads: {
+        maxThreads: 4,
+        minThreads: 1,
+      },
+    },
   },
 });
