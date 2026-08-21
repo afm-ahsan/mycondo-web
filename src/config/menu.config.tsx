@@ -247,6 +247,35 @@ export const MENU_SIDEBAR: MenuConfig = [
     permission: PERMISSIONS.payment.view,
   },
   {
+    title: 'Banking & Investments',
+    icon: Landmark,
+    children: [
+      {
+        title: 'Financial Accounts',
+        icon: Landmark,
+        path: '/finance/financial-accounts',
+        permission: PERMISSIONS.finance.bankAccountView,
+      },
+      {
+        title: 'Fixed Deposits',
+        icon: PiggyBank,
+        path: '/finance/fixed-deposits',
+        permission: PERMISSIONS.finance.fixedDepositView,
+      },
+      {
+        title: 'FD Interest',
+        path: '/finance/reports/fixed-deposit-interest',
+        permission: PERMISSIONS.finance.reportView,
+      },
+      {
+        title: 'Bank Reconciliation',
+        icon: Banknote,
+        path: '/finance/bank-reconciliation',
+        permission: PERMISSIONS.finance.reconciliationView,
+      },
+    ],
+  },
+  {
     title: 'Reports',
     icon: BarChart3,
     children: [
@@ -389,24 +418,6 @@ export const MENU_SIDEBAR: MenuConfig = [
     ],
   },
   {
-    title: 'Banking',
-    icon: Landmark,
-    children: [
-      {
-        title: 'Financial Accounts',
-        icon: Landmark,
-        path: '/finance/financial-accounts',
-        permission: PERMISSIONS.finance.bankAccountView,
-      },
-      {
-        title: 'Fixed Deposits',
-        icon: PiggyBank,
-        path: '/finance/fixed-deposits',
-        permission: PERMISSIONS.finance.fixedDepositView,
-      },
-    ],
-  },
-  {
     title: 'Governance',
     icon: ShieldCheck,
     children: [
@@ -417,19 +428,13 @@ export const MENU_SIDEBAR: MenuConfig = [
         permission: PERMISSIONS.finance.periodManage,
       },
       {
-        title: 'Bank Reconciliation',
-        icon: Banknote,
-        path: '/finance/bank-reconciliation',
-        permission: PERMISSIONS.finance.reconciliationView,
-      },
-      {
-        title: 'Integrity Dashboard',
+        title: 'Financial Integrity',
         icon: ShieldAlert,
         path: '/finance/integrity-dashboard',
         permission: PERMISSIONS.finance.reportView,
       },
       {
-        title: 'Audit Log',
+        title: 'Finance Audit Log',
         icon: History,
         path: '/finance/audit-log',
         permission: PERMISSIONS.audit.view,
