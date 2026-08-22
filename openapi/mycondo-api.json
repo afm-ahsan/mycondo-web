@@ -12430,6 +12430,13 @@
             }
           },
           {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "page",
             "in": "query",
             "required": true,
@@ -12462,7 +12469,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfOccupancyRegistrationDto"
+                  "$ref": "#/components/schemas/PagedResultOfOccupancyRegistrationListItemDto"
                 }
               }
             }
@@ -21625,6 +21632,71 @@
           }
         }
       },
+      "OccupancyRegistrationListItemDto": {
+        "required": [
+          "occupancyRegistrationId",
+          "primaryFullName",
+          "primaryEmail",
+          "primaryPhone",
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "occupancyType",
+          "status",
+          "moveInExpectedDate"
+        ],
+        "type": "object",
+        "properties": {
+          "occupancyRegistrationId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryEmail": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "occupancyType": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "moveInExpectedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        },
+        "description": "List-page projection for Tenant Registrations — adds the human-readable Flat/Building\r\n            context (absent from the base `OccupancyRegistrationDto`, which only carries the raw\r\n            `FlatId`) so the register doesn't have to expose GUIDs, mirroring\r\n            `FlatOwnerRegisterDto`'s list-projection pattern."
+      },
       "OccupancyRegistrationSecuritySummaryDto": {
         "required": [
           "occupancyRegistrationId",
@@ -23770,7 +23842,7 @@
           }
         }
       },
-      "PagedResultOfOccupancyRegistrationDto": {
+      "PagedResultOfOccupancyRegistrationListItemDto": {
         "required": [
           "items",
           "page",
@@ -23782,7 +23854,7 @@
           "items": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OccupancyRegistrationDto"
+              "$ref": "#/components/schemas/OccupancyRegistrationListItemDto"
             }
           },
           "page": {
