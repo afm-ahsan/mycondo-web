@@ -44,6 +44,10 @@ describe('AttachmentUploadPanel', () => {
     };
     server.use(
       http.get(`${API_BASE}/api/v1/attachments`, () => HttpResponse.json(removed ? [] : [existingDto])),
+      http.get(
+        `${API_BASE}/api/v1/attachments/attachment-1/content`,
+        () => new HttpResponse('fake-bytes', { headers: { 'Content-Type': 'application/pdf' } }),
+      ),
       http.delete(`${API_BASE}/api/v1/attachments/attachment-1`, () => {
         removed = true;
         return new HttpResponse(null, { status: 204 });
@@ -53,6 +57,7 @@ describe('AttachmentUploadPanel', () => {
     renderPanel();
 
     expect(await screen.findByText('deed.pdf')).toBeInTheDocument();
+    expect(await screen.findByRole('link', { name: /view/i })).toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: /remove deed\.pdf/i }));
 
@@ -75,6 +80,10 @@ describe('AttachmentUploadPanel', () => {
     };
     server.use(
       http.get(`${API_BASE}/api/v1/attachments`, () => HttpResponse.json(uploaded ? [uploadedDto] : [])),
+      http.get(
+        `${API_BASE}/api/v1/attachments/attachment-2/content`,
+        () => new HttpResponse('fake-bytes', { headers: { 'Content-Type': 'application/pdf' } }),
+      ),
       http.post(`${API_BASE}/api/v1/attachments`, () => {
         uploaded = true;
         return HttpResponse.json(uploadedDto);
@@ -125,5 +134,29 @@ describe('AttachmentUploadPanel', () => {
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /retry deed\.pdf/i })).not.toBeInTheDocument();
     });
+  });
+
+  it('shows an image thumbnail preview for an existing image attachment', async () => {
+    const imageDto = {
+      attachmentId: 'attachment-img',
+      ownerType: 'Resident',
+      ownerId: 'resident-1',
+      storageKey: 'a1b2c3.jpg',
+      fileName: 'photo.jpg',
+      contentType: 'image/jpeg',
+      sizeBytes: 1024,
+      createdAtUtc: new Date().toISOString(),
+    };
+    server.use(
+      http.get(`${API_BASE}/api/v1/attachments`, () => HttpResponse.json([imageDto])),
+      http.get(
+        `${API_BASE}/api/v1/attachments/attachment-img/content`,
+        () => new HttpResponse('fake-bytes', { headers: { 'Content-Type': 'image/jpeg' } }),
+      ),
+    );
+    renderPanel();
+
+    const preview = await screen.findByRole('link', { name: /preview photo\.jpg/i });
+    expect(preview.querySelector('img')).toBeInTheDocument();
   });
 });

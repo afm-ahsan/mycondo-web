@@ -59,7 +59,7 @@ import {
   useEndFlatOwnership,
   useFlatOwners,
   useFlatOwnershipsForOwner,
-  useUpdateFlatOwnerProfile,
+  useUpdateResident,
 } from '../api/residentsApi';
 
 const OWNERS_FILTER_DEFAULTS = { search: '', status: 'Active', page: '1', pageSize: '10' };
@@ -82,7 +82,11 @@ export function FlatOwnerListPage() {
     pageSize: pagination.pageSize,
   });
 
-  const [detailTarget, setDetailTarget] = useState<FlatOwnerRegisterDto | null>(null);
+  // Stores just the id, not a snapshot of the row — the owner object is derived from `data` below so
+  // that once the list refetches (e.g. after an edit), the still-open dialog reflects the fresh values
+  // too, instead of showing what was on screen at the moment the row was clicked.
+  const [detailTargetId, setDetailTargetId] = useState<string | null>(null);
+  const detailTarget = detailTargetId ? (data?.items.find((o) => o.residentId === detailTargetId) ?? null) : null;
   const [endTarget, setEndTarget] = useState<FlatOwnerRegisterDto | null>(null);
 
   function handlePaginationChange(updater: Updater<PaginationState>) {
@@ -101,7 +105,7 @@ export function FlatOwnerListPage() {
       header: 'Owner',
       size: DATA_GRID_COLUMN_SIZE.flexible,
       cell: ({ row }) => (
-        <button type="button" className="text-primary hover:underline text-left" onClick={() => setDetailTarget(row.original)}>
+        <button type="button" className="text-primary hover:underline text-left" onClick={() => setDetailTargetId(row.original.residentId)}>
           {row.original.ownerFullName}
         </button>
       ),
@@ -244,7 +248,12 @@ export function FlatOwnerListPage() {
       )}
 
       {detailTarget && (
-        <FlatOwnerDetailDialog owner={detailTarget} open onOpenChange={(open) => !open && setDetailTarget(null)} />
+        <FlatOwnerDetailDialog
+          owner={detailTarget}
+          open
+          onOpenChange={(open) => !open && setDetailTargetId(null)}
+          onUpdated={refetch}
+        />
       )}
       {endTarget && (
         <EndOwnershipDialog ownership={endTarget} open onOpenChange={(open) => !open && setEndTarget(null)} />
@@ -264,13 +273,17 @@ function FlatOwnerDetailDialog({
   owner,
   open,
   onOpenChange,
+  onUpdated,
 }: {
   owner: FlatOwnerRegisterDto;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Called after a successful profile save so the caller can refetch the Ownership Register list —
+   * this dialog's own `owner` prop is a snapshot passed down by the caller, not a live query result. */
+  onUpdated: () => void;
 }) {
   const { data: ownerships, isLoading } = useFlatOwnershipsForOwner({ residentId: owner.residentId }, { skip: !open });
-  const [updateProfile, { isLoading: isSaving }] = useUpdateFlatOwnerProfile();
+  const [updateResident, { isLoading: isSaving }] = useUpdateResident();
   const [createOwnership, { isLoading: isAddingFlat }] = useCreateFlatOwnership();
   const [isEditing, setIsEditing] = useState(false);
   const [isAddingFlatOpen, setIsAddingFlatOpen] = useState(false);
@@ -285,34 +298,22 @@ function FlatOwnerDetailDialog({
 
   async function onSubmit(values: OwnerProfileSchemaType) {
     try {
-      await updateProfile({
-        residentId: owner.residentId,
-        updateFlatOwnerProfileRequest: {
+      // This lightweight editor only ever touches name/phone/email, so it deliberately calls the
+      // narrow UpdateResidentCommand (not UpdateFlatOwnerProfileCommand, which the full "Edit full
+      // profile" wizard step uses) — that command's own required fields (address, profession, etc.)
+      // would otherwise reject this form's payload, and calling it here would also overwrite that
+      // owner-detail data with nulls since it isn't shown/collected in this modal.
+      await updateResident({
+        id: owner.residentId,
+        updateResidentRequest: {
           fullName: values.fullName,
           phone: values.phone || null,
           email: values.email || null,
-          alternatePhone: null,
-          nationalIdNumber: null,
-          passportNumber: null,
-          dateOfBirth: null,
-          gender: null,
-          presentAddress: null,
-          permanentAddress: null,
-          fatherName: null,
-          motherName: null,
-          maritalStatus: null,
-          profession: null,
-          employer: null,
-          officeAddress: null,
-          emergencyContactName: null,
-          emergencyContactPhone: null,
-          bloodGroup: null,
-          religion: null,
-          nationality: null,
         },
       }).unwrap();
       toast.success('Owner profile updated.');
       setIsEditing(false);
+      onUpdated();
     } catch (err) {
       const apiError = toApiError(err);
       if (!applyApiErrorToForm(form, apiError)) {

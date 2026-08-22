@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import { toUserMessage } from '@/api/errors';
 import { Alert, AlertIcon, AlertTitle } from '@/components/ui/alert';
@@ -6,6 +6,8 @@ import { FileUpload, FileUploadListItem } from '@/components/ui/file-upload';
 import { InlineSpinner } from '@/components/feedback/InlineSpinner';
 import { toApiError } from '@/lib/forms/applyApiErrorToForm';
 import { generateUUID } from '@/lib/helpers';
+import type { AttachmentDto } from '@/api/generated/mycondoApi';
+import { useAttachmentContentUrl } from '../hooks/useAttachmentContentUrl';
 import { useAttachmentsForOwner, useDeleteAttachment, useUploadAttachmentMutation } from '../api/attachmentsApi';
 
 interface PendingUpload {
@@ -13,6 +15,25 @@ interface PendingUpload {
   file: File;
   status: 'uploading' | 'failed';
   error?: string;
+  /** Local blob URL so a just-picked file (image or PDF) is previewable before it finishes
+   * uploading — created eagerly on selection since it's a cheap, local-only operation. */
+  previewUrl: string;
+}
+
+/** One existing (already-uploaded) document row — a separate component because each row needs its own
+ * `useAttachmentContentUrl` call to fetch its own preview, same primitive Household edit mode's
+ * Spouse/Child photo preview uses (see HouseholdMemberCard/HouseholdMemberPhotoUpload). */
+function ExistingAttachmentItem({ doc, onRemove }: { doc: AttachmentDto; onRemove: () => void }) {
+  const previewUrl = useAttachmentContentUrl(doc.attachmentId);
+  return (
+    <FileUploadListItem
+      fileName={doc.fileName}
+      status="uploaded"
+      onRemove={onRemove}
+      previewUrl={previewUrl}
+      isImage={doc.contentType.startsWith('image/')}
+    />
+  );
 }
 
 interface AttachmentUploadPanelProps {
@@ -55,12 +76,30 @@ export function AttachmentUploadPanel({
   const [deleteAttachment] = useDeleteAttachment();
   const [pending, setPending] = useState<PendingUpload[]>([]);
   const [error, setError] = useState<string | null>(null);
+  // Tracks every local blob URL created for a pending preview so it can be revoked once the file
+  // finishes uploading, is removed, or the panel unmounts mid-upload — mirrors attachmentsApi.ts's own
+  // create/revoke discipline for server-fetched blob URLs.
+  const previewUrlsRef = useRef<Set<string>>(new Set());
+
+  function revokePreviewUrl(url: string) {
+    previewUrlsRef.current.delete(url);
+    URL.revokeObjectURL(url);
+  }
+
+  useEffect(
+    () => () => {
+      previewUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+      previewUrlsRef.current.clear();
+    },
+    [],
+  );
 
   async function uploadOne(entry: PendingUpload) {
     setPending((prev) => prev.map((p) => (p.localId === entry.localId ? { ...p, status: 'uploading', error: undefined } : p)));
     try {
       await uploadAttachment({ file: entry.file, ownerType, ownerId }).unwrap();
       setPending((prev) => prev.filter((p) => p.localId !== entry.localId));
+      revokePreviewUrl(entry.previewUrl);
     } catch (err) {
       const message = toUserMessage(toApiError(err) ?? err);
       setPending((prev) => prev.map((p) => (p.localId === entry.localId ? { ...p, status: 'failed', error: message } : p)));
@@ -75,7 +114,11 @@ export function AttachmentUploadPanel({
     }
 
     const accepted = files.filter((f) => !oversized.includes(f));
-    const entries: PendingUpload[] = accepted.map((file) => ({ localId: generateUUID(), file, status: 'uploading' }));
+    const entries: PendingUpload[] = accepted.map((file) => {
+      const previewUrl = URL.createObjectURL(file);
+      previewUrlsRef.current.add(previewUrl);
+      return { localId: generateUUID(), file, status: 'uploading', previewUrl };
+    });
     setPending((prev) => [...prev, ...entries]);
     for (const entry of entries) {
       void uploadOne(entry);
@@ -92,7 +135,11 @@ export function AttachmentUploadPanel({
   }
 
   function handleRemovePending(localId: string) {
-    setPending((prev) => prev.filter((p) => p.localId !== localId));
+    setPending((prev) => {
+      const entry = prev.find((p) => p.localId === localId);
+      if (entry) revokePreviewUrl(entry.previewUrl);
+      return prev.filter((p) => p.localId !== localId);
+    });
   }
 
   return (
@@ -116,10 +163,9 @@ export function AttachmentUploadPanel({
             </p>
           ) : (
             existingDocuments?.map((doc) => (
-              <FileUploadListItem
+              <ExistingAttachmentItem
                 key={doc.attachmentId}
-                fileName={doc.fileName}
-                status="uploaded"
+                doc={doc}
                 onRemove={() => handleRemoveExisting(doc.attachmentId)}
               />
             ))
@@ -131,6 +177,8 @@ export function AttachmentUploadPanel({
               status={entry.status}
               onRetry={() => uploadOne(entry)}
               onRemove={() => handleRemovePending(entry.localId)}
+              previewUrl={entry.previewUrl}
+              isImage={entry.file.type.startsWith('image/')}
             />
           ))}
         </div>
