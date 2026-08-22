@@ -76,7 +76,18 @@ export const PERMISSIONS = {
     ownerReview: 'occupancy-registration.owner-review',
     verify: 'occupancy-registration.verify',
     moveOut: 'occupancy-registration.move-out',
-    securityView: 'occupancy-registration.security-view',
+  },
+  // mycondo-api's PermissionCatalogue.cs — Security Directory (merged Owner+Tenant security-facing
+  // resident directory). `view` is the base permission; the remaining four keys only ever expand what
+  // a caller who already holds `view` can see inside the detail modal — they never independently grant
+  // directory access, so gate the route/list on `view` alone and let the backend's per-section response
+  // shape drive which parts of the detail modal render.
+  securityDirectory: {
+    view: 'security.directory.view',
+    householdView: 'security.directory.household.view',
+    workerView: 'security.directory.worker.view',
+    vehicleView: 'security.directory.vehicle.view',
+    detailView: 'security.directory.detail.view',
   },
   // mycondo-api's Seed_Security_Permissions.cs — Vehicle Access.
   vehicle: {

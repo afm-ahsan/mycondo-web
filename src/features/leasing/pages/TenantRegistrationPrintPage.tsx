@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { formatDate } from '@/lib/helpers';
 import {
   useHouseholdMembers,
-  useOccupancySecurityView,
   useTenantRegistration,
+  useTenantRegistrations,
   useVehicleAssignments,
   useWorkerAssignments,
 } from '../api/leasingApi';
@@ -27,7 +27,12 @@ export function TenantRegistrationPrintPage() {
   const registrationId = id ?? '';
 
   const { data: registration } = useTenantRegistration(registrationId ? { id: registrationId } : skipToken);
-  const { data: security } = useOccupancySecurityView(registrationId ? { id: registrationId } : skipToken);
+  // The registration detail DTO carries flatId but not the flat/building display name (that's a
+  // list-row projection) — reuse the existing list query rather than the security-restricted
+  // directory endpoint, which requires a permission this print page's users don't necessarily hold.
+  const { data: flatRegistrations } = useTenantRegistrations(
+    registration ? { flatId: registration.flatId, page: 1, pageSize: 50 } : skipToken,
+  );
   const { data: members } = useHouseholdMembers(registrationId ? { id: registrationId } : skipToken);
   const { data: workers } = useWorkerAssignments(registrationId ? { id: registrationId } : skipToken);
   const { data: vehicles } = useVehicleAssignments(registrationId ? { id: registrationId } : skipToken);
@@ -35,6 +40,8 @@ export function TenantRegistrationPrintPage() {
   if (!registration) {
     return <p className="text-muted-foreground p-6 text-sm">Loading…</p>;
   }
+
+  const flatInfo = flatRegistrations?.items.find((r) => r.occupancyRegistrationId === registration.occupancyRegistrationId);
 
   const activeMembers = members?.filter((m) => m.isActive) ?? [];
   const activeWorkers = workers?.filter((w) => w.isActive) ?? [];
@@ -66,7 +73,7 @@ export function TenantRegistrationPrintPage() {
             <div>
               <h1 className="text-lg font-bold uppercase">Flat Owner / Tenant Registration Form</h1>
               <p className="text-sm">
-                {security?.buildingName ?? '—'} · Flat {security?.flatNumber ?? '—'}
+                {flatInfo?.buildingName ?? '—'} · Flat {flatInfo?.flatNumber ?? '—'}
               </p>
             </div>
             <div className="text-end text-xs">
