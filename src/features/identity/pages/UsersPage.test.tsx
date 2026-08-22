@@ -23,8 +23,8 @@ const adminUser: AuthUser = {
 const viewOnlyUser: AuthUser = { ...adminUser, permissions: ['user.view'] };
 
 const baseUsers = [
-  { userId: 'user-1', email: 'jane@example.com', fullName: 'Jane Doe', phoneNumber: '+8801000000000', isActive: true, lastLoginAtUtc: null, createdAtUtc: '2026-01-01T00:00:00Z' },
-  { userId: 'user-2', email: 'john@example.com', fullName: 'John Roe', phoneNumber: null, isActive: false, lastLoginAtUtc: null, createdAtUtc: '2026-01-02T00:00:00Z' },
+  { userId: 'user-1', email: 'jane@example.com', fullName: 'Jane Doe', phoneNumber: '+8801000000000', isActive: true, lastLoginAtUtc: null, createdAtUtc: '2026-01-01T00:00:00Z', roleNames: ['BuildingAdmin'] },
+  { userId: 'user-2', email: 'john@example.com', fullName: 'John Roe', phoneNumber: null, isActive: false, lastLoginAtUtc: null, createdAtUtc: '2026-01-02T00:00:00Z', roleNames: [] },
 ];
 
 function setUpMocks(usersOverride = baseUsers) {
@@ -71,6 +71,7 @@ describe('UsersPage', () => {
     expect(screen.getAllByText('John Roe').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Active').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Disabled').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('BuildingAdmin').length).toBeGreaterThan(0);
   });
 
   it('filters the list by search text', async () => {
@@ -120,12 +121,14 @@ describe('UsersPage', () => {
     });
   });
 
-  it('creates a user and shows the generated temporary password once', async () => {
+  it('creates a user with a mandatory password and status, defaulting status to Active', async () => {
     setUpMocks();
+    let capturedBody: unknown;
     server.use(
-      http.post(`${API_BASE}/api/v1/users`, () =>
-        HttpResponse.json({ userId: 'user-new', temporaryPassword: 'Tmp1234Secure!' }),
-      ),
+      http.post(`${API_BASE}/api/v1/users`, async ({ request }) => {
+        capturedBody = await request.json();
+        return HttpResponse.json({ userId: 'user-new' });
+      }),
     );
     const user = userEvent.setup();
     renderWithProviders(<UsersPage />, { auth: { user: adminUser, isInitialized: true } });
@@ -133,13 +136,46 @@ describe('UsersPage', () => {
     await screen.findAllByText('Jane Doe');
 
     await user.click(screen.getByRole('button', { name: /add user/i }));
-    await user.type(await screen.findByLabelText('Full name'), 'New Person');
-    await user.type(screen.getByLabelText('Email'), 'new.person@example.com');
+    // Required fields render a trailing " *" in the label's accessible text (FormItem `required`),
+    // so exact-string label matches fail here — use anchored regexes instead.
+    await user.type(await screen.findByLabelText(/^full name/i), 'New Person');
+    await user.type(screen.getByLabelText(/^email/i), 'new.person@example.com');
+    await user.type(screen.getByLabelText(/^mobile/i), '01711000000');
+    // { selector: 'input' } excludes the PasswordPolicyInfo trigger, whose aria-label ("Password
+    // requirements") also starts with "Password" and would otherwise make this match ambiguous.
+    await user.type(screen.getByLabelText(/^password/i, { selector: 'input' }), 'Str0ngPassw0rd!');
+    await user.type(screen.getByLabelText(/^confirm password/i), 'Str0ngPassw0rd!');
 
     await user.click(screen.getByRole('button', { name: /create user/i }));
 
-    expect(await screen.findByText(/will not be shown again/i)).toBeInTheDocument();
-    expect(screen.getByDisplayValue('Tmp1234Secure!')).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    expect(capturedBody).toMatchObject({
+      fullName: 'New Person',
+      email: 'new.person@example.com',
+      phoneNumber: '+8801711000000',
+      password: 'Str0ngPassw0rd!',
+      isActive: true,
+    });
+  });
+
+  it('rejects Add User submission when Confirm password does not match', async () => {
+    setUpMocks();
+    const user = userEvent.setup();
+    renderWithProviders(<UsersPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findAllByText('Jane Doe');
+
+    await user.click(screen.getByRole('button', { name: /add user/i }));
+    await user.type(await screen.findByLabelText(/^full name/i), 'New Person');
+    await user.type(screen.getByLabelText(/^email/i), 'new.person@example.com');
+    await user.type(screen.getByLabelText(/^mobile/i), '01711000000');
+    // { selector: 'input' } excludes the PasswordPolicyInfo trigger, whose aria-label ("Password
+    // requirements") also starts with "Password" and would otherwise make this match ambiguous.
+    await user.type(screen.getByLabelText(/^password/i, { selector: 'input' }), 'Str0ngPassw0rd!');
+    await user.type(screen.getByLabelText(/^confirm password/i), 'Different1!');
+    await user.click(screen.getByRole('button', { name: /create user/i }));
+
+    expect(await screen.findByText('Passwords do not match.')).toBeInTheDocument();
   });
 
   it("edits a user's full name and mobile number", async () => {
