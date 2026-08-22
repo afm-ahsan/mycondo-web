@@ -13151,18 +13151,40 @@
         }
       }
     },
-    "/api/v1/occupancy-registrations/security": {
+    "/api/v1/security/directory": {
       "get": {
         "tags": [
-          "Tenant Registrations"
+          "Security Directory"
         ],
         "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buildingId",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
           {
             "name": "flatId",
             "in": "query",
             "schema": {
               "type": "string",
               "format": "uuid"
+            }
+          },
+          {
+            "name": "accessStatus",
+            "in": "query",
+            "schema": {
+              "type": "string"
             }
           },
           {
@@ -13198,7 +13220,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PagedResultOfOccupancyRegistrationSecuritySummaryDto"
+                  "$ref": "#/components/schemas/PagedResultOfSecurityDirectoryEntryDto"
                 }
               }
             }
@@ -13206,10 +13228,10 @@
         }
       }
     },
-    "/api/v1/occupancy-registrations/security/{id}": {
+    "/api/v1/security/directory/{id}": {
       "get": {
         "tags": [
-          "Tenant Registrations"
+          "Security Directory"
         ],
         "parameters": [
           {
@@ -13220,6 +13242,14 @@
               "type": "string",
               "format": "uuid"
             }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -13228,7 +13258,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OccupancyRegistrationSecurityViewDto"
+                  "$ref": "#/components/schemas/SecurityDirectoryDetailDto"
                 }
               }
             }
@@ -21739,139 +21769,6 @@
         },
         "description": "List-page projection for Tenant Registrations — adds the human-readable Flat/Building\r\n            context (absent from the base `OccupancyRegistrationDto`, which only carries the raw\r\n            `FlatId`) so the register doesn't have to expose GUIDs, mirroring\r\n            `FlatOwnerRegisterDto`'s list-projection pattern."
       },
-      "OccupancyRegistrationSecuritySummaryDto": {
-        "required": [
-          "occupancyRegistrationId",
-          "flatNumber",
-          "buildingName",
-          "primaryFullName",
-          "primaryPhotoAttachmentId",
-          "status",
-          "accessEligible"
-        ],
-        "type": "object",
-        "properties": {
-          "occupancyRegistrationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "flatNumber": {
-            "type": "string"
-          },
-          "buildingName": {
-            "type": "string"
-          },
-          "primaryFullName": {
-            "type": "string"
-          },
-          "primaryPhotoAttachmentId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "status": {
-            "type": "string"
-          },
-          "accessEligible": {
-            "type": "boolean"
-          }
-        },
-        "description": "List-row shape for the security-facing directory — see\r\n            OccupancyRegistrationSecurityViewDto for the full detail shape and masking rules."
-      },
-      "OccupancyRegistrationSecurityViewDto": {
-        "required": [
-          "occupancyRegistrationId",
-          "flatId",
-          "flatNumber",
-          "buildingId",
-          "buildingName",
-          "primaryFullName",
-          "primaryPhotoAttachmentId",
-          "occupancyType",
-          "status",
-          "accessEligible",
-          "activatedAtUtc",
-          "movedOutAtUtc",
-          "householdMembers",
-          "workers",
-          "vehicles"
-        ],
-        "type": "object",
-        "properties": {
-          "occupancyRegistrationId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "flatId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "flatNumber": {
-            "type": "string"
-          },
-          "buildingId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "buildingName": {
-            "type": "string"
-          },
-          "primaryFullName": {
-            "type": "string"
-          },
-          "primaryPhotoAttachmentId": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "uuid"
-          },
-          "occupancyType": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "accessEligible": {
-            "type": "boolean"
-          },
-          "activatedAtUtc": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "movedOutAtUtc": {
-            "type": [
-              "null",
-              "string"
-            ],
-            "format": "date-time"
-          },
-          "householdMembers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SecurityHouseholdMemberDto"
-            }
-          },
-          "workers": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SecurityWorkerDto"
-            }
-          },
-          "vehicles": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SecurityVehicleDto"
-            }
-          }
-        },
-        "description": "Deliberately restricted view of an OccupancyRegistration\r\nfor security staff — operational information only (name, photo, unit, occupancy/access status,\r\napproved household/workers/vehicles). Never includes National ID, passport, permanent address,\r\nemail, or any identity-document/lease data — see `GetOccupancyRegistrationSecurityViewQueryHandler`."
-      },
       "OccupancyRegistrationStatusHistoryDto": {
         "required": [
           "occupancyRegistrationStatusHistoryId",
@@ -23939,61 +23836,6 @@
           }
         }
       },
-      "PagedResultOfOccupancyRegistrationSecuritySummaryDto": {
-        "required": [
-          "items",
-          "page",
-          "pageSize",
-          "total"
-        ],
-        "type": "object",
-        "properties": {
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OccupancyRegistrationSecuritySummaryDto"
-            }
-          },
-          "page": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "pageSize": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "total": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int64"
-          },
-          "totalPages": {
-            "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
-            "format": "int32"
-          },
-          "hasNext": {
-            "type": "boolean"
-          },
-          "hasPrevious": {
-            "type": "boolean"
-          }
-        }
-      },
       "PagedResultOfOrganizationListItemDto": {
         "required": [
           "items",
@@ -24392,6 +24234,61 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/ResidentDto"
+            }
+          },
+          "page": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          },
+          "totalPages": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "hasNext": {
+            "type": "boolean"
+          },
+          "hasPrevious": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PagedResultOfSecurityDirectoryEntryDto": {
+        "required": [
+          "items",
+          "page",
+          "pageSize",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SecurityDirectoryEntryDto"
             }
           },
           "page": {
@@ -27843,7 +27740,205 @@
           }
         }
       },
-      "SecurityHouseholdMemberDto": {
+      "SecurityDirectoryDetailDto": {
+        "required": [
+          "entryId",
+          "residentType",
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "primaryFullName",
+          "primaryPhone",
+          "primaryPhotoAttachmentId",
+          "accessStatus",
+          "occupancyStatus",
+          "householdMembers",
+          "workers",
+          "vehicles",
+          "extendedDetail"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "residentType": {
+            "type": "string"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhone": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "accessStatus": {
+            "type": "string"
+          },
+          "occupancyStatus": {
+            "type": "string"
+          },
+          "householdMembers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SecurityDirectoryHouseholdMemberDto"
+            }
+          },
+          "workers": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SecurityDirectoryWorkerDto"
+            }
+          },
+          "vehicles": {
+            "type": [
+              "null",
+              "array"
+            ],
+            "items": {
+              "$ref": "#/components/schemas/SecurityDirectoryVehicleDto"
+            }
+          },
+          "extendedDetail": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/SecurityDirectoryExtendedDetailDto"
+              }
+            ]
+          }
+        },
+        "description": "Deliberately restricted detail view of a merged security-directory entry (Owner via\r\n`FlatOwnership`, or Tenant via `OccupancyRegistration`) — operational information only\r\n(name, phone, photo, unit, resident type, access/occupancy status). Never includes National ID,\r\npassport, permanent address, email, religion, nationality, parents' names, or any other identity-\r\ndocument/financial data — see `GetSecurityDirectoryDetailQueryHandler`.\r\n\r\nIReadOnlyList&lt;SecurityDirectoryHouseholdMemberDto&gt;? SecurityDirectoryDetailDto.HouseholdMembers, IReadOnlyList&lt;SecurityDirectoryWorkerDto&gt;? SecurityDirectoryDetailDto.Workers, IReadOnlyList&lt;SecurityDirectoryVehicleDto&gt;? SecurityDirectoryDetailDto.Vehicles, and\r\nSecurityDirectoryExtendedDetailDto? SecurityDirectoryDetailDto.ExtendedDetail are each `null` when the caller lacks the matching granular\r\npermission (`security.directory.household.view` / `.worker.view` / `.vehicle.view` /\r\n`.detail.view`) — distinct from an empty list, which means the caller is authorized but there is\r\nnothing on file. The API never returns a section the caller isn't authorized for."
+      },
+      "SecurityDirectoryEntryDto": {
+        "required": [
+          "entryId",
+          "residentType",
+          "flatId",
+          "flatNumber",
+          "buildingId",
+          "buildingName",
+          "primaryFullName",
+          "primaryPhotoAttachmentId",
+          "accessStatus",
+          "occupancyStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "entryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "residentType": {
+            "type": "string"
+          },
+          "flatId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "flatNumber": {
+            "type": "string"
+          },
+          "buildingId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "buildingName": {
+            "type": "string"
+          },
+          "primaryFullName": {
+            "type": "string"
+          },
+          "primaryPhotoAttachmentId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "accessStatus": {
+            "type": "string"
+          },
+          "occupancyStatus": {
+            "type": "string"
+          }
+        },
+        "description": "List-row shape for the merged, security-facing resident directory — one row per active\r\n`OccupancyRegistration` (Tenant) or active `FlatOwnership` (Owner). Guid SecurityDirectoryEntryDto.EntryId is\r\nthe underlying aggregate's id (the `OccupancyRegistrationId` for a Tenant row, the\r\n`FlatOwnershipId` for an Owner row) — callers must pass both Guid SecurityDirectoryEntryDto.EntryId and\r\nstring SecurityDirectoryEntryDto.ResidentType back to the detail endpoint to resolve the right aggregate. See\r\nSecurityDirectoryDetailDto for the full detail shape and masking rules."
+      },
+      "SecurityDirectoryExtendedDetailDto": {
+        "required": [
+          "activatedAtUtc",
+          "movedOutAtUtc",
+          "ownershipStartDate",
+          "ownershipEndDate"
+        ],
+        "type": "object",
+        "properties": {
+          "activatedAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "movedOutAtUtc": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date-time"
+          },
+          "ownershipStartDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          },
+          "ownershipEndDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "date"
+          }
+        },
+        "description": "Extended occupancy/ownership timeline — activation/move-out for a Tenant entry,\r\n            start/end date for an Owner entry — gated by `security.directory.detail.view`."
+      },
+      "SecurityDirectoryHouseholdMemberDto": {
         "required": [
           "fullName",
           "relationshipToPrimary"
@@ -27854,6 +27949,40 @@
             "type": "string"
           },
           "relationshipToPrimary": {
+            "type": "string"
+          }
+        }
+      },
+      "SecurityDirectoryVehicleDto": {
+        "required": [
+          "registrationNumber",
+          "vehicleType"
+        ],
+        "type": "object",
+        "properties": {
+          "registrationNumber": {
+            "type": "string"
+          },
+          "vehicleType": {
+            "type": "string"
+          }
+        }
+      },
+      "SecurityDirectoryWorkerDto": {
+        "required": [
+          "fullName",
+          "workerType",
+          "verificationStatus"
+        ],
+        "type": "object",
+        "properties": {
+          "fullName": {
+            "type": "string"
+          },
+          "workerType": {
+            "type": "string"
+          },
+          "verificationStatus": {
             "type": "string"
           }
         }
@@ -27881,40 +28010,6 @@
           }
         },
         "description": "Tenant-wide only — `AccessSession` and `Parcel` have no BuildingId of their own\r\n            (one front gate/desk serves the whole property), so no buildingId filter is offered here. Excludes\r\n            Payroll's Staff Attendance entirely — that stays Payroll's domain, not Security's, per UX-5's\r\n            approved module-boundary decision."
-      },
-      "SecurityVehicleDto": {
-        "required": [
-          "registrationNumber",
-          "vehicleType"
-        ],
-        "type": "object",
-        "properties": {
-          "registrationNumber": {
-            "type": "string"
-          },
-          "vehicleType": {
-            "type": "string"
-          }
-        }
-      },
-      "SecurityWorkerDto": {
-        "required": [
-          "fullName",
-          "workerType",
-          "verificationStatus"
-        ],
-        "type": "object",
-        "properties": {
-          "fullName": {
-            "type": "string"
-          },
-          "workerType": {
-            "type": "string"
-          },
-          "verificationStatus": {
-            "type": "string"
-          }
-        }
       },
       "ServiceChargeCollectionReportDto": {
         "required": [
@@ -29975,6 +30070,9 @@
     },
     {
       "name": "Gas Cylinder Reports"
+    },
+    {
+      "name": "Security Directory"
     }
   ]
 }

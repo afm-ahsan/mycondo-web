@@ -96,6 +96,7 @@ const ParcelRegisterPage = lazyPage(security, 'ParcelRegisterPage');
 const ReceiveParcelPage = lazyPage(security, 'ReceiveParcelPage');
 const ParcelDetailPage = lazyPage(security, 'ParcelDetailPage');
 const EntryGateListPage = lazyPage(security, 'EntryGateListPage');
+const SecurityDirectoryPage = lazyPage(security, 'SecurityDirectoryPage');
 
 // Leasing
 const leasing = () => import('@/features/leasing');
@@ -103,7 +104,6 @@ const TenantRegistrationListPage = lazyPage(leasing, 'TenantRegistrationListPage
 const TenantRegistrationWizardPage = lazyPage(leasing, 'TenantRegistrationWizardPage');
 const TenantRegistrationDetailPage = lazyPage(leasing, 'TenantRegistrationDetailPage');
 const TenantRegistrationPrintPage = lazyPage(leasing, 'TenantRegistrationPrintPage');
-const SecurityDirectoryPage = lazyPage(leasing, 'SecurityDirectoryPage');
 
 // Billing & Payments
 const billing = () => import('@/features/billing');
@@ -769,6 +769,14 @@ export function AppRoutingSetup() {
             }
           />
           <Route
+            path="/security/directory"
+            element={
+              <RequirePermission permission={PERMISSIONS.securityDirectory.view} fallback={<AccessDeniedNotice />}>
+                <SecurityDirectoryPage />
+              </RequirePermission>
+            }
+          />
+          <Route
             path="/billing/service-charge-rules"
             element={
               <RequirePermission permission={PERMISSIONS.billing.ruleView} fallback={<AccessDeniedNotice />}>
@@ -1423,14 +1431,6 @@ export function AppRoutingSetup() {
             element={
               <RequirePermission permission={PERMISSIONS.occupancyRegistration.view} fallback={<AccessDeniedNotice />}>
                 <TenantRegistrationPrintPage />
-              </RequirePermission>
-            }
-          />
-          <Route
-            path="/leasing/security-directory"
-            element={
-              <RequirePermission permission={PERMISSIONS.occupancyRegistration.securityView} fallback={<AccessDeniedNotice />}>
-                <SecurityDirectoryPage />
               </RequirePermission>
             }
           />

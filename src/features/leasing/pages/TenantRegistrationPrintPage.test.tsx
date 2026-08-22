@@ -51,23 +51,26 @@ describe('TenantRegistrationPrintPage', () => {
           rejectedReason: null,
         }),
       ),
-      http.get(`${API_BASE}/api/v1/occupancy-registrations/security/reg-1`, () =>
+      http.get(`${API_BASE}/api/v1/occupancy-registrations`, () =>
         HttpResponse.json({
-          occupancyRegistrationId: 'reg-1',
-          flatId: 'flat-1',
-          flatNumber: 'A-101',
-          buildingId: 'building-1',
-          buildingName: 'Tower A',
-          primaryFullName: 'Karim Ahmed',
-          primaryPhotoAttachmentId: null,
-          occupancyType: 'Occupant',
-          status: 'Active',
-          accessEligible: true,
-          activatedAtUtc: null,
-          movedOutAtUtc: null,
-          householdMembers: [],
-          workers: [],
-          vehicles: [],
+          items: [
+            {
+              occupancyRegistrationId: 'reg-1',
+              primaryFullName: 'Karim Ahmed',
+              primaryEmail: null,
+              primaryPhone: '01711000000',
+              flatId: 'flat-1',
+              flatNumber: 'A-101',
+              buildingId: 'building-1',
+              buildingName: 'Tower A',
+              occupancyType: 'Occupant',
+              status: 'Active',
+              moveInExpectedDate: null,
+            },
+          ],
+          page: 1,
+          pageSize: 50,
+          total: 1,
         }),
       ),
       http.get(`${API_BASE}/api/v1/occupancy-registrations/reg-1/household-members`, () => HttpResponse.json([])),
@@ -89,6 +92,6 @@ describe('TenantRegistrationPrintPage', () => {
     expect(await screen.findByText('Flat Owner / Tenant Registration Form')).toBeInTheDocument();
     expect(screen.getByText(/\*{6}7890/)).toBeInTheDocument();
     expect(screen.queryByText('1234567890')).not.toBeInTheDocument();
-    expect(screen.getByText('Tower A · Flat A-101')).toBeInTheDocument();
+    expect(await screen.findByText('Tower A · Flat A-101')).toBeInTheDocument();
   });
 });

@@ -62,11 +62,6 @@ export const MENU_SIDEBAR: MenuConfig = [
         permission: PERMISSIONS.occupancyRegistration.view,
       },
       { title: 'Resident Directory', path: '/residents', permission: 'resident.view' },
-      {
-        title: 'Security Directory',
-        path: '/leasing/security-directory',
-        permission: PERMISSIONS.occupancyRegistration.securityView,
-      },
     ],
   },
   {
@@ -81,6 +76,12 @@ export const MENU_SIDEBAR: MenuConfig = [
     title: 'Security & Access',
     icon: ShieldUser,
     children: [
+      {
+        title: 'Security Directory',
+        icon: ShieldCheck,
+        path: '/security/directory',
+        permission: PERMISSIONS.securityDirectory.view,
+      },
       {
         title: 'Entry Gates',
         icon: DoorOpen,

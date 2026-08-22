@@ -5,8 +5,6 @@ import {
   useGetApiV1OccupancyRegistrationsByIdVehicleAssignmentsQuery,
   useGetApiV1OccupancyRegistrationsByIdWorkerAssignmentsQuery,
   useGetApiV1OccupancyRegistrationsQuery,
-  useGetApiV1OccupancyRegistrationsSecurityByIdQuery,
-  useGetApiV1OccupancyRegistrationsSecurityQuery,
   usePostApiV1HouseholdMembersByIdDeactivateMutation,
   usePostApiV1OccupancyRegistrationsByIdActivateMutation,
   usePostApiV1OccupancyRegistrationsByIdHouseholdMembersMutation,
@@ -61,5 +59,3 @@ export const useEndWorkerAssignment = usePostApiV1WorkerAssignmentsByIdEndMutati
 export const useVehicleAssignments = useGetApiV1OccupancyRegistrationsByIdVehicleAssignmentsQuery;
 export const useAssignVehicle = usePostApiV1OccupancyRegistrationsByIdVehicleAssignmentsMutation;
 export const useEndVehicleAssignment = usePostApiV1VehicleAssignmentsByIdEndMutation;
-export const useOccupancySecurityViews = useGetApiV1OccupancyRegistrationsSecurityQuery;
-export const useOccupancySecurityView = useGetApiV1OccupancyRegistrationsSecurityByIdQuery;
