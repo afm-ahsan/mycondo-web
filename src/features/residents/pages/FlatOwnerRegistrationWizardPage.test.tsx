@@ -78,12 +78,24 @@ describe('FlatOwnerRegistrationWizardPage', () => {
     await user.click(await screen.findByRole('option', { name: 'A-101' }));
     await user.click(screen.getByRole('button', { name: /save & continue/i }));
 
-    // Step 2 — Contact & Identity (creates the Resident via SaveOwnerResidentProfile)
-    await user.type(await screen.findByLabelText('Full name'), 'New Owner');
-    await user.type(screen.getByLabelText('National ID'), '1234567890123');
-    await user.type(screen.getByLabelText('Date of birth'), '1990-01-01');
+    // Step 2 — Contact & Identity (creates the Resident via SaveOwnerResidentProfile). Label queries
+    // use a leading-text regex, not an exact string, because required fields' FormLabel renders a
+    // trailing visually-hidden " *" indicator that's part of the label's text content.
+    await user.type(await screen.findByLabelText(/^full name/i), 'New Owner');
+    await user.type(screen.getByLabelText(/^mobile number/i), '1700000000');
+    await user.type(screen.getByLabelText(/^national id/i), '1234567890123');
     await user.click((await screen.findByText('Select gender')).closest('button')!);
     await user.click(await screen.findByRole('option', { name: 'Male' }));
+    await user.type(screen.getByLabelText(/^date of birth/i), '1990-01-01');
+    await user.type(screen.getByLabelText(/^nationality/i), 'Bangladeshi');
+    await user.type(screen.getByLabelText(/^religion/i), 'Islam');
+    await user.type(screen.getByLabelText(/^present address/i), 'House 1, Road 2, Dhaka');
+    await user.type(screen.getByLabelText(/^permanent address/i), 'House 1, Road 2, Dhaka');
+    await user.type(screen.getByLabelText(/^father's name/i), 'John Owner');
+    await user.type(screen.getByLabelText(/^mother's name/i), 'Mary Owner');
+    await user.click((await screen.findByText('Select')).closest('button')!);
+    await user.click(await screen.findByRole('option', { name: 'Married' }));
+    await user.type(screen.getByLabelText(/^profession/i), 'Engineer');
     await user.click(screen.getByRole('button', { name: /save & continue/i }));
 
     // Step 3 — Household (optional, skip)
@@ -117,10 +129,11 @@ describe('FlatOwnerRegistrationWizardPage', () => {
           residentId: 'resident-1', flatId: 'flat-1', fullName: 'Jane Owner', phone: '+8801700000000',
           email: 'jane.owner@example.com', residentType: 'Owner', alternatePhone: null,
           nationalIdNumberMasked: '****3210', passportNumberMasked: null, dateOfBirth: '1990-01-01',
-          gender: 'Male', presentAddress: null, permanentAddress: null, fatherName: null, motherName: null,
-          maritalStatus: null, profession: null, employer: null, officeAddress: null,
-          emergencyContactName: null, emergencyContactPhone: null, bloodGroup: null, religion: null,
-          nationality: null,
+          gender: 'Male', presentAddress: 'House 1, Road 2, Dhaka', permanentAddress: 'House 1, Road 2, Dhaka',
+          fatherName: 'John Owner', motherName: 'Mary Owner', maritalStatus: 'Married', profession: 'Engineer',
+          employer: null, officeAddress: null,
+          emergencyContactName: null, emergencyContactPhone: null, bloodGroup: null, religion: 'Islam',
+          nationality: 'Bangladeshi',
         }),
       ),
       http.get(`${API_BASE}/api/v1/properties/owners/resident-1/ownerships`, () =>
@@ -172,7 +185,7 @@ describe('FlatOwnerRegistrationWizardPage', () => {
     await user.click(screen.getByRole('button', { name: /^continue$/i }));
 
     // Step 2 — preloaded from the existing Resident; National ID stays blank (masked, kept as-is).
-    const fullNameInput = await screen.findByLabelText('Full name');
+    const fullNameInput = await screen.findByLabelText(/^full name/i);
     expect(fullNameInput).toHaveValue('Jane Owner');
     expect(screen.getByLabelText(/national id/i)).toHaveValue('');
     await user.clear(fullNameInput);
@@ -191,5 +204,77 @@ describe('FlatOwnerRegistrationWizardPage', () => {
     // Step 5 — edit mode shows "Done" instead of "Register owner" and does not call CreateFlatOwnership.
     expect(await screen.findByRole('button', { name: /^done$/i })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /register owner/i })).not.toBeInTheDocument();
+  }, 15000);
+
+  // Guards against an owner ending up with no National ID on file forever: unlike the other Contact &
+  // Identity fields (which round-trip normally), National ID is masked and never sent back to the
+  // browser — so "leave blank to keep existing" is only valid when the resident actually already has
+  // one (nationalIdNumberMasked is non-null). Here it's null, so it must be supplied like create mode.
+  it('requires National ID in edit mode when the resident has none on file yet', async () => {
+    server.use(
+      http.get(`${API_BASE}/api/v1/residents/resident-2`, () =>
+        HttpResponse.json({
+          residentId: 'resident-2', flatId: 'flat-1', fullName: 'No Nid Owner', phone: '+8801700000001',
+          email: null, residentType: 'Owner', alternatePhone: null,
+          nationalIdNumberMasked: null, passportNumberMasked: null, dateOfBirth: '1990-01-01',
+          gender: 'Male', presentAddress: 'House 1, Road 2, Dhaka', permanentAddress: 'House 1, Road 2, Dhaka',
+          fatherName: 'John Owner', motherName: 'Mary Owner', maritalStatus: 'Married', profession: 'Engineer',
+          employer: null, officeAddress: null,
+          emergencyContactName: null, emergencyContactPhone: null, bloodGroup: null, religion: 'Islam',
+          nationality: 'Bangladeshi',
+        }),
+      ),
+      http.get(`${API_BASE}/api/v1/properties/owners/resident-2/ownerships`, () =>
+        HttpResponse.json([
+          { flatOwnershipId: 'own-2', flatId: 'flat-1', flatNumber: 'A-101', buildingId: 'b-1', buildingName: 'Tower A', status: 'Active', startDate: '2026-01-01', endDate: null },
+        ]),
+      ),
+      http.get(`${API_BASE}/api/v1/properties/buildings/b-1`, () =>
+        HttpResponse.json({ buildingId: 'b-1', name: 'Tower A', code: 'TA', address: null, primaryPhotoAttachmentId: null }),
+      ),
+      http.get(`${API_BASE}/api/v1/properties/buildings/b-1/flats/flat-1`, () =>
+        HttpResponse.json({
+          flatId: 'flat-1', buildingId: 'b-1', flatNumber: 'A-101', floorNumber: 1, flatType: 'Residential', areaSqFt: null,
+          primaryPhotoAttachmentId: null,
+        }),
+      ),
+      http.get(`${API_BASE}/api/v1/residents/resident-2/household-members`, () => HttpResponse.json([])),
+      http.get(`${API_BASE}/api/v1/attachments`, () => HttpResponse.json([])),
+      http.put(`${API_BASE}/api/v1/properties/flat-ownerships/owners/resident-2/profile`, () =>
+        HttpResponse.json({ residentId: 'resident-2', flatId: 'flat-1', fullName: 'No Nid Owner' }),
+      ),
+    );
+
+    const store = createStore({ auth: { user: adminUser, isInitialized: true } });
+    const user = userEvent.setup();
+    render(
+      <MemoryRouter initialEntries={['/residents/flat-owners/resident-2/edit']}>
+        <Provider store={store}>
+          <PageHeaderProvider>
+            <Routes>
+              <Route path="/residents/flat-owners/:residentId/edit" element={<FlatOwnerRegistrationWizardPage />} />
+            </Routes>
+          </PageHeaderProvider>
+        </Provider>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText(/Tower A \(TA\) — Flat A-101/);
+    await user.click(screen.getByRole('button', { name: /^continue$/i }));
+
+    await screen.findByLabelText(/^full name/i);
+    expect(screen.getByLabelText(/^national id/i)).toHaveValue('');
+
+    // Leaving it blank must not save — the form should block with an inline validation message rather
+    // than silently keeping the (non-existent) prior value.
+    await user.click(screen.getByRole('button', { name: /save & continue/i }));
+    expect(await screen.findByText('National ID is required.')).toBeInTheDocument();
+
+    await user.type(screen.getByLabelText(/^national id/i), '1234567890123');
+    await user.click(screen.getByRole('button', { name: /save & continue/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByText('National ID is required.')).not.toBeInTheDocument();
+    });
   }, 15000);
 });

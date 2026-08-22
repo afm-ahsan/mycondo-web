@@ -41,8 +41,15 @@ function setUpMocks() {
         { flatOwnershipId: 'own-1', flatId: 'flat-1', flatNumber: 'A-101', buildingId: 'b-1', buildingName: 'Tower A', status: 'Active', startDate: '2026-01-01', endDate: null },
       ]),
     ),
-    http.put(`${API_BASE}/api/v1/properties/flat-ownerships/owners/:residentId/profile`, () =>
-      HttpResponse.json({ ...baseOwners[0], residentId: 'resident-1', fullName: 'Jane Owner Updated' }),
+    http.put(`${API_BASE}/api/v1/residents/:id`, () =>
+      HttpResponse.json({
+        residentId: 'resident-1', flatId: 'flat-1', fullName: 'Jane Owner Updated', phone: '01700000000',
+        email: 'jane.owner@example.com', residentType: 'Owner', alternatePhone: null,
+        nationalIdNumberMasked: '****3210', passportNumberMasked: null, dateOfBirth: null, gender: null,
+        presentAddress: null, permanentAddress: null, fatherName: null, motherName: null, maritalStatus: null,
+        profession: null, employer: null, officeAddress: null, emergencyContactName: null,
+        emergencyContactPhone: null, bloodGroup: null, religion: null, nationality: null,
+      }),
     ),
   );
 }
@@ -88,8 +95,22 @@ describe('FlatOwnerListPage', () => {
     expect(await within(dialog).findByText(/A-101 — Tower A/)).toBeInTheDocument();
   });
 
-  it('edits the owner profile from the detail dialog', async () => {
+  it('edits the owner profile from the detail dialog, sending only name/phone/email', async () => {
     setUpMocks();
+    let requestBody: unknown;
+    server.use(
+      http.put(`${API_BASE}/api/v1/residents/:id`, async ({ request }) => {
+        requestBody = await request.json();
+        return HttpResponse.json({
+          residentId: 'resident-1', flatId: 'flat-1', fullName: 'Jane Owner Updated', phone: '01700000000',
+          email: 'jane.owner@example.com', residentType: 'Owner', alternatePhone: null,
+          nationalIdNumberMasked: '****3210', passportNumberMasked: null, dateOfBirth: null, gender: null,
+          presentAddress: null, permanentAddress: null, fatherName: null, motherName: null, maritalStatus: null,
+          profession: null, employer: null, officeAddress: null, emergencyContactName: null,
+          emergencyContactPhone: null, bloodGroup: null, religion: null, nationality: null,
+        });
+      }),
+    );
     const user = userEvent.setup();
     renderWithProviders(<FlatOwnerListPage />, { auth: { user: adminUser, isInitialized: true } });
 
@@ -105,6 +126,61 @@ describe('FlatOwnerListPage', () => {
     await waitFor(() => {
       expect(within(dialog).queryByLabelText('Full name')).not.toBeInTheDocument();
     });
+    // This lightweight editor must never submit the full-profile fields (address, profession, etc.)
+    // it doesn't show — that's exactly what caused the 400 this test guards against.
+    expect(requestBody).toEqual({ fullName: 'Jane Owner Updated', phone: '01700000000', email: 'jane.owner@example.com' });
+  });
+
+  it('refreshes the Ownership Register list and the open dialog after a successful edit, with no page reload', async () => {
+    let updated = false;
+    server.use(
+      http.get(`${API_BASE}/api/v1/properties/flat-ownerships`, () =>
+        HttpResponse.json({
+          items: updated ? [{ ...baseOwners[0], ownerFullName: 'Jane Owner Updated' }] : baseOwners,
+          page: 1,
+          pageSize: 10,
+          total: baseOwners.length,
+        }),
+      ),
+      http.put(`${API_BASE}/api/v1/residents/:id`, () => {
+        updated = true;
+        return HttpResponse.json({
+          residentId: 'resident-1', flatId: 'flat-1', fullName: 'Jane Owner Updated', phone: '01700000000',
+          email: 'jane.owner@example.com', residentType: 'Owner', alternatePhone: null,
+          nationalIdNumberMasked: '****3210', passportNumberMasked: null, dateOfBirth: null, gender: null,
+          presentAddress: null, permanentAddress: null, fatherName: null, motherName: null, maritalStatus: null,
+          profession: null, employer: null, officeAddress: null, emergencyContactName: null,
+          emergencyContactPhone: null, bloodGroup: null, religion: null, nationality: null,
+        });
+      }),
+      http.get(`${API_BASE}/api/v1/properties/owners/resident-1/ownerships`, () =>
+        HttpResponse.json([
+          { flatOwnershipId: 'own-1', flatId: 'flat-1', flatNumber: 'A-101', buildingId: 'b-1', buildingName: 'Tower A', status: 'Active', startDate: '2026-01-01', endDate: null },
+        ]),
+      ),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<FlatOwnerListPage />, { auth: { user: adminUser, isInitialized: true } });
+
+    await screen.findByText('Jane Owner');
+    await user.click(screen.getByText('Jane Owner'));
+
+    const dialog = await screen.findByRole('dialog');
+    await user.click(within(dialog).getByRole('button', { name: /edit profile/i }));
+    await user.clear(within(dialog).getByLabelText('Full name'));
+    await user.type(within(dialog).getByLabelText('Full name'), 'Jane Owner Updated');
+    await user.click(within(dialog).getByRole('button', { name: /save changes/i }));
+
+    // The still-open dialog reflects the new name (it derives from the refetched list, not a stale
+    // snapshot captured when the row was first clicked).
+    expect(await within(dialog).findByText('Jane Owner Updated')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /close/i }));
+
+    // The background Ownership Register table shows the new name too — no manual refresh needed, and
+    // the old name is gone (not just a duplicate row).
+    expect(await screen.findByText('Jane Owner Updated')).toBeInTheDocument();
+    expect(screen.queryByText('Jane Owner')).not.toBeInTheDocument();
   });
 
   it('links Edit full profile to the wizard in edit mode', async () => {

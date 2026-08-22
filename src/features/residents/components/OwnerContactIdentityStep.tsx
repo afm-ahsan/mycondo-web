@@ -25,6 +25,11 @@ interface OwnerContactIdentityStepProps {
   /** Present in edit mode — the Resident already exists, so "Save & Continue" updates it
    * (UpdateFlatOwnerProfileCommand) instead of the create-mode find-or-create. */
   residentId?: string;
+  /** Edit mode only — whether this Resident already has a National ID on file (derived from
+   * `nationalIdNumberMasked` being non-null). National ID is masked on read and never round-tripped
+   * back into this form, so leaving it blank only means "keep existing" when one already exists;
+   * otherwise it must be supplied now, same as create mode. */
+  hasExistingNationalId?: boolean;
   onSaved: (residentId: string) => void;
   onBack: () => void;
 }
@@ -37,14 +42,21 @@ interface OwnerContactIdentityStepProps {
  * the existing Resident by id instead (UpdateFlatOwnerProfile) — National ID/passport are left blank
  * and skipped from validation, matching OwnerHouseholdStep's "leave blank to keep existing" masked-field
  * convention. */
-export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: OwnerContactIdentityStepProps) {
+export function OwnerContactIdentityStep({
+  form,
+  residentId,
+  hasExistingNationalId,
+  onSaved,
+  onBack,
+}: OwnerContactIdentityStepProps) {
   const [saveProfile, { isLoading: isSaving }] = useSaveOwnerResidentProfile();
   const [updateProfile, { isLoading: isUpdating }] = useUpdateFlatOwnerProfile();
   const isLoading = isSaving || isUpdating;
   const [error, setError] = useState<string | null>(null);
-  const fieldsToValidate = residentId
-    ? OWNER_CONTACT_IDENTITY_FIELDS.filter((field) => field !== 'nationalIdNumber')
-    : OWNER_CONTACT_IDENTITY_FIELDS;
+  const nationalIdRequired = !residentId || !hasExistingNationalId;
+  const fieldsToValidate = nationalIdRequired
+    ? OWNER_CONTACT_IDENTITY_FIELDS
+    : OWNER_CONTACT_IDENTITY_FIELDS.filter((field) => field !== 'nationalIdNumber');
 
   async function handleNext() {
     setError(null);
@@ -135,7 +147,7 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
         control={form.control}
         name="fullName"
         render={({ field }) => (
-          <FormItem>
+          <FormItem required>
             <FormLabel>Full name</FormLabel>
             <FormControl>
               <Input {...field} />
@@ -150,8 +162,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="phone"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mobile number (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Mobile number</FormLabel>
               <FormControl>
                 <BangladeshPhoneInput {...field} />
               </FormControl>
@@ -192,10 +204,10 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="nationalIdNumber"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>National ID{residentId ? ' (optional)' : ''}</FormLabel>
+            <FormItem required={nationalIdRequired}>
+              <FormLabel>National ID{!nationalIdRequired ? ' (optional)' : ''}</FormLabel>
               <FormControl>
-                <Input {...field} placeholder={residentId ? 'Leave blank to keep existing' : undefined} />
+                <Input {...field} placeholder={!nationalIdRequired ? 'Leave blank to keep existing' : undefined} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -218,7 +230,7 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="gender"
           render={({ field }) => (
-            <FormItem>
+            <FormItem required>
               <FormLabel>Gender</FormLabel>
               <GenderSelect value={field.value} onChange={field.onChange} />
               <FormMessage />
@@ -232,7 +244,7 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="dateOfBirth"
           render={({ field }) => (
-            <FormItem>
+            <FormItem required>
               <FormLabel>Date of birth</FormLabel>
               <FormControl>
                 <DateOfBirthWithAge {...field} />
@@ -256,8 +268,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="nationality"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nationality (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Nationality</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -271,8 +283,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
         control={form.control}
         name="religion"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Religion (optional)</FormLabel>
+          <FormItem required>
+            <FormLabel>Religion</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -285,8 +297,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
         control={form.control}
         name="presentAddress"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Present address (optional)</FormLabel>
+          <FormItem required>
+            <FormLabel>Present address</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -298,8 +310,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
         control={form.control}
         name="permanentAddress"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Permanent address (optional)</FormLabel>
+          <FormItem required>
+            <FormLabel>Permanent address</FormLabel>
             <FormControl>
               <Input {...field} />
             </FormControl>
@@ -313,8 +325,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="fatherName"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Father&apos;s name (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Father&apos;s name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -326,8 +338,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="motherName"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Mother&apos;s name (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Mother&apos;s name</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -339,8 +351,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="maritalStatus"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Marital status (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Marital status</FormLabel>
               <Select value={field.value} onValueChange={field.onChange}>
                 <FormControl>
                   <SelectTrigger className="w-full">
@@ -366,8 +378,8 @@ export function OwnerContactIdentityStep({ form, residentId, onSaved, onBack }: 
           control={form.control}
           name="profession"
           render={({ field }) => (
-            <FormItem>
-              <FormLabel>Profession (optional)</FormLabel>
+            <FormItem required>
+              <FormLabel>Profession</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>

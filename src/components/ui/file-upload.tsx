@@ -92,14 +92,41 @@ export interface FileUploadListItemProps {
   status: 'selected' | 'uploading' | 'uploaded' | 'failed';
   onRemove?: () => void;
   onRetry?: () => void;
+  /** Object URL for an inline preview — either an existing attachment's fetched content, or a local
+   * blob URL for a just-picked file, not yet uploaded. Renders as a thumbnail when `isImage`, otherwise
+   * as a "View" link (e.g. for PDFs) that opens the same URL in a new tab. */
+  previewUrl?: string | null;
+  isImage?: boolean;
 }
 
 /** One row of a selected/uploading/uploaded/failed document — pairs with `FileUpload` above. */
-export function FileUploadListItem({ fileName, status, onRemove, onRetry }: FileUploadListItemProps) {
+export function FileUploadListItem({ fileName, status, onRemove, onRetry, previewUrl, isImage }: FileUploadListItemProps) {
   return (
     <div className="border-border flex items-center gap-2 rounded-md border px-3 py-2 text-sm">
-      <FileText className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+      {isImage && previewUrl ? (
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0"
+          aria-label={`Preview ${fileName}`}
+        >
+          <img src={previewUrl} alt="" className="border-border size-8 rounded object-cover" />
+        </a>
+      ) : (
+        <FileText className="text-muted-foreground size-4 shrink-0" aria-hidden="true" />
+      )}
       <span className="flex-1 truncate">{fileName}</span>
+      {!isImage && previewUrl && (
+        <a
+          href={previewUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary shrink-0 text-xs underline-offset-2 hover:underline"
+        >
+          View
+        </a>
+      )}
       <span
         className={cn(
           'text-xs',

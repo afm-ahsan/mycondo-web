@@ -182,6 +182,7 @@ export function FlatOwnerRegistrationWizardPage() {
               <OwnerContactIdentityStep
                 form={form}
                 residentId={residentId ?? undefined}
+                hasExistingNationalId={!!existingResident?.nationalIdNumberMasked}
                 onSaved={(id) => {
                   setResidentId(id);
                   goToStep(3);
