@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
@@ -300,7 +301,7 @@ export function OwnerContactIdentityStep({
           <FormItem required>
             <FormLabel>Present address</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Textarea rows={3} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
@@ -313,7 +314,7 @@ export function OwnerContactIdentityStep({
           <FormItem required>
             <FormLabel>Permanent address</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Textarea rows={3} {...field} />
             </FormControl>
             <FormMessage />
           </FormItem>
