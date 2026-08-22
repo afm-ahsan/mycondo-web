@@ -11,7 +11,7 @@ const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 export interface HouseholdMemberPhotoUploadProps {
-  ownerType: 'ResidentHouseholdMember' | 'LeasingHouseholdMember';
+  ownerType: 'ResidentHouseholdMember' | 'LeasingHouseholdMember' | 'OccupancyRegistration';
   ownerId: string;
   primaryPhotoAttachmentId: string | null | undefined;
   onSetPrimaryPhoto: (attachmentId: string | null) => Promise<unknown>;

@@ -16,11 +16,11 @@ import {
  * anywhere in mycondo-api or mycondo-web today — see the Priority 2 conflict write-up): `@media print`
  * CSS plus `window.print()`, the browser handles A4 pagination and page breaks natively.
  *
- * A few paper-form fields (Father's/Mother's Name, Marital Status, Profession, Employer, household
- * Occupation, driver Licence number, Unit Owner/Lease dates, Previous Landlord) are on the original
- * DMP form but were never part of the Priority 1/2 data model — rather than fabricate values, this
- * renders those rows with "—" so the layout matches the paper form's intent while never inventing
- * business data. National ID is always masked; there is no "reveal" authorization mechanism.
+ * A few paper-form fields (Employer, household Occupation, driver Licence number, Unit Owner/Lease
+ * dates, Previous Landlord) are on the original DMP form but were never part of the Priority 1/2
+ * data model — rather than fabricate values, this renders those rows with "—" so the layout matches
+ * the paper form's intent while never inventing business data. National ID is always masked; there
+ * is no "reveal" authorization mechanism.
  */
 export function TenantRegistrationPrintPage() {
   const { id } = useParams<{ id: string }>();
@@ -82,12 +82,12 @@ export function TenantRegistrationPrintPage() {
         <Section title="Primary Resident">
           <Grid>
             <Field label="Full Name" value={registration.primaryFullName} />
-            <Field label="Father's Name" value="—" />
-            <Field label="Mother's Name" value="—" />
+            <Field label="Father's Name" value={registration.primaryFatherName ?? '—'} />
+            <Field label="Mother's Name" value={registration.primaryMotherName ?? '—'} />
             <Field label="Date of Birth" value={registration.primaryDateOfBirth ? formatDate(registration.primaryDateOfBirth) : '—'} />
-            <Field label="Marital Status" value="—" />
+            <Field label="Marital Status" value={registration.primaryMaritalStatus ?? '—'} />
             <Field label="Permanent Address" value={registration.primaryPermanentAddress ?? '—'} span2 />
-            <Field label="Profession" value="—" />
+            <Field label="Profession" value={registration.primaryProfession ?? '—'} />
             <Field label="Employer / Office Address" value="—" />
             <Field label="Mobile" value={registration.primaryPhone ?? '—'} />
             <Field label="Email" value={registration.primaryEmail ?? '—'} />

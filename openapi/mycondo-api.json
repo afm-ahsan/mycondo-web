@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "https://127.0.0.1:7219/"
+      "url": "http://localhost:5219/"
     }
   ],
   "paths": {
@@ -16449,6 +16449,9 @@
           "primaryBloodGroup",
           "primaryReligion",
           "primaryNationality",
+          "primaryFatherName",
+          "primaryMotherName",
+          "primaryMaritalStatus",
           "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
@@ -16511,6 +16514,24 @@
             ]
           },
           "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryFatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMotherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMaritalStatus": {
             "type": [
               "null",
               "string"
@@ -21451,6 +21472,9 @@
           "primaryBloodGroup",
           "primaryReligion",
           "primaryNationality",
+          "primaryFatherName",
+          "primaryMotherName",
+          "primaryMaritalStatus",
           "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
@@ -21531,6 +21555,24 @@
             ]
           },
           "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryFatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMotherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMaritalStatus": {
             "type": [
               "null",
               "string"
@@ -29174,6 +29216,9 @@
           "primaryBloodGroup",
           "primaryReligion",
           "primaryNationality",
+          "primaryFatherName",
+          "primaryMotherName",
+          "primaryMaritalStatus",
           "primaryProfession",
           "primaryPermanentAddress",
           "emergencyContactName",
@@ -29229,6 +29274,24 @@
             ]
           },
           "primaryNationality": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryFatherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMotherName": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "primaryMaritalStatus": {
             "type": [
               "null",
               "string"

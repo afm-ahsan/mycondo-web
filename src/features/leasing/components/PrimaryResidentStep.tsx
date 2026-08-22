@@ -13,6 +13,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BangladeshPhoneInput } from '@/components/shared/BangladeshPhoneInput';
 import { BloodGroupSelect } from '@/components/shared/BloodGroupSelect';
 import { DateOfBirthWithAge } from '@/components/shared/DateOfBirthWithAge';
@@ -23,6 +24,8 @@ import { applyApiErrorToForm, toApiError } from '@/lib/forms/applyApiErrorToForm
 import { useUnsavedChangesGuard } from '@/hooks/use-unsaved-changes-guard';
 import { useUpdateTenantRegistrationDraft } from '../api/leasingApi';
 import { primaryResidentSchema, type PrimaryResidentSchemaType } from '../schemas/primaryResidentSchema';
+
+const MARITAL_STATUSES = ['Single', 'Married', 'Divorced', 'Widowed'] as const;
 
 interface PrimaryResidentStepProps {
   registrationId: string;
@@ -59,6 +62,9 @@ export function PrimaryResidentStep({
       primaryBloodGroup: defaultValues.primaryBloodGroup ?? '',
       primaryReligion: defaultValues.primaryReligion ?? '',
       primaryNationality: defaultValues.primaryNationality ?? '',
+      primaryFatherName: defaultValues.primaryFatherName ?? '',
+      primaryMotherName: defaultValues.primaryMotherName ?? '',
+      primaryMaritalStatus: defaultValues.primaryMaritalStatus ?? '',
       primaryProfession: defaultValues.primaryProfession ?? '',
       primaryPermanentAddress: defaultValues.primaryPermanentAddress ?? '',
       emergencyContactName: defaultValues.emergencyContactName ?? '',
@@ -84,6 +90,9 @@ export function PrimaryResidentStep({
           primaryBloodGroup: values.primaryBloodGroup || null,
           primaryReligion: values.primaryReligion || null,
           primaryNationality: values.primaryNationality || null,
+          primaryFatherName: values.primaryFatherName || null,
+          primaryMotherName: values.primaryMotherName || null,
+          primaryMaritalStatus: values.primaryMaritalStatus || null,
           primaryProfession: values.primaryProfession || null,
           primaryPermanentAddress: values.primaryPermanentAddress || null,
           emergencyContactName: values.emergencyContactName || null,
@@ -118,7 +127,7 @@ export function PrimaryResidentStep({
             control={form.control}
             name="primaryFullName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem required>
                 <FormLabel>Full name</FormLabel>
                 <FormControl>
                   <Input {...field} />
@@ -133,8 +142,8 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryPhone"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mobile number (optional)</FormLabel>
+                <FormItem required>
+                  <FormLabel>Mobile number</FormLabel>
                   <FormControl>
                     <BangladeshPhoneInput {...field} />
                   </FormControl>
@@ -162,7 +171,7 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryNationalIdNumber"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>National ID / Passport number</FormLabel>
                   <FormControl>
                     <Input {...field} />
@@ -175,7 +184,7 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryDateOfBirth"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Date of birth</FormLabel>
                   <FormControl>
                     <DateOfBirthWithAge {...field} />
@@ -188,7 +197,7 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryGender"
               render={({ field }) => (
-                <FormItem>
+                <FormItem required>
                   <FormLabel>Gender</FormLabel>
                   <GenderSelect value={field.value} onChange={field.onChange} />
                   <FormMessage />
@@ -213,8 +222,8 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryReligion"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Religion (optional)</FormLabel>
+                <FormItem required>
+                  <FormLabel>Religion</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -226,11 +235,64 @@ export function PrimaryResidentStep({
               control={form.control}
               name="primaryNationality"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nationality (optional)</FormLabel>
+                <FormItem required>
+                  <FormLabel>Nationality</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <FormField
+              control={form.control}
+              name="primaryFatherName"
+              render={({ field }) => (
+                <FormItem required>
+                  <FormLabel>Father&apos;s name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryMotherName"
+              render={({ field }) => (
+                <FormItem required>
+                  <FormLabel>Mother&apos;s name</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="primaryMaritalStatus"
+              render={({ field }) => (
+                <FormItem required>
+                  <FormLabel>Marital status</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {MARITAL_STATUSES.map((status) => (
+                        <SelectItem key={status} value={status}>
+                          {status}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
@@ -241,8 +303,8 @@ export function PrimaryResidentStep({
             control={form.control}
             name="primaryProfession"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Profession (optional)</FormLabel>
+              <FormItem required>
+                <FormLabel>Profession</FormLabel>
                 <FormControl>
                   <Input {...field} />
                 </FormControl>
@@ -255,8 +317,8 @@ export function PrimaryResidentStep({
             control={form.control}
             name="primaryPermanentAddress"
             render={({ field }) => (
-              <FormItem>
-                <FormLabel>Permanent address (optional)</FormLabel>
+              <FormItem required>
+                <FormLabel>Permanent address</FormLabel>
                 <FormControl>
                   <Textarea rows={3} {...field} />
                 </FormControl>

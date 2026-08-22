@@ -170,6 +170,12 @@ export function TenantRegistrationDetailPage() {
                 <Field label="Email">{registration.primaryEmail ?? '—'}</Field>
                 <Field label="National ID">{registration.primaryNationalIdNumberMasked ?? '—'}</Field>
                 <Field label="Date of birth">{registration.primaryDateOfBirth ?? '—'}</Field>
+                <Field label="Religion">{registration.primaryReligion ?? '—'}</Field>
+                <Field label="Nationality">{registration.primaryNationality ?? '—'}</Field>
+                <Field label="Father's name">{registration.primaryFatherName ?? '—'}</Field>
+                <Field label="Mother's name">{registration.primaryMotherName ?? '—'}</Field>
+                <Field label="Marital status">{registration.primaryMaritalStatus ?? '—'}</Field>
+                <Field label="Profession">{registration.primaryProfession ?? '—'}</Field>
                 <Field label="Permanent address">{registration.primaryPermanentAddress ?? '—'}</Field>
                 <Field label="Emergency contact">
                   {registration.emergencyContactName
