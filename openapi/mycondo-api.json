@@ -6,7 +6,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5219/"
+      "url": "https://localhost:7219/"
     }
   ],
   "paths": {
@@ -16867,7 +16867,8 @@
           "fullName",
           "email",
           "phoneNumber",
-          "initialPassword"
+          "password",
+          "isActive"
         ],
         "type": "object",
         "properties": {
@@ -16883,34 +16884,26 @@
               "string"
             ]
           },
-          "initialPassword": {
-            "type": [
-              "null",
-              "string"
-            ]
+          "password": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         },
-        "description": "Creates a user within the caller's own tenant. string? CreateUserCommand.InitialPassword is optional — when\r\nomitted, a random temporary password is generated and returned once in CreateUserResult\r\nfor the administrator to relay to the new user out-of-band. TenantId is deliberately not a field\r\nhere — it is always resolved from `ICurrentUserProvider`, never accepted from the client."
+        "description": "Creates a user within the caller's own tenant. The administrator sets string CreateUserCommand.Password\r\ndirectly — there is no generated-temporary-password flow. TenantId is deliberately not a field\r\nhere — it is always resolved from `ICurrentUserProvider`, never accepted from the client."
       },
       "CreateUserResult": {
         "required": [
-          "userId",
-          "temporaryPassword"
+          "userId"
         ],
         "type": "object",
         "properties": {
           "userId": {
             "type": "string",
             "format": "uuid"
-          },
-          "temporaryPassword": {
-            "type": [
-              "null",
-              "string"
-            ]
           }
-        },
-        "description": "string? CreateUserResult.TemporaryPassword is populated only when the caller did not supply\r\n        `InitialPassword` — it is never persisted or retrievable again after this response."
+        }
       },
       "CurrentlyInsideCategoryCountDto": {
         "required": [
@@ -29751,7 +29744,8 @@
           "phoneNumber",
           "isActive",
           "lastLoginAtUtc",
-          "createdAtUtc"
+          "createdAtUtc",
+          "roleNames"
         ],
         "type": "object",
         "properties": {
@@ -29784,6 +29778,12 @@
           "createdAtUtc": {
             "type": "string",
             "format": "date-time"
+          },
+          "roleNames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

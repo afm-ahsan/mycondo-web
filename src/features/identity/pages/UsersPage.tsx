@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { type ColumnDef, getCoreRowModel, type PaginationState, type Updater, useReactTable } from '@tanstack/react-table';
 import { Eye, Pencil, ShieldCheck, Ban, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle, CardToolbar } from '@/components/ui/card';
+import { Card, CardFooter, CardHeader, CardHeading, CardTable, CardTitle } from '@/components/ui/card';
 import { DataGrid } from '@/components/ui/data-grid';
 import { DATA_GRID_COLUMN_ALIGN_CENTER, DATA_GRID_COLUMN_SIZE } from '@/components/ui/data-grid-column-sizing';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
@@ -102,6 +103,12 @@ export function UsersPage() {
     },
     { id: 'phoneNumber', header: 'Mobile', size: DATA_GRID_COLUMN_SIZE.medium, cell: ({ row }) => row.original.phoneNumber ?? '—' },
     {
+      id: 'roles',
+      header: 'Roles',
+      size: DATA_GRID_COLUMN_SIZE.medium,
+      cell: ({ row }) => <RoleBadges roleNames={row.original.roleNames} />,
+    },
+    {
       id: 'status',
       header: 'Status',
       size: DATA_GRID_COLUMN_SIZE.compact,
@@ -177,41 +184,43 @@ export function UsersPage() {
         <DataGrid table={table} recordCount={total} isLoading={isFetching} emptyMessage="No users match these filters.">
           <Card>
             <CardHeader>
-              <CardHeading>
+              <CardHeading className="w-full">
                 <CardTitle>All users</CardTitle>
+              </CardHeading>
+              <div className="flex w-full flex-col gap-2.5 sm:flex-row sm:items-center">
                 <SearchInput
                   value={search}
                   onChange={handleSearchChange}
                   placeholder="Search by name or email…"
                   isSearching={isSearchPending}
-                  className="w-64"
+                  className="min-w-0 sm:flex-1"
                 />
-              </CardHeading>
-              <CardToolbar>
-                <Select value={filters.roleId} onValueChange={(v) => setFilters({ roleId: v, page: '1' })}>
-                  <SelectTrigger className="w-44">
-                    <SelectValue placeholder="All roles" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All roles</SelectItem>
-                    {roles?.map((role) => (
-                      <SelectItem key={role.roleId} value={role.roleId}>
-                        {role.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
-                  <SelectTrigger className="w-36">
-                    <SelectValue placeholder="All statuses" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Disabled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardToolbar>
+                <div className="flex flex-col gap-2.5 sm:flex-row">
+                  <Select value={filters.roleId} onValueChange={(v) => setFilters({ roleId: v, page: '1' })}>
+                    <SelectTrigger className="w-full sm:w-44">
+                      <SelectValue placeholder="All roles" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All roles</SelectItem>
+                      {roles?.map((role) => (
+                        <SelectItem key={role.roleId} value={role.roleId}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
+                    <SelectTrigger className="w-full sm:w-36">
+                      <SelectValue placeholder="All statuses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Disabled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </CardHeader>
 
             <div className="hidden md:block">
@@ -310,6 +319,7 @@ function UserCard({
         <StatusBadge status={user.isActive ? 'Active' : 'Disabled'} toneMap={userStatusToneMap} />
       </div>
       <div className="text-muted-foreground text-xs">{user.email}</div>
+      <RoleBadges roleNames={user.roleNames} />
       <div className="flex items-center gap-3 pt-1">
         <Button variant="primary" mode="link" size="sm" className="h-auto p-0" onClick={onView}>
           View
@@ -328,6 +338,22 @@ function UserCard({
           </Button>
         </RequirePermission>
       </div>
+    </div>
+  );
+}
+
+function RoleBadges({ roleNames }: { roleNames: string[] }) {
+  if (roleNames.length === 0) {
+    return <span className="text-muted-foreground text-xs">—</span>;
+  }
+
+  return (
+    <div className="flex flex-wrap gap-1">
+      {roleNames.map((name) => (
+        <Badge key={name} variant="secondary" appearance="light" size="sm">
+          {name}
+        </Badge>
+      ))}
     </div>
   );
 }
