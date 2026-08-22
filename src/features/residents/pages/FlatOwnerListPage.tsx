@@ -205,28 +205,30 @@ export function FlatOwnerListPage() {
         >
           <Card>
             <CardHeader>
-              <CardHeading>
+              <CardHeading className="w-full">
                 <CardTitle>Ownership register</CardTitle>
+              </CardHeading>
+              <div className="flex w-full items-center gap-2.5">
                 <SearchInput
                   value={search}
                   onChange={handleSearchChange}
                   placeholder="Search by owner name, email, or phone…"
                   isSearching={isSearchPending}
-                  className="w-64"
+                  className="flex-1 min-w-0"
                 />
-              </CardHeading>
-              <CardToolbar>
-                <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
-                  <SelectTrigger className="w-36">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All statuses</SelectItem>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Ended">Ended</SelectItem>
-                  </SelectContent>
-                </Select>
-              </CardToolbar>
+                <CardToolbar className="shrink-0">
+                  <Select value={filters.status} onValueChange={(v) => setFilters({ status: v, page: '1' })}>
+                    <SelectTrigger className="w-36">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All statuses</SelectItem>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Ended">Ended</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </CardToolbar>
+              </div>
             </CardHeader>
             <CardTable>
               <ScrollArea>

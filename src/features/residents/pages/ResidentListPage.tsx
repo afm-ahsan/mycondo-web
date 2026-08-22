@@ -198,16 +198,18 @@ export function ResidentListPage() {
         >
           <Card>
             <CardHeader>
-              <CardHeading>
+              <CardHeading className="w-full">
                 <CardTitle>All residents</CardTitle>
+              </CardHeading>
+              <div className="flex w-full items-center gap-2.5">
                 <SearchInput
                   value={search}
                   onChange={handleSearchChange}
                   placeholder="Search by name or mobile…"
                   isSearching={isSearchPending}
-                  className="w-64"
+                  className="flex-1 min-w-0"
                 />
-              </CardHeading>
+              </div>
             </CardHeader>
             <CardTable>
               <ScrollArea>
