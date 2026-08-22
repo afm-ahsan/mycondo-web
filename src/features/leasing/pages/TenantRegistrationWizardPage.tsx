@@ -134,6 +134,19 @@ export function TenantRegistrationWizardPage() {
                 primaryNationalIdNumber: undefined,
                 primaryDateOfBirth:
                   registration?.primaryDateOfBirth ?? undefined,
+                primaryGender: registration?.primaryGender ?? undefined,
+                primaryBloodGroup: registration?.primaryBloodGroup ?? undefined,
+                primaryReligion: registration?.primaryReligion ?? undefined,
+                primaryNationality:
+                  registration?.primaryNationality ?? undefined,
+                primaryFatherName:
+                  registration?.primaryFatherName ?? undefined,
+                primaryMotherName:
+                  registration?.primaryMotherName ?? undefined,
+                primaryMaritalStatus:
+                  registration?.primaryMaritalStatus ?? undefined,
+                primaryProfession:
+                  registration?.primaryProfession ?? undefined,
                 primaryPermanentAddress:
                   registration?.primaryPermanentAddress ?? undefined,
                 emergencyContactName:

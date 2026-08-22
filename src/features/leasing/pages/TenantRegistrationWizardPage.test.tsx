@@ -96,6 +96,6 @@ describe('TenantRegistrationWizardPage', () => {
     await user.type(screen.getByLabelText("Primary occupant's full name"), 'Karim Ahmed');
     await user.click(screen.getByRole('button', { name: /save & continue/i }));
 
-    expect(await screen.findByLabelText('Full name')).toBeInTheDocument();
+    expect(await screen.findByLabelText(/^full name/i)).toBeInTheDocument();
   });
 });
